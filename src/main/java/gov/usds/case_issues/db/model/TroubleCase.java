@@ -10,6 +10,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.NaturalId;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * A case that has been seen, at some point, by this system
  * (and hence must, at some point, have had an issue).
@@ -20,6 +22,7 @@ public class TroubleCase {
 
 	@Id
 	@GeneratedValue
+	@JsonIgnore
 	private Long internalCaseId;
 	@NaturalId
 	private String receiptNumber;

@@ -4,8 +4,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.NaturalId;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * A type of case adjudicated in a specific {@link CaseManagementSystem}
@@ -16,12 +19,15 @@ public class CaseType {
 
 	@Id
 	@GeneratedValue
+	@JsonIgnore
 	private Long caseTypeId;
 	@NaturalId
-	@ManyToOne
+	@ManyToOne(optional=false)
 	private CaseManagementSystem caseManagementSystem;
 	@NaturalId
+	@NotNull
 	private String caseTypeTag;
+	private String description;
 
 	protected CaseType() { /* for hibernate/JPA */ }
 
@@ -35,5 +41,9 @@ public class CaseType {
 
 	public String getCaseTypeTag() {
 		return caseTypeTag;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 }
