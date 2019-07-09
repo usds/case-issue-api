@@ -24,8 +24,13 @@ public class TroubleCase {
 	@GeneratedValue
 	@JsonIgnore
 	private Long internalCaseId;
+
+	@NaturalId
+	@ManyToOne(optional=false)
+	private CaseManagementSystem caseManagementSystem;
 	@NaturalId
 	private String receiptNumber;
+
 	@ManyToOne(optional=false)
 	private CaseType caseType;
 	@NotNull
@@ -36,12 +41,19 @@ public class TroubleCase {
 	public Long getInternalCaseId() {
 		return internalCaseId;
 	}
+
+	public CaseManagementSystem getCaseManagementSystem() {
+		return caseManagementSystem;
+	}
+
 	public String getReceiptNumber() {
 		return receiptNumber;
 	}
+
 	public CaseType getCaseType() {
 		return caseType;
 	}
+
 	public ZonedDateTime getCaseCreation() {
 		return caseCreation;
 	}
