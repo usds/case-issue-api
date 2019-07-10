@@ -4,10 +4,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.NaturalId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A type of case adjudicated in a specific {@link CaseManagementSystem}
@@ -22,6 +24,8 @@ public class CaseType {
 	private Long caseTypeId;
 	@NaturalId
 	@NotNull
+	@Pattern(regexp="[-\\w]+")
+	@JsonProperty("tag")
 	private String caseTypeTag;
 	private String description;
 
