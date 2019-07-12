@@ -4,6 +4,8 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
+# allow local property overrides without annoying git statuses
+/src/main/resources/application-local.properties
 
 ### STS ###
 .apt_generated
