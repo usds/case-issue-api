@@ -1,4 +1,4 @@
-package gov.usds.case_issues;
+package gov.usds.case_issues.controllers;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -32,7 +32,7 @@ import gov.usds.case_issues.db.model.TroubleCase;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class RestDataRoundtripTest {
+public class ResourceControllerTest {
 
 	private static final String FIXTURE_FORM_TAG = "FORM_1";
 	private static final String FIXTURE_CASE_MANAGER_TAG = "ME2";

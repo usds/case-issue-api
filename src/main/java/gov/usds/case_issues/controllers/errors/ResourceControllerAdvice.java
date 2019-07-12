@@ -1,4 +1,4 @@
-package gov.usds.case_issues.controllers;
+package gov.usds.case_issues.controllers.errors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import gov.usds.case_issues.controllers.SpringRestError;
+
+/**
+ * ControllerAdvice to detect and appropriately wrap constraint violations and
+ * validation failures in CRUD operations provided by spring-data-rest.
+ */
 @RestControllerAdvice("org.springframework.data.rest.webmvc") // could also use annotations, if preferred
 public class ResourceControllerAdvice {
 

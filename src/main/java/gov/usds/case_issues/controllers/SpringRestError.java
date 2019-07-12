@@ -6,16 +6,18 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 
-/*
- * /*
- * {
-  "timestamp": "2019-07-11T18:28:59.707+0000",
-  "status": 404,
-  "error": "Not Found",
-  "message": "No message available",
-  "path": "/rest/profile/troubleCases"
-}
- */
+/**
+ * Trivial wrapper for error messages, to match the standard Spring JSON error format.
+ <pre>
+   {
+     "timestamp": "2019-07-11T18:28:59.707+0000",
+     "status": 404,
+     "error": "Not Found",
+     "message": "No message available",
+     "path": "/rest/profile/troubleCases"
+   }
+</pre>
+*/
 public class SpringRestError {
 
 	private ZonedDateTime timestamp;
