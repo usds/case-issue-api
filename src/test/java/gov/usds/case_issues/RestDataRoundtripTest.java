@@ -1,15 +1,13 @@
 package gov.usds.case_issues;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -19,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,11 +34,14 @@ import gov.usds.case_issues.db.model.TroubleCase;
 @AutoConfigureMockMvc
 public class RestDataRoundtripTest {
 
+	private static final String FIXTURE_FORM_TAG = "FORM_1";
+	private static final String FIXTURE_CASE_MANAGER_TAG = "ME2";
+
 	@Autowired
 	private MockMvc mvc;
 	@Autowired
 	private RepositoryEntityLinks links;
-	@Value("${spring.data.rest.basePath}") // is this terrible?
+	@Value("${spring.data.rest.basePath}")
 	private String basePath;
 
 
@@ -90,7 +92,7 @@ public class RestDataRoundtripTest {
 		reqBody = new JSONObject();
 		reqBody.put("issueClosed", "2019-07-10T18:11:00-04:00");
 		mvc.perform(patch(issueUrl).content(reqBody.toString()))
-			.andExpect(status().is(HttpServletResponse.SC_NO_CONTENT))
+			.andExpect(status().is(HttpStatus.NO_CONTENT.value()))
 		;
 		mvc.perform(get(issueUrl))
 			.andExpect(status().isOk())
@@ -110,14 +112,118 @@ public class RestDataRoundtripTest {
 		;
 	}
 
+	@Test
+	public void invalidTagErrors() throws Exception {
+		JSONObject reqBody = new JSONObject();
+		reqBody.put("tag", "MINE/YOURS");
+		reqBody.put("description", "This should never get inserted");
+		reqBody.put("name", "Tagged Entity With Invalid Tag");
+		doCreate(CaseManagementSystem.class, reqBody, HttpStatus.BAD_REQUEST);
+		doCreate(CaseType.class, reqBody, HttpStatus.BAD_REQUEST);
+
+		reqBody.put("tag", "1.2");
+		doCreate(CaseManagementSystem.class, reqBody, HttpStatus.BAD_REQUEST);
+		doCreate(CaseType.class, reqBody, HttpStatus.BAD_REQUEST);
+
+		reqBody.put("tag", "");
+		doCreate(CaseManagementSystem.class, reqBody, HttpStatus.BAD_REQUEST);
+		doCreate(CaseType.class, reqBody, HttpStatus.BAD_REQUEST);
+	}
+
+	@Test
+	public void invalidReceiptNumber() throws Exception {
+		createFixtureEntities();
+		JSONObject reqBody = new JSONObject();
+		reqBody.put("caseType", getFixtureCaseTypeUrl());
+		reqBody.put("caseManagementSystem", getFixtureCaseManagerUrl());
+		reqBody.put("caseCreation", "1978-08-05T01:00:00-07:00");
+
+		// null receipt
+		doCreate(TroubleCase.class, reqBody, HttpStatus.BAD_REQUEST);
+		reqBody.put("receiptNumber", "");
+		doCreate(TroubleCase.class, reqBody, HttpStatus.BAD_REQUEST);
+		reqBody.put("receiptNumber", "/hacker");
+		doCreate(TroubleCase.class, reqBody, HttpStatus.BAD_REQUEST);
+		reqBody.put("receiptNumber", "spaces are not allowed");
+		doCreate(TroubleCase.class, reqBody, HttpStatus.BAD_REQUEST);
+	}
+
+
+	@Test
+	public void duplicateTagErrors() throws Exception {
+		JSONObject reqBody = new JSONObject();
+		reqBody.put("tag", "ME3");
+		reqBody.put("description", "The new manager of my cases");
+		reqBody.put("name", "MyCaseManager 3.3");
+
+		doCreate(CaseManagementSystem.class, reqBody);
+		doCreate(CaseManagementSystem.class, reqBody, HttpStatus.CONFLICT);
+
+		reqBody = new JSONObject();
+		reqBody.put("tag", "F123");
+		reqBody.put("description", "The new hot form");
+		reqBody.put("name", "Standard Form 321");
+		doCreate(CaseType.class, reqBody);
+		reqBody.put("description", "Newest and hottest!");
+		doCreate(CaseType.class, reqBody, HttpStatus.CONFLICT);
+	}
+
+	@Test
+	public void duplicateReceiptScenarios() throws Exception {
+		createFixtureEntities();
+		JSONObject reqBody = new JSONObject();
+		reqBody.put("caseType", getFixtureCaseTypeUrl());
+		reqBody.put("caseManagementSystem", getFixtureCaseManagerUrl());
+		reqBody.put("caseCreation", "1978-08-05T01:00:00-07:00");
+
+		reqBody.put("receiptNumber", "A123456789");
+		doCreate(TroubleCase.class, reqBody);
+		doCreate(TroubleCase.class, reqBody, HttpStatus.CONFLICT);
+
+	}
+
 	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body) throws Exception {
+		return doCreate(entityType, body, HttpStatus.CREATED);
+	}
+
+	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus expectedStatus) throws Exception {
 		MockHttpServletRequestBuilder postRequest = post(links.linkFor(entityType).toUri())
 			.content(body.toString());
 		return mvc.perform(postRequest)
-			.andExpect(status().is(HttpServletResponse.SC_CREATED))
+			.andExpect(status().is(expectedStatus.value()))
 			.andReturn()
 			.getResponse()
 			;
 	}
 
+	private void createFixtureEntities() throws Exception {
+		MockHttpServletResponse caseManagerCheck = mvc.perform(get(getFixtureCaseManagerUrl()))
+				.andReturn().getResponse();
+		if (caseManagerCheck.getStatus() == HttpStatus.NOT_FOUND.value()) {
+			JSONObject reqBody = new JSONObject();
+			reqBody.put("tag", FIXTURE_CASE_MANAGER_TAG);
+			reqBody.put("description", "The new manager of my cases");
+			reqBody.put("name", "MyCaseManager 3.1");
+
+			doCreate(CaseManagementSystem.class, reqBody);
+		}
+
+		MockHttpServletResponse caseTypeCheck = mvc.perform(get(getFixtureCaseTypeUrl()))
+				.andReturn().getResponse();
+		if (caseTypeCheck.getStatus() == HttpStatus.NOT_FOUND.value()) {
+			JSONObject reqBody = new JSONObject();
+			reqBody.put("tag", FIXTURE_FORM_TAG);
+			reqBody.put("description", "The new form for every possible request");
+			reqBody.put("name", "Request For Any and Every Type of Benefit");
+			doCreate(CaseType.class, reqBody);
+		}
+	}
+
+	private URI getFixtureCaseManagerUrl() {
+		return links.linkForSingleResource(CaseManagementSystem.class, FIXTURE_CASE_MANAGER_TAG).toUri();
+	}
+
+	private URI getFixtureCaseTypeUrl() {
+		return links.linkForSingleResource(CaseType.class, FIXTURE_FORM_TAG).toUri();
+	}
 }

@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.NaturalId;
 
@@ -29,6 +30,8 @@ public class TroubleCase {
 	@ManyToOne(optional=false)
 	private CaseManagementSystem caseManagementSystem;
 	@NaturalId
+	@NotNull
+	@Pattern(regexp="[-\\w]+")
 	private String receiptNumber;
 
 	@ManyToOne(optional=false)
