@@ -29,6 +29,8 @@ dependencies {
 // try this again when springfox 3.0 comes out:
 //	implementation "io.springfox:springfox-data-rest:${springFoxVersion}"
 
+	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
+
 	runtimeOnly 'org.hsqldb:hsqldb'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

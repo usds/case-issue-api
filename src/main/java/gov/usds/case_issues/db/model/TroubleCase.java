@@ -41,6 +41,16 @@ public class TroubleCase {
 
 	protected TroubleCase() {/* for hibernate/JPA */}
 
+	public TroubleCase(CaseManagementSystem caseManagementSystem,
+			@NotNull @Pattern(regexp = "[-\\w]+") String receiptNumber, CaseType caseType,
+			@NotNull ZonedDateTime caseCreation) {
+		this();
+		this.caseManagementSystem = caseManagementSystem;
+		this.receiptNumber = receiptNumber;
+		this.caseType = caseType;
+		this.caseCreation = caseCreation;
+	}
+
 	public Long getInternalCaseId() {
 		return internalCaseId;
 	}

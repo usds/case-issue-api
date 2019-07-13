@@ -32,6 +32,13 @@ public class CaseIssue {
 	
 	protected CaseIssue() { /* for hibernate/JPA */ }
 
+	public CaseIssue(TroubleCase issueCase, @NotNull String issueType, @NotNull ZonedDateTime issueCreated) {
+		super();
+		this.issueCase = issueCase;
+		this.issueType = issueType;
+		this.issueCreated = issueCreated;
+	}
+
 	public Long getCaseIssueId() {
 		return caseIssueId;
 	}
@@ -51,4 +58,5 @@ public class CaseIssue {
 	public ZonedDateTime getIssueClosed() {
 		return issueClosed;
 	}
+
 }

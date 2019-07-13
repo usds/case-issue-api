@@ -27,9 +27,16 @@ public class CaseType {
 	@Pattern(regexp="[-\\w]+")
 	@JsonProperty("tag")
 	private String caseTypeTag;
+	private String name;
 	private String description;
 
 	protected CaseType() { /* for hibernate/JPA */ }
+
+	public CaseType(String tag, String name, String desc) {
+		this.caseTypeTag = tag;
+		this.name = name;
+		this.description = desc;
+	}
 
 	public Long getCaseTypeId() {
 		return caseTypeId;
@@ -37,6 +44,10 @@ public class CaseType {
 
 	public String getCaseTypeTag() {
 		return caseTypeTag;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public String getDescription() {
