@@ -1,4 +1,4 @@
-package gov.usds.case_issues.controllers;
+package gov.usds.case_issues.controllers.errors;
 
 import java.time.ZonedDateTime;
 

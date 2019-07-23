@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import gov.usds.case_issues.controllers.SpringRestError;
-
 /**
  * ControllerAdvice to detect and appropriately wrap constraint violations and
  * validation failures in CRUD operations provided by spring-data-rest.
