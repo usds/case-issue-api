@@ -10,6 +10,11 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.NaturalId;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import gov.usds.case_issues.model.ApiViews;
+
 /**
  * An issue associated with a case.
  */
@@ -47,14 +52,17 @@ public class CaseIssue {
 		return issueCase;
 	}
 
+	@JsonView(ApiViews.Summary.class)
 	public String getIssueType() {
 		return issueType;
 	}
 
+	@JsonView(ApiViews.Summary.class)
 	public ZonedDateTime getIssueCreated() {
 		return issueCreated;
 	}
 
+	@JsonInclude // this will be null for most interesting cases, but in those cases we can exclude it explicitly
 	public ZonedDateTime getIssueClosed() {
 		return issueClosed;
 	}

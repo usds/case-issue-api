@@ -20,7 +20,10 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
+
+import gov.usds.case_issues.model.ApiViews;
 
 /**
  * A case that has been seen, at some point, by this system
@@ -79,6 +82,7 @@ public class TroubleCase {
 		return caseManagementSystem;
 	}
 
+	@JsonView(ApiViews.Summary.class)
 	public String getReceiptNumber() {
 		return receiptNumber;
 	}
@@ -87,14 +91,17 @@ public class TroubleCase {
 		return caseType;
 	}
 
+	@JsonView(ApiViews.Summary.class)
 	public ZonedDateTime getCaseCreation() {
 		return caseCreation;
 	}
 
+	@JsonView(ApiViews.Summary.class)
 	public List<CaseIssue> getOpenIssues() {
 		return openIssues;
 	}
 
+	@JsonView(ApiViews.Summary.class)
 	public Map<String, Object> getExtraData() {
 		return extraData;
 	}
