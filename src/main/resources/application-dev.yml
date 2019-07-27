@@ -1,0 +1,33 @@
+spring:
+  profiles:
+    include:
+    - local
+logging:
+  level:
+      # org.hibernate.SQL: DEBUG
+      # org.springframework.data.rest=DEBUG
+      gov.usds: DEBUG
+sample-data:
+  case-management-systems:
+    -
+      name: Default Case Management System
+      tag: DEFAULT
+      description: Fictional System for tests and demos.
+  case-types:
+    -
+      name: Standard Case
+      tag: STANDARD
+      description: The type of case that is loaded for tests and demos.
+ # to a more-specific file such as application-local.yml, add something that follows
+ # this general shape (see SampleDataConfig for more insight):
+ #  files:
+ #    - filename: sample_data/my-old-cases.csv
+ #      case-management-system: DEFAULT
+ #      case-type: STANDARD
+ #      creation_date_format: "EEE MMM dd yyyy HH:mm:ss"
+ #      extra-data-keys:
+ #        - internalKey: filingType
+ #        - externalKey: someOverlySpecificName
+ #          internalKey: flagColumn
+ #          column-type: BOOLEAN
+ 

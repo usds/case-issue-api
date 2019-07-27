@@ -6,6 +6,7 @@ build/
 !**/src/test/**
 # allow local property overrides without annoying git statuses
 /src/main/resources/application-local.properties
+/src/main/resources/application-local.yml
 
 ### STS ###
 .apt_generated

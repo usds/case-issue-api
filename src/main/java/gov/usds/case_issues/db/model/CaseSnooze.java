@@ -27,6 +27,13 @@ public class CaseSnooze {
 	
 	protected CaseSnooze() { /* for hibernate/JPA */ }
 
+	public CaseSnooze(TroubleCase troubleCase, String reason, int days) {
+		snoozeCase = troubleCase;
+		snoozeReason = reason;
+		snoozeStart = ZonedDateTime.now();
+		snoozeEnd = snoozeStart.plusDays(days);
+	}
+
 	public Long getCaseSnoozeId() {
 		return caseSnoozeId;
 	}
