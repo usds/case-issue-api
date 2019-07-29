@@ -13,13 +13,14 @@ import org.hibernate.annotations.NaturalId;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
 import gov.usds.case_issues.model.ApiViews;
 
 /**
  * An issue associated with a case.
  */
 @Entity
-public class CaseIssue {
+public class CaseIssue implements CaseIssueSummary {
 
 	@Id
 	@GeneratedValue

@@ -8,8 +8,13 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
+import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
+import gov.usds.case_issues.model.ApiViews;
+
 @Entity
-public class CaseSnooze {
+public class CaseSnooze implements CaseSnoozeSummary {
 
 	@Id
 	@GeneratedValue
@@ -40,18 +45,26 @@ public class CaseSnooze {
 	public TroubleCase getSnoozeCase() {
 		return snoozeCase;
 	}
+
+	@JsonView(ApiViews.Summary.class)
 	public String getSnoozeReason() {
 		return snoozeReason;
 	}
+
 	public ZonedDateTime getSnoozeStart() {
 		return snoozeStart;
 	}
+
 	public ZonedDateTime getSnoozeEnd() {
 		return snoozeEnd;
 	}
+
 	public String getSnoozeDetails() {
 		return snoozeDetails;
 	}
 
+	public void endSnoozeNow() {
+		snoozeEnd = ZonedDateTime.now();
+	}
 	
 }

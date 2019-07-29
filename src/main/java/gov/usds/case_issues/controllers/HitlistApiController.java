@@ -22,7 +22,7 @@ import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.ApiViews;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/cases/")
 public class HitlistApiController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HitlistApiController.class);
@@ -35,7 +35,7 @@ public class HitlistApiController {
 	private TroubleCaseRepository _caseRepo;
 
 	@JsonView(ApiViews.Summary.class)
-	@RequestMapping(value = "/cases/{caseManagementSystemTag}/{caseTypeTag}", method = RequestMethod.GET)
+	@RequestMapping(value = "{caseManagementSystemTag}/{caseTypeTag}", method = RequestMethod.GET)
 	public Page<TroubleCase> getAllCases(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, Pageable pageMe) {
 		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
