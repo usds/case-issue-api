@@ -1,5 +1,8 @@
 package gov.usds.case_issues.controllers;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
@@ -22,7 +26,7 @@ import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.ApiViews;
 
 @RestController
-@RequestMapping("/api/cases/")
+@RequestMapping("/api/cases/{caseManagementSystemTag}/{caseTypeTag}")
 public class HitlistApiController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HitlistApiController.class);
@@ -33,9 +37,11 @@ public class HitlistApiController {
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
 	@Autowired
 	private TroubleCaseRepository _caseRepo;
+	@Autowired
+	private BulkCaseRepository _bulkRepo;
 
 	@JsonView(ApiViews.Summary.class)
-	@RequestMapping(value = "{caseManagementSystemTag}/{caseTypeTag}", method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public Page<TroubleCase> getAllCases(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, Pageable pageMe) {
 		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
@@ -46,5 +52,34 @@ public class HitlistApiController {
 				caseManagementSystem.getCaseManagementSystemTag(), caseType.getCaseTypeTag(),
 				cases.getTotalElements(), cases.getNumberOfElements());
 		return cases;
+	}
+
+	@JsonView(ApiViews.Summary.class)
+	@RequestMapping(value="snoozed", method=RequestMethod.GET)
+	public Object doSillyTest(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, Pageable pageMe) {
+		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
+				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
+		CaseType caseType = _caseTypeRepo.findByCaseTypeTag(caseTypeTag)
+				.orElseThrow(()->new ApiModelNotFoundException("Case Type", caseTypeTag));
+		return _bulkRepo.getSnoozedCases(caseManagementSystem.getCaseManagementSystemId(), caseType.getCaseTypeId(), pageMe);
+	}
+
+	@JsonView(ApiViews.Summary.class)
+	@RequestMapping(value="active", method=RequestMethod.GET)
+	public Object doSillierTest(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, Pageable pageMe) {
+		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
+				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
+		CaseType caseType = _caseTypeRepo.findByCaseTypeTag(caseTypeTag)
+				.orElseThrow(()->new ApiModelNotFoundException("Case Type", caseTypeTag));
+		return _bulkRepo.getActiveCases(caseManagementSystem.getCaseManagementSystemId(), caseType.getCaseTypeId(), pageMe);
+	}
+
+	@RequestMapping(value="summary", method=RequestMethod.GET)
+	public Map<?, ?> getSummary(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, Pageable pageMe) {
+		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
+				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
+		CaseType caseType = _caseTypeRepo.findByCaseTypeTag(caseTypeTag)
+				.orElseThrow(()->new ApiModelNotFoundException("Case Type", caseTypeTag));
+		return _bulkRepo.getSnoozeSummary(caseManagementSystem.getCaseManagementSystemId(), caseType.getCaseTypeId()).stream().collect(Collectors.toMap(a->((String) a[0]).trim(), a->a[1]));
 	}
 }
