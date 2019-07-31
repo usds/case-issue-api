@@ -2,8 +2,9 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
+import gov.usds.case_issues.model.SnoozeRequest;
 
 /**
  * Service object for querying and manipulating details of individual cases (largely manipulating the
@@ -92,7 +94,7 @@ public class CaseDetailsService {
 	}
 
 	@Transactional(readOnly=false)
-	public CaseSnoozeSummary updateSnooze(String caseManagementSystemTag, String receiptNumber, Map<?,?> requestedSnooze) {
+	public CaseSnoozeSummary updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
 		if (snoozeIsActive(foundSnooze)) {
@@ -101,9 +103,9 @@ public class CaseDetailsService {
 				caseManagementSystemTag, receiptNumber, oldSnooze.getSnoozeEnd());
 			oldSnooze.endSnoozeNow();
 		}
-		String reason = (String) requestedSnooze.get("reason");
-		String details = (String) requestedSnooze.get("details");
-		Integer duration = (Integer) requestedSnooze.get("duration");
+		String reason = requestedSnooze.getSnoozeReason();
+		String details = requestedSnooze.getSnoozeDetails();
+		int duration = requestedSnooze.getDuration();
 		LOG.debug("Setting snooze on {}/{} to {} for {} days",
 				caseManagementSystemTag, receiptNumber, reason, duration);
 		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration, details);

@@ -1,7 +1,8 @@
 package gov.usds.case_issues.controllers;
 
-import java.util.Map;
 import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.model.CaseDetails;
+import gov.usds.case_issues.model.SnoozeRequest;
 import gov.usds.case_issues.services.CaseDetailsService;
 
 @RestController
@@ -50,7 +52,7 @@ public class CaseDetailsApiController {
 	public ResponseEntity<CaseSnoozeSummary> changeActiveSnooze(
 			@PathVariable String caseManagementSystemTag,
 			@PathVariable String receiptNumber,
-			@RequestBody Map<String,?> requestedSnooze) {
+			@RequestBody @Valid SnoozeRequest requestedSnooze) {
 		CaseSnoozeSummary replacement = _caseDetailsService.updateSnooze(caseManagementSystemTag, receiptNumber, requestedSnooze);
 		return ResponseEntity.ok(replacement);
 	}
