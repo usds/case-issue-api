@@ -76,7 +76,7 @@ import gov.usds.case_issues.model.ApiViews;
 	@SqlResultSetMapping(
 		name="snoozeCaseMapping",
 		entities=@EntityResult(entityClass=TroubleCase.class),
-		columns=@ColumnResult(name="last_snooze_end")
+		columns=@ColumnResult(name="last_snooze_end", type=ZonedDateTime.class)
 	),
 	@SqlResultSetMapping(
 		name="rowCount",
