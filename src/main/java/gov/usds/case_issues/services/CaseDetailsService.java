@@ -1,8 +1,12 @@
 package gov.usds.case_issues.services;
 
+import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +22,17 @@ import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseDetails;
+import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
 
+/**
+ * Service object for querying and manipulating details of individual cases (largely manipulating the
+ * snooze state, since issues are not intended to be handled through the browser-facing API).
+ */
 @Service
 @Transactional(readOnly=true)
 public class CaseDetailsService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CaseDetailsService.class);
 
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
@@ -56,5 +67,51 @@ public class CaseDetailsService {
 		Collection<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase);
 		Collection<CaseSnoozeSummary> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase);
 		return new CaseDetails(mainCase, issues, snoozes);
+	}
+
+	public Optional<CaseSnoozeSummary> findActiveSnooze(String caseManagementSystemTag, String receiptNumber) {
+		Optional<CaseSnooze> found = findSnooze(caseManagementSystemTag, receiptNumber);
+		if (snoozeIsActive(found)) {
+			return Optional.of(new CaseSnoozeSummaryFacade(found));
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	@Transactional(readOnly=false)
+	public boolean endActiveSnooze(String caseManagementSystemTag, String receiptNumber) {
+		LOG.debug("Ending current snooze on {}/{}", caseManagementSystemTag, receiptNumber);
+		Optional<CaseSnooze> found = findSnooze(caseManagementSystemTag, receiptNumber);
+		if (snoozeIsActive(found)) {
+			found.get().endSnoozeNow();
+			return true;
+		} else {
+			LOG.debug("No active snooze found for {}/{}", caseManagementSystemTag, receiptNumber);
+			return false;
+		}
+	}
+
+	@Transactional(readOnly=false)
+	public CaseSnoozeSummary updateSnooze(String caseManagementSystemTag, String receiptNumber, Map<?,?> requestedSnooze) {
+		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
+		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
+		if (snoozeIsActive(foundSnooze)) {
+			CaseSnooze oldSnooze = foundSnooze.get();
+			LOG.debug("Found snooze on {}/{} expiring {}: ending it now",
+				caseManagementSystemTag, receiptNumber, oldSnooze.getSnoozeEnd());
+			oldSnooze.endSnoozeNow();
+		}
+		String reason = (String) requestedSnooze.get("reason");
+		String details = (String) requestedSnooze.get("details");
+		Integer duration = (Integer) requestedSnooze.get("duration");
+		LOG.debug("Setting snooze on {}/{} to {} for {} days",
+				caseManagementSystemTag, receiptNumber, reason, duration);
+		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration, details);
+		_snoozeRepo.save(replacement);
+		return new CaseSnoozeSummaryFacade(replacement);
+	}
+
+	private static boolean snoozeIsActive(Optional<CaseSnooze> snooze) {
+		return snooze.isPresent() && snooze.get().getSnoozeEnd().isAfter(ZonedDateTime.now());
 	}
 }
