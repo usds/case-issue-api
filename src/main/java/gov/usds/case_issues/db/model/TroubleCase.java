@@ -16,6 +16,7 @@ import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -53,30 +54,53 @@ import gov.usds.case_issues.model.ApiViews;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
+		name = "snoozed.count",
+		query = "SELECT count(1) as entity_count from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP ",
+		resultSetMapping = "rowCount"
+	),
+	@NamedNativeQuery(
+		name = "unSnoozed.count",
+		query = "SELECT count(1) as entity_count from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP ",
+		resultSetMapping = "rowCount"
+	),
+	@NamedNativeQuery(
 		name = "summary",
-		query = "SELECT case when last_snooze_end is null then 'NEVER_SNOOZED' when last_snooze_end < CURRENT_TIMESTAMP then 'PREVIOUSLY_SNOOZED' else 'CURRENTLY_SNOOZED' end as snooze_state, count(1) "
+		query = "SELECT " + TroubleCase.CASE_SNOOZE_DECODE + "as snooze_state, count(1) "
 				+ "FROM ( " + TroubleCase.CASE_DTO_QUERY + ") "
-				+ "GROUP BY case when last_snooze_end is null then 'NEVER_SNOOZED' when last_snooze_end < CURRENT_TIMESTAMP then 'PREVIOUSLY_SNOOZED' else 'CURRENTLY_SNOOZED' end"
+				+ "GROUP BY " + TroubleCase.CASE_SNOOZE_DECODE
 	),
 })
-@SqlResultSetMapping(
-	name="snoozeCaseMapping",
-	entities=@EntityResult(entityClass=TroubleCase.class),
-	columns=@ColumnResult(name="last_snooze_end")
-)
+@SqlResultSetMappings({
+	@SqlResultSetMapping(
+		name="snoozeCaseMapping",
+		entities=@EntityResult(entityClass=TroubleCase.class),
+		columns=@ColumnResult(name="last_snooze_end")
+	),
+	@SqlResultSetMapping(
+		name="rowCount",
+		columns=@ColumnResult(name="entity_count", type=Long.class)
+	),
+})
 public class TroubleCase {
 
-	protected static final String CASE_DTO_QUERY = "SELECT c.*, "
-					+ "(SELECT MAX(snooze_end) FROM case_snooze s where s.snooze_case_internal_case_id = c.internal_case_id) last_snooze_end "
-					+ "FROM trouble_case c "
-					+ "WHERE case_management_system_case_management_system_id = :caseManagementSystemId "
-					+ "AND case_type_case_type_id = :caseTypeId "
-					+ "AND exists ("
-						+ "select openissues1_.case_issue_id "
-						+ "from case_issue openissues1_ "
-						+ "where c.internal_case_id=openissues1_.issue_case_internal_case_id "
-						+ "and ( openissues1_.issue_closed is null)"
-					+ ")";
+	public static final String CASE_SNOOZE_DECODE =
+		"case when last_snooze_end is null then 'NEVER_SNOOZED' "
+		+ "when last_snooze_end < CURRENT_TIMESTAMP then 'PREVIOUSLY_SNOOZED' "
+		+ "else 'CURRENTLY_SNOOZED' end";
+	public static final String CASE_DTO_QUERY =
+		"SELECT c.*, "
+		+ "(SELECT MAX(snooze_end) FROM case_snooze s where s.snooze_case_internal_case_id = c.internal_case_id) last_snooze_end "
+		+ "FROM trouble_case c "
+		+ "WHERE case_management_system_case_management_system_id = :caseManagementSystemId "
+		+ "AND case_type_case_type_id = :caseTypeId "
+		+ "AND exists ("
+			+ "select openissues1_.case_issue_id "
+			+ "from case_issue openissues1_ "
+			+ "where c.internal_case_id=openissues1_.issue_case_internal_case_id "
+			+ "and ( openissues1_.issue_closed is null)"
+		+ ")";
 
 	@Id
 	@GeneratedValue
