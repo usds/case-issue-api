@@ -13,7 +13,8 @@ import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
 /**
- * API Model for the full details of a {@link TroubleCase}.
+ * API Model for the full details of a {@link TroubleCase}, including all issues (open and closed)
+ * and all snoozes (active and past).
  */
 public class CaseDetails {
 
