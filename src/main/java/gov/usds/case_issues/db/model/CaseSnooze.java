@@ -19,6 +19,9 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 @DynamicUpdate
 public class CaseSnooze implements CaseSnoozeSummary {
 
+	/** The hour of the day (in server local time) at which all snoozes expire, if they are not manually terminated first */
+	public static final int EXPIRES_TIME = 3;
+
 	@Id
 	@GeneratedValue
 	private Long caseSnoozeId;
@@ -42,7 +45,7 @@ public class CaseSnooze implements CaseSnoozeSummary {
 		snoozeCase = troubleCase;
 		snoozeReason = reason;
 		snoozeStart = ZonedDateTime.now();
-		snoozeEnd = snoozeStart.truncatedTo(ChronoUnit.DAYS).plusHours(3).plusDays(days);
+		snoozeEnd = getEndTime(snoozeStart, days);
 	}
 
 	public CaseSnooze(TroubleCase troubleCase, String reason, int days, String details) {
@@ -76,5 +79,11 @@ public class CaseSnooze implements CaseSnoozeSummary {
 	public void endSnoozeNow() {
 		snoozeEnd = ZonedDateTime.now();
 	}
-	
+
+	public static ZonedDateTime getEndTime(ZonedDateTime startTime, int durationDays) {
+		return startTime
+				.truncatedTo(ChronoUnit.DAYS)
+				.withHour(EXPIRES_TIME)
+				.plusDays(durationDays);
+	}
 }
