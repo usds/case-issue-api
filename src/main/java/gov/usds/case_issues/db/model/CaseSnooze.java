@@ -13,10 +13,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.fasterxml.jackson.annotation.JsonView;
-
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
-import gov.usds.case_issues.model.ApiViews;
 
 @Entity
 @DynamicUpdate
@@ -60,7 +57,6 @@ public class CaseSnooze implements CaseSnoozeSummary {
 		return snoozeCase;
 	}
 
-	@JsonView(ApiViews.Summary.class)
 	public String getSnoozeReason() {
 		return snoozeReason;
 	}
