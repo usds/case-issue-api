@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import gov.usds.case_issues.model.CaseInformation;
+import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.CaseListService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -33,7 +33,7 @@ public class HitlistApiController {
 		@ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
 			value = "Number of records per page.", defaultValue = "20"),
 	})
-	public List<CaseInformation> getSnoozedCases(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @ApiIgnore Pageable pageMe) {
+	public List<CaseSummary> getSnoozedCases(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @ApiIgnore Pageable pageMe) {
 		return _listService.getSnoozedCases(caseManagementSystemTag, caseTypeTag, pageMe);
 	}
 
@@ -44,7 +44,7 @@ public class HitlistApiController {
 		@ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
 			value = "Number of records per page.", defaultValue = "20"),
 	})
-	public List<CaseInformation>  getActiveCases(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @ApiIgnore Pageable pageMe) {
+	public List<CaseSummary>  getActiveCases(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @ApiIgnore Pageable pageMe) {
 		return _listService.getActiveCases(caseManagementSystemTag, caseTypeTag, pageMe);
 	}
 

@@ -23,8 +23,12 @@ import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
-import gov.usds.case_issues.model.CaseInformation;
+import gov.usds.case_issues.model.CaseSummary;
 
+/**
+ * Service object for fetching paged lists of cases (and information about case counts)
+ * for the main hit-list API.
+ */
 @Service
 @Transactional(readOnly=true)
 public class CaseListService {
@@ -40,7 +44,7 @@ public class CaseListService {
 	@Autowired
 	private BulkCaseRepository _bulkRepo;
 
-	public List<CaseInformation> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
+	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for active cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
 		Page<Object[]> cases = _bulkRepo.getActiveCases(
@@ -48,7 +52,7 @@ public class CaseListService {
 		return rewrap(cases.getContent());
 	}
 
-	public List<CaseInformation> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
+	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for snoozed cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
 		Page<Object[]> cases = _bulkRepo.getSnoozedCases(
@@ -71,12 +75,12 @@ public class CaseListService {
 		return new CaseGroupInfo(caseManagementSystem, caseType);
 	}
 
-	private List<CaseInformation> rewrap(List<Object[]> queryResult) {
-		Function<? super Object[], ? extends CaseInformation> mapper = row ->{
+	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
+		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null : _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			return new CaseInformation(rootCase, lastSnoozeEnd, summary);
+			return new CaseSummary(rootCase, summary);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
 	}
@@ -98,14 +102,6 @@ public class CaseListService {
 
 		public Long getCaseTypeId() {
 			return _type.getCaseTypeId();
-		}
-
-		public CaseManagementSystem getCaseManagementSystem() {
-			return _system;
-		}
-
-		public CaseType getCaseType() {
-			return _type;
 		}
 	}
 }

@@ -8,16 +8,21 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
-public class CaseInformation {
+/**
+ * API container for the information we will return about each case in a list of either active
+ * or snoozed cases. Exposes summary information about the {@link TroubleCase}, summary information
+ * about the most recent CaseSnooze applied to it, and a flag to indicate if this is a
+ * previously-snoozed case (a shortcut for checking for snooze information and then checking if the
+ * snooze has expired).
+ */
+public class CaseSummary {
 
 	private TroubleCase rootCase;
-	private ZonedDateTime lastSnoozeEnd;
 	private CaseSnoozeSummary snoozeSummary;
 
-	public CaseInformation(TroubleCase rootCase, ZonedDateTime row, CaseSnoozeSummary summary) {
+	public CaseSummary(TroubleCase rootCase, CaseSnoozeSummary summary) {
 		super();
 		this.rootCase = rootCase;
-		this.lastSnoozeEnd = row;
 		this.snoozeSummary = summary;
 	}
 
@@ -34,7 +39,7 @@ public class CaseInformation {
 	}
 
 	public boolean isPreviouslySnoozed() {
-		return lastSnoozeEnd != null && lastSnoozeEnd.isBefore(ZonedDateTime.now());
+		return snoozeSummary != null && snoozeSummary.getSnoozeEnd().isBefore(ZonedDateTime.now());
 	}
 
 	@JsonSerialize(as=CaseSnoozeSummary.class)
