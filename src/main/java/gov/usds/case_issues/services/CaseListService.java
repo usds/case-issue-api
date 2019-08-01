@@ -3,6 +3,7 @@ package gov.usds.case_issues.services;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,8 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
+import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseInformation;
@@ -32,6 +35,8 @@ public class CaseListService {
 	private CaseTypeRepository _caseTypeRepo;
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
+	@Autowired
+	private CaseSnoozeRepository _snoozeRepo;
 	@Autowired
 	private BulkCaseRepository _bulkRepo;
 
@@ -66,9 +71,14 @@ public class CaseListService {
 		return new CaseGroupInfo(caseManagementSystem, caseType);
 	}
 
-	private static List<CaseInformation> rewrap(List<Object[]> queryResult) {
-		return queryResult.stream().map(row ->new CaseInformation((TroubleCase) row[0], (ZonedDateTime) row[1]))
-			.collect(Collectors.toList());
+	private List<CaseInformation> rewrap(List<Object[]> queryResult) {
+		Function<? super Object[], ? extends CaseInformation> mapper = row ->{
+			TroubleCase rootCase = (TroubleCase) row[0];
+			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
+			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null : _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
+			return new CaseInformation(rootCase, lastSnoozeEnd, summary);
+		};
+		return queryResult.stream().map(mapper).collect(Collectors.toList());
 	}
 
 	private static class CaseGroupInfo {

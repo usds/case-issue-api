@@ -43,7 +43,7 @@ import gov.usds.case_issues.model.ApiViews;
 		name = "snoozed",
 		query = "SELECT * from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
 			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
-			  + "ORDER BY case_creation ASC, internal_case_id ASC",
+			  + "ORDER BY last_snooze_end ASC, case_creation ASC, internal_case_id ASC",
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
