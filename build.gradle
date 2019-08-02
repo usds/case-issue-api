@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.1.6.RELEASE'
 	id 'java'
 	id 'checkstyle'
+	id 'jacoco'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -39,3 +40,16 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.2 // please ratchet this up!
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
