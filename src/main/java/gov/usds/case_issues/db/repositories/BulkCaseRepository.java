@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.RepositoryDefinition;
-import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import gov.usds.case_issues.db.model.TroubleCase;
-
-@RepositoryDefinition(idClass=Long.class, domainClass=TroubleCase.class)
-@RestResource(exported=false)
+/**
+ * Repository interface for bulk operations (not independently autowired because
+ * this turns out to break things horribly).
+ */
+@RepositoryRestResource(exported=false)
 public interface BulkCaseRepository {
 
 	@Query(name="snoozed")
