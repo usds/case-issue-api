@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import gov.usds.case_issues.config.SampleDataConfig.ColumnSpec;
-import gov.usds.case_issues.config.SampleDataConfig.SampleDataFileSpec;
+import gov.usds.case_issues.config.SampleDataFileSpec;
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.TroubleCase;

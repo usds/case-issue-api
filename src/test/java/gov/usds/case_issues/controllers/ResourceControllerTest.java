@@ -12,8 +12,6 @@ import java.net.URI;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQuery;
 
 import org.json.JSONObject;
 import org.junit.Test;
