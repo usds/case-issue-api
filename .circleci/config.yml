@@ -44,5 +44,7 @@ jobs:
           path: build/test-results
       - store_artifacts:
           path: build/reports/jacoco/test/html
+          destination: coverage
       - store_artifacts:
           path: build/reports/checkstyle
+          destination: checkstyle
