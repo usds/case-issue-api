@@ -64,4 +64,7 @@ public class CaseIssue implements CaseIssueSummary {
 		return issueClosed;
 	}
 
+	public void setIssueClosed(ZonedDateTime closedDate) {
+		this.issueClosed = closedDate;
+	}
 }
