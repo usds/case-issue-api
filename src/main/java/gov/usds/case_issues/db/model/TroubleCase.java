@@ -64,7 +64,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 	),
 	@NamedNativeQuery(
 		name = "summary",
-		query = "SELECT " + TroubleCase.CASE_SNOOZE_DECODE + "as snooze_state, count(1) "
+		query = "SELECT " + TroubleCase.CASE_SNOOZE_DECODE + " as snooze_state, count(1) "
 				+ "FROM ( " + TroubleCase.CASE_DTO_QUERY + ") "
 				+ "GROUP BY " + TroubleCase.CASE_SNOOZE_DECODE
 	),
