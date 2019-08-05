@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
+import gov.usds.case_issues.test_util.HsqlDbTruncator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -23,7 +25,14 @@ public class CaseManagementSystemRepositoryTest {
 
 	@Autowired
 	private CaseManagementSystemRepository repo;
-	
+	@Autowired
+	private HsqlDbTruncator truncator;
+
+	@Before
+	public void emptyDb() {
+		truncator.truncateAll();
+	}
+
 	@Test
 	public void findAll_emptyDatabase_emptyResult() {
 		Iterable<CaseManagementSystem> found = repo.findAll();

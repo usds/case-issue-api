@@ -16,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,6 +40,8 @@ import gov.usds.case_issues.db.model.TroubleCase;
 @AutoConfigureMockMvc
 public class ResourceControllerTest {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceControllerTest.class);
+
 	private static final String FIXTURE_FORM_TAG = "FORM_1";
 	private static final String FIXTURE_CASE_MANAGER_TAG = "ME2";
 
@@ -47,7 +51,6 @@ public class ResourceControllerTest {
 	private RepositoryEntityLinks links;
 	@Value("${spring.data.rest.basePath}")
 	private String basePath;
-
 
 	@Test
 	public void createAndRetrieveData() throws Exception {
@@ -215,6 +218,7 @@ public class ResourceControllerTest {
 		MockHttpServletResponse caseManagerCheck = mvc.perform(get(getFixtureCaseManagerUrl()))
 				.andReturn().getResponse();
 		if (caseManagerCheck.getStatus() == HttpStatus.NOT_FOUND.value()) {
+			LOG.debug("(Re)creating fixture case manager");
 			JSONObject reqBody = new JSONObject();
 			reqBody.put("tag", FIXTURE_CASE_MANAGER_TAG);
 			reqBody.put("description", "The new manager of my cases");
@@ -226,6 +230,7 @@ public class ResourceControllerTest {
 		MockHttpServletResponse caseTypeCheck = mvc.perform(get(getFixtureCaseTypeUrl()))
 				.andReturn().getResponse();
 		if (caseTypeCheck.getStatus() == HttpStatus.NOT_FOUND.value()) {
+			LOG.debug("(Re)creating fixture case type");
 			JSONObject reqBody = new JSONObject();
 			reqBody.put("tag", FIXTURE_FORM_TAG);
 			reqBody.put("description", "The new form for every possible request");
