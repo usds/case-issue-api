@@ -85,7 +85,7 @@ public class CaseListService {
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
 	}
 
-	private static class CaseGroupInfo {
+	public static class CaseGroupInfo {
 
 		private CaseManagementSystem _system;
 		private CaseType _type;
@@ -102,6 +102,14 @@ public class CaseListService {
 
 		public Long getCaseTypeId() {
 			return _type.getCaseTypeId();
+		}
+
+		public CaseManagementSystem getCaseManagementSystem() {
+			return _system;
+		}
+
+		public CaseType getCaseType() {
+			return _type;
 		}
 	}
 }

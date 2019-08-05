@@ -18,46 +18,40 @@ import org.springframework.stereotype.Service;
 import gov.usds.case_issues.config.SampleDataConfig.ColumnSpec;
 import gov.usds.case_issues.config.SampleDataConfig.SampleDataFileSpec;
 import gov.usds.case_issues.db.model.CaseIssue;
-import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseSnooze;
-import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
-import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
-import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
+import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
 
 @Service
-@Profile({"dev"})
+@Profile({"dev", "servicetest"})
 public class CsvLoader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CsvLoader.class);
+	/** One in ever this-many cases will get snoozed at start-up time, to make the data more interesting */
+	private static final int FAKE_SNOOZE_INTERVAL = 10;
 
 	private TroubleCaseRepository caseRepo;
-	private CaseManagementSystemRepository caseManagerRepo;
-	private CaseTypeRepository caseTypeRepo;
 	private CaseIssueRepository caseIssueRepo;
 	private CaseSnoozeRepository snoozeRepo;
+	private CaseListService listService;
 
-	public CsvLoader(TroubleCaseRepository caseRepo, CaseManagementSystemRepository caseManagerRepo,
-			CaseTypeRepository caseTypeRepo, CaseIssueRepository caseIssueRepo, CaseSnoozeRepository snoozeRepo) {
+	public CsvLoader(TroubleCaseRepository caseRepo, CaseIssueRepository caseIssueRepo,
+			CaseSnoozeRepository snoozeRepo, CaseListService caseListService) {
 		super();
 		this.caseRepo = caseRepo;
-		this.caseManagerRepo = caseManagerRepo;
-		this.caseTypeRepo = caseTypeRepo;
 		this.caseIssueRepo = caseIssueRepo;
 		this.snoozeRepo = snoozeRepo;
+		this.listService = caseListService;
 	}
 
 	@Transactional
 	public <T extends Iterator<Map<String,String>>> void loadAll(T values, SampleDataFileSpec fileConfig) {
-		CaseManagementSystem defaultSystem = caseManagerRepo.findByCaseManagementSystemTag(fileConfig.getCaseManagementSystem())
-				.orElseThrow(() -> new RuntimeException("Couldn't find specified case management system."));
-		CaseType defaultType = caseTypeRepo.findByCaseTypeTag(fileConfig.getCaseType())
-				.orElseThrow(() -> new RuntimeException("Couldn't find specified case type."));
+		CaseGroupInfo caseGroup = listService.translatePath(fileConfig.getCaseManagementSystem(), fileConfig.getCaseType());
 		ZonedDateTime now = ZonedDateTime.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(fileConfig.getCreationDateFormat());
+		DateTimeFormatter formatter = fileConfig.getCreationDateParser();
 		AtomicInteger i = new AtomicInteger(0);
 		Consumer<Map<String,String>> r = row -> {
 			String receipt = row.get(fileConfig.getReceiptNumberKey());
@@ -69,9 +63,9 @@ public class CsvLoader {
 				extras.put(spec.getInternalKey(), storedValue);
 			}
 
-			TroubleCase caseData = caseRepo.save(new TroubleCase(defaultSystem, receipt, defaultType, creationDate, extras));
+			TroubleCase caseData = caseRepo.save(new TroubleCase(caseGroup.getCaseManagementSystem(), receipt, caseGroup.getCaseType(), creationDate, extras));
 			caseIssueRepo.save(new CaseIssue(caseData, "OLD", now));
-			if (0 == i.incrementAndGet() % 10) {
+			if (0 == i.incrementAndGet() % FAKE_SNOOZE_INTERVAL) {
 				snoozeRepo.save(new CaseSnooze(caseData, "Just Because", 2));
 			}
 		};
