@@ -1,6 +1,7 @@
 package gov.usds.case_issues.controllers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -8,6 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.net.URI;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQuery;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -94,10 +100,21 @@ public class ResourceControllerTest {
 		mvc.perform(patch(issueUrl).content(reqBody.toString()))
 			.andExpect(status().is(HttpStatus.NO_CONTENT.value()))
 		;
-		mvc.perform(get(issueUrl))
+
+		@SuppressWarnings("checkstyle:MagicNumber")
+		ZonedDateTime closedTime = ZonedDateTime.of(2019, 7, 10, 18, 11, 0, 0, ZoneId.of("-04:00"));
+		String responseBody = mvc.perform(get(issueUrl))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("issueClosed").value("2019-07-10T18:11:00-04:00"))
+			.andReturn()
+			.getResponse()
+			.getContentAsString()
 		;
+		ZonedDateTime issueClosedTime = ZonedDateTime.parse(
+				new JSONObject(responseBody).getString("issueClosed"),
+				DateTimeFormatter.ISO_OFFSET_DATE_TIME
+		);
+		assertTrue("Closed time as expected", issueClosedTime.isEqual(closedTime));
+
 		reqBody = new JSONObject();
 		reqBody.put("snoozeCase", caseUrl);
 		reqBody.put("snoozeReason", "In the Mail");
