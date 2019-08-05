@@ -6,11 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -20,10 +26,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
-
-import gov.usds.case_issues.model.ApiViews;
 
 /**
  * A case that has been seen, at some point, by this system
@@ -32,7 +35,69 @@ import gov.usds.case_issues.model.ApiViews;
 /* And yes, "Case" would be a simpler name, until you remember that it's a reserved word in every language ever */
 @Entity
 @TypeDef(name="json", typeClass=JsonStringType.class)
+@NamedNativeQueries({
+	@NamedNativeQuery(
+		name = "snoozed",
+		query = "SELECT * from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
+			  + "ORDER BY last_snooze_end ASC, case_creation ASC, internal_case_id ASC",
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "unSnoozed",
+		query = "SELECT * from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP "
+			  + "ORDER BY case_creation ASC, internal_case_id ASC",
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "snoozed.count",
+		query = "SELECT count(1) as entity_count from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP ",
+		resultSetMapping = "rowCount"
+	),
+	@NamedNativeQuery(
+		name = "unSnoozed.count",
+		query = "SELECT count(1) as entity_count from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP ",
+		resultSetMapping = "rowCount"
+	),
+	@NamedNativeQuery(
+		name = "summary",
+		query = "SELECT " + TroubleCase.CASE_SNOOZE_DECODE + "as snooze_state, count(1) "
+				+ "FROM ( " + TroubleCase.CASE_DTO_QUERY + ") "
+				+ "GROUP BY " + TroubleCase.CASE_SNOOZE_DECODE
+	),
+})
+@SqlResultSetMappings({
+	@SqlResultSetMapping(
+		name="snoozeCaseMapping",
+		entities=@EntityResult(entityClass=TroubleCase.class),
+		columns=@ColumnResult(name="last_snooze_end", type=ZonedDateTime.class)
+	),
+	@SqlResultSetMapping(
+		name="rowCount",
+		columns=@ColumnResult(name="entity_count", type=Long.class)
+	),
+})
 public class TroubleCase {
+
+	public static final String CASE_SNOOZE_DECODE =
+		"case when last_snooze_end is null then 'NEVER_SNOOZED' "
+		+ "when last_snooze_end < CURRENT_TIMESTAMP then 'PREVIOUSLY_SNOOZED' "
+		+ "else 'CURRENTLY_SNOOZED' end";
+	public static final String CASE_DTO_QUERY =
+		"SELECT c.*, "
+		+ "(SELECT MAX(snooze_end) FROM case_snooze s where s.snooze_case_internal_case_id = c.internal_case_id) last_snooze_end "
+		+ "FROM trouble_case c "
+		+ "WHERE case_management_system_case_management_system_id = :caseManagementSystemId "
+		+ "AND case_type_case_type_id = :caseTypeId "
+		+ "AND exists ("
+			+ "select openissues1_.case_issue_id "
+			+ "from case_issue openissues1_ "
+			+ "where c.internal_case_id=openissues1_.issue_case_internal_case_id "
+			+ "and ( openissues1_.issue_closed is null)"
+		+ ")";
 
 	@Id
 	@GeneratedValue
@@ -52,7 +117,7 @@ public class TroubleCase {
 	@NotNull
 	private ZonedDateTime caseCreation;
 
-	@OneToMany(mappedBy="issueCase") // that right?
+	@OneToMany(mappedBy = "issueCase")
 	@Where(clause="issue_closed is null")
 	private List<CaseIssue> openIssues;
 
@@ -82,7 +147,6 @@ public class TroubleCase {
 		return caseManagementSystem;
 	}
 
-	@JsonView(ApiViews.Summary.class)
 	public String getReceiptNumber() {
 		return receiptNumber;
 	}
@@ -91,17 +155,14 @@ public class TroubleCase {
 		return caseType;
 	}
 
-	@JsonView(ApiViews.Summary.class)
 	public ZonedDateTime getCaseCreation() {
 		return caseCreation;
 	}
 
-	@JsonView(ApiViews.Summary.class)
 	public List<CaseIssue> getOpenIssues() {
 		return openIssues;
 	}
 
-	@JsonView(ApiViews.Summary.class)
 	public Map<String, Object> getExtraData() {
 		return extraData;
 	}

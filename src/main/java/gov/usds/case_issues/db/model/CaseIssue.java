@@ -11,15 +11,14 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.NaturalId;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonView;
 
-import gov.usds.case_issues.model.ApiViews;
+import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
 
 /**
  * An issue associated with a case.
  */
 @Entity
-public class CaseIssue {
+public class CaseIssue implements CaseIssueSummary {
 
 	@Id
 	@GeneratedValue
@@ -52,12 +51,10 @@ public class CaseIssue {
 		return issueCase;
 	}
 
-	@JsonView(ApiViews.Summary.class)
 	public String getIssueType() {
 		return issueType;
 	}
 
-	@JsonView(ApiViews.Summary.class)
 	public ZonedDateTime getIssueCreated() {
 		return issueCreated;
 	}

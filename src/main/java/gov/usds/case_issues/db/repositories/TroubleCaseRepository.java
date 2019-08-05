@@ -19,7 +19,7 @@ import gov.usds.case_issues.db.model.TroubleCase;
 	collectionResourceRel="cases",
 	collectionResourceDescription=@Description("All cases that have had at least one issue reported.")
 )
-public interface TroubleCaseRepository extends PagingAndSortingRepository<TroubleCase, Long> {
+public interface TroubleCaseRepository extends PagingAndSortingRepository<TroubleCase, Long>, BulkCaseRepository {
 
 	public static final String ACTIVE_CASE_CLAUSE = "c.caseManagementSystem = :caseManagementSystem and c.caseType = :caseType and c.openIssues is not empty";
 	public static final String ACTIVE_CASE_QUERY = "select c from #{#entityName} c where " + ACTIVE_CASE_CLAUSE;
