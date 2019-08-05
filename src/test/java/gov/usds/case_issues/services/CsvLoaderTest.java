@@ -21,10 +21,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import gov.usds.case_issues.config.SampleDataConfig;
 import gov.usds.case_issues.config.SampleDataConfig.ColumnSpec;
 import gov.usds.case_issues.config.SampleDataConfig.ColumnType;
-import gov.usds.case_issues.config.SampleDataConfig.SampleDataFileSpec;
+import gov.usds.case_issues.config.SampleDataFileSpec;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
@@ -99,8 +98,8 @@ public class CsvLoaderTest {
 		dataService.ensureCaseTypeInitialized("STANDARD", "Kinda standard", "boring");
 
 		Map<String, String> singleCase = new HashMap<>();
-		singleCase.put(SampleDataConfig.SampleDataFileSpec.DEFAULT_RECEIPT_NUMBER_KEY, "FAKE123");
-		singleCase.put(SampleDataConfig.SampleDataFileSpec.DEFAULT_CREATION_DATE_KEY, "1940-09-30T05:30:31Z");
+		singleCase.put(SampleDataFileSpec.DEFAULT_RECEIPT_NUMBER_KEY, "FAKE123");
+		singleCase.put(SampleDataFileSpec.DEFAULT_CREATION_DATE_KEY, "1940-09-30T05:30:31Z");
 		singleCase.put("ignoredField", "this should not show up");
 		Iterator<Map<String, String>> values = Collections.singletonList(singleCase).iterator();
 
@@ -130,8 +129,8 @@ public class CsvLoaderTest {
 		dataService.ensureCaseTypeInitialized("STANDARD", "Kinda standard", "boring");
 
 		Map<String, String> singleCase = new HashMap<>();
-		singleCase.put(SampleDataConfig.SampleDataFileSpec.DEFAULT_RECEIPT_NUMBER_KEY, "WRONG");
-		singleCase.put(SampleDataConfig.SampleDataFileSpec.DEFAULT_CREATION_DATE_KEY, "1940-09-30T05:30:31Z");
+		singleCase.put(SampleDataFileSpec.DEFAULT_RECEIPT_NUMBER_KEY, "WRONG");
+		singleCase.put(SampleDataFileSpec.DEFAULT_CREATION_DATE_KEY, "1940-09-30T05:30:31Z");
 		singleCase.put("myReceipt", "FAKE456");
 		singleCase.put("created", "2010-07-24T06:30:00-04:00");
 		singleCase.put("myBoolean", "true");

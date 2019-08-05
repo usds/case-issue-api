@@ -17,8 +17,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import gov.usds.case_issues.config.SampleDataConfig;
-import gov.usds.case_issues.config.SampleDataConfig.SampleDataFileSpec;
 import gov.usds.case_issues.config.SampleDataConfig.TaggedResource;
+import gov.usds.case_issues.config.SampleDataFileSpec;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
