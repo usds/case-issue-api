@@ -28,34 +28,34 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	@Before
 	public void resetDb() {
-		truncator.truncateAll();
-		_system = dataService.ensureCaseManagementSystemInitialized(VALID_CASE_MGT_SYS, "Fake 1", "Fakest");
-		_type = dataService.ensureCaseTypeInitialized(VALID_CASE_TYPE, "Case type 1", "");
+		_truncator.truncateAll();
+		_system = _dataService.ensureCaseManagementSystemInitialized(VALID_CASE_MGT_SYS, "Fake 1", "Fakest");
+		_type = _dataService.ensureCaseTypeInitialized(VALID_CASE_TYPE, "Case type 1", "");
 	}
 
 	@Test
 	public void invalidPath_correctErrorMessages() throws Exception {
-		mvc.perform(getActive("NOPE", VALID_CASE_TYPE))
+		_mvc.perform(getActive("NOPE", VALID_CASE_TYPE))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("message").value(CASE_MANAGEMENT_SYSTEM_NOPE))
 		;
-		mvc.perform(getSnoozed("NOPE", VALID_CASE_TYPE))
+		_mvc.perform(getSnoozed("NOPE", VALID_CASE_TYPE))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("message").value(CASE_MANAGEMENT_SYSTEM_NOPE))
 		;
-		mvc.perform(getSummary("NOPE", VALID_CASE_TYPE))
+		_mvc.perform(getSummary("NOPE", VALID_CASE_TYPE))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("message").value(CASE_MANAGEMENT_SYSTEM_NOPE))
 		;
-		mvc.perform(getActive(VALID_CASE_MGT_SYS, "NOPE"))
+		_mvc.perform(getActive(VALID_CASE_MGT_SYS, "NOPE"))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("message").value(CASE_TYPE_NOPE))
 		;
-		mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, "NOPE"))
+		_mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, "NOPE"))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("message").value(CASE_TYPE_NOPE))
 		;
-		mvc.perform(getSummary(VALID_CASE_MGT_SYS, "NOPE"))
+		_mvc.perform(getSummary(VALID_CASE_MGT_SYS, "NOPE"))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("message").value(CASE_TYPE_NOPE))
 		;
@@ -63,15 +63,15 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	@Test
 	public void validPath_noData_emptyResponses() throws Exception {
-		mvc.perform(getActive(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+		_mvc.perform(getActive(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("[]", true))
 		;
-		mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+		_mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("[]", true))
 		;
-		mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+		_mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("{}", true))
 		;
@@ -80,15 +80,15 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	public void getActive_withData_correctResponse() throws Exception {
 		initCaseData();
-		mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+		_mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("{'NEVER_SNOOZED': 1, 'CURRENTLY_SNOOZED': 1}", true))
 		;
-		mvc.perform(getActive(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+		_mvc.perform(getActive(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("[{'receiptNumber': 'FFFF1111', 'previouslySnoozed': false}]", false))
 		;
-		mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+		_mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("[{'receiptNumber': 'FFFF1112', 'snoozeInformation': {'snoozeReason': 'DONOTCARE'}}]", false))
 		;
@@ -102,11 +102,11 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	 */
 	private void initCaseData() {
 		ZonedDateTime thatWasThen = ZonedDateTime.now().minusMonths(1);
-		TroubleCase case1 = dataService.initCase(_system, "FFFF1111", _type, thatWasThen);
-		dataService.initIssue(case1, "FOOBAR", thatWasThen, null);
-		TroubleCase case2 = dataService.initCase(_system, "FFFF1112", _type, thatWasThen);
-		dataService.initIssue(case2, "FOOBAR", thatWasThen, null);
-		dataService.snoozeCase(case2);
+		TroubleCase case1 = _dataService.initCase(_system, "FFFF1111", _type, thatWasThen);
+		_dataService.initIssue(case1, "FOOBAR", thatWasThen, null);
+		TroubleCase case2 = _dataService.initCase(_system, "FFFF1112", _type, thatWasThen);
+		_dataService.initIssue(case2, "FOOBAR", thatWasThen, null);
+		_dataService.snoozeCase(case2);
 	}
 
 	private static MockHttpServletRequestBuilder getActive(String cmsTag, String ctTag) {

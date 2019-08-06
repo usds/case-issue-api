@@ -16,9 +16,9 @@ import gov.usds.case_issues.test_util.HsqlDbTruncator;
 public abstract class ControllerTestBase {
 
 	@Autowired
-	protected FixtureDataInitializationService dataService;
+	protected FixtureDataInitializationService _dataService;
 	@Autowired
-	protected HsqlDbTruncator truncator;
+	protected HsqlDbTruncator _truncator;
 	@Autowired
-	protected MockMvc mvc;
+	protected MockMvc _mvc;
 }
