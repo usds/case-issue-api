@@ -15,18 +15,13 @@ import java.time.format.DateTimeFormatter;
 
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.CaseIssue;
@@ -35,18 +30,13 @@ import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-public class ResourceControllerTest {
+public class ResourceControllerTest extends ControllerTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceControllerTest.class);
 
 	private static final String FIXTURE_FORM_TAG = "FORM_1";
 	private static final String FIXTURE_CASE_MANAGER_TAG = "ME2";
 
-	@Autowired
-	private MockMvc mvc;
 	@Autowired
 	private RepositoryEntityLinks links;
 	@Value("${spring.data.rest.basePath}")

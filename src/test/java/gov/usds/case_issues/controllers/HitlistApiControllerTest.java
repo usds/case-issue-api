@@ -9,37 +9,19 @@ import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
-import gov.usds.case_issues.test_util.FixtureDataInitializationService;
-import gov.usds.case_issues.test_util.HsqlDbTruncator;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-public class HitlistApiControllerTest {
+public class HitlistApiControllerTest extends ControllerTestBase {
 
 	private static final String VALID_CASE_TYPE = "C1";
 	private static final String VALID_CASE_MGT_SYS = "F1";
 	private static final String API_PATH = "/api/cases/{caseManagementSystemTag}/{caseTypeTag}/";
 	private static final String CASE_TYPE_NOPE = "Case Type 'NOPE' was not found";
 	private static final String CASE_MANAGEMENT_SYSTEM_NOPE = "Case Management System 'NOPE' was not found";
-
-	@Autowired
-	private FixtureDataInitializationService dataService;
-	@Autowired
-	private HsqlDbTruncator truncator;
-	@Autowired
-	private MockMvc mvc;
 
 	private CaseManagementSystem _system;
 	private CaseType _type;
