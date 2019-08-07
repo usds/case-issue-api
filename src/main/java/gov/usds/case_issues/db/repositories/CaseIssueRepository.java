@@ -18,10 +18,14 @@ public interface CaseIssueRepository extends PagingAndSortingRepository<CaseIssu
 	List<CaseIssueSummary> findAllByIssueCaseOrderByIssueCreated(TroubleCase mainCase);
 
 	@Query(
-		"select i from #{#entityName} i where i.issueCase.caseManagementSystem = :caseManagementSystem "
+		"select i from #{#entityName} i join  fetch i.issueCase "
+		+ "where i.issueCase.caseManagementSystem = :caseManagementSystem "
 		+ "and i.issueCase.caseType = :caseType "
 		+ "and i.issueType = :issueType "
 		+ "and i.issueClosed is null "
 	)
+	// we could force pre-fetching of the case management system and type with @EntityGraph(attributePaths={"issueCase.caseType"})
+	// if we wanted to, but that would only save us two queries and only if we had crossed a transaction boundary: probably
+	// not worth the trouble
 	List<CaseIssue> findActiveIssues(CaseManagementSystem caseManagementSystem, CaseType caseType, String issueType);
 }
