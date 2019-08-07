@@ -24,7 +24,7 @@ public class SnoozeRequest {
 	}
 
 	@JsonProperty("reason")
-	@Pattern(regexp="\\p{Alpha}[-_\\p{Alnum}}+")
+	@Pattern(regexp="\\p{Alpha}[-_\\p{Alnum}]+")
 	public String getSnoozeReason() {
 		return snoozeReason;
 	}
