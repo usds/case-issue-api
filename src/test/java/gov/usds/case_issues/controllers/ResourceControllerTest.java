@@ -15,18 +15,13 @@ import java.time.format.DateTimeFormatter;
 
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.CaseIssue;
@@ -35,18 +30,13 @@ import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-public class ResourceControllerTest {
+public class ResourceControllerTest extends ControllerTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceControllerTest.class);
 
 	private static final String FIXTURE_FORM_TAG = "FORM_1";
 	private static final String FIXTURE_CASE_MANAGER_TAG = "ME2";
 
-	@Autowired
-	private MockMvc mvc;
 	@Autowired
 	private RepositoryEntityLinks links;
 	@Value("${spring.data.rest.basePath}")
@@ -62,7 +52,7 @@ public class ResourceControllerTest {
 		MockHttpServletResponse response = doCreate(CaseManagementSystem.class, reqBody);
 		String caseManagerUrl = response.getRedirectedUrl();
 		assertEquals("http://localhost" + basePath + "/caseManagementSystems/MINE", caseManagerUrl);
-		mvc.perform(get(caseManagerUrl))
+		_mvc.perform(get(caseManagerUrl))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("name").value("MyCaseManager 3.0"))
 			.andExpect(jsonPath("$._links.self.href").value(caseManagerUrl))
@@ -75,7 +65,7 @@ public class ResourceControllerTest {
 		response = doCreate(CaseType.class, reqBody);
 		String caseTypeUrl = response.getRedirectedUrl();
 		assertEquals("http://localhost" + basePath + "/caseTypes/W-2", caseTypeUrl);
-		mvc.perform(get(caseTypeUrl))
+		_mvc.perform(get(caseTypeUrl))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("tag").value("W-2"))
 			.andExpect(jsonPath("_links.self.href").value(caseTypeUrl))
@@ -93,18 +83,18 @@ public class ResourceControllerTest {
 		reqBody.put("issueType", "Super old");
 		response = doCreate(CaseIssue.class, reqBody);
 		String issueUrl = response.getRedirectedUrl();
-		mvc.perform(get(issueUrl))
+		_mvc.perform(get(issueUrl))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("issueClosed").isEmpty());
 		reqBody = new JSONObject();
 		reqBody.put("issueClosed", "2019-07-10T18:11:00-04:00");
-		mvc.perform(patch(issueUrl).content(reqBody.toString()))
+		_mvc.perform(patch(issueUrl).content(reqBody.toString()))
 			.andExpect(status().is(HttpStatus.NO_CONTENT.value()))
 		;
 
 		@SuppressWarnings("checkstyle:MagicNumber")
 		ZonedDateTime closedTime = ZonedDateTime.of(2019, 7, 10, 18, 11, 0, 0, ZoneId.of("-04:00"));
-		String responseBody = mvc.perform(get(issueUrl))
+		String responseBody = _mvc.perform(get(issueUrl))
 			.andExpect(status().isOk())
 			.andReturn()
 			.getResponse()
@@ -124,7 +114,7 @@ public class ResourceControllerTest {
 		reqBody.put("snoozeEnd", "2019-07-18T00:00:00-00:00");
 
 		String snoozeUrl = doCreate(CaseSnooze.class, reqBody).getRedirectedUrl();
-		mvc.perform(get(snoozeUrl))
+		_mvc.perform(get(snoozeUrl))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("snoozeReason").value("In the Mail"))
 		;
@@ -207,7 +197,7 @@ public class ResourceControllerTest {
 	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus expectedStatus) throws Exception {
 		MockHttpServletRequestBuilder postRequest = post(links.linkFor(entityType).toUri())
 			.content(body.toString());
-		return mvc.perform(postRequest)
+		return _mvc.perform(postRequest)
 			.andExpect(status().is(expectedStatus.value()))
 			.andReturn()
 			.getResponse()
@@ -215,7 +205,7 @@ public class ResourceControllerTest {
 	}
 
 	private void createFixtureEntities() throws Exception {
-		MockHttpServletResponse caseManagerCheck = mvc.perform(get(getFixtureCaseManagerUrl()))
+		MockHttpServletResponse caseManagerCheck = _mvc.perform(get(getFixtureCaseManagerUrl()))
 				.andReturn().getResponse();
 		if (caseManagerCheck.getStatus() == HttpStatus.NOT_FOUND.value()) {
 			LOG.debug("(Re)creating fixture case manager");
@@ -227,7 +217,7 @@ public class ResourceControllerTest {
 			doCreate(CaseManagementSystem.class, reqBody);
 		}
 
-		MockHttpServletResponse caseTypeCheck = mvc.perform(get(getFixtureCaseTypeUrl()))
+		MockHttpServletResponse caseTypeCheck = _mvc.perform(get(getFixtureCaseTypeUrl()))
 				.andReturn().getResponse();
 		if (caseTypeCheck.getStatus() == HttpStatus.NOT_FOUND.value()) {
 			LOG.debug("(Re)creating fixture case type");

@@ -37,7 +37,11 @@ public class CaseDetailsApiController {
 	@GetMapping("activeSnooze")
 	public ResponseEntity<CaseSnoozeSummary> getActiveSnooze(@PathVariable String caseManagementSystemTag, @PathVariable String receiptNumber) {
 		Optional<CaseSnoozeSummary> snooze = _caseDetailsService.findActiveSnooze(caseManagementSystemTag, receiptNumber);
-		return ResponseEntity.of(snooze);
+		if (snooze.isPresent()) {
+			return ResponseEntity.of(snooze);
+		} else {
+			return ResponseEntity.noContent().build();
+		}
 	}
 
 	@DeleteMapping("activeSnooze")

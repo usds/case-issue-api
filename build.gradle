@@ -45,11 +45,11 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.48 // please ratchet this up!
+                minimum = 0.62 // please ratchet this up!
             }
         }
     }
 }
 
-check.dependsOn jacocoTestReport
+test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
