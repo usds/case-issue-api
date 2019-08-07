@@ -72,6 +72,17 @@ public class FixtureDataInitializationService {
 		return _caseRepo.save(new TroubleCase(caseManagementSystem, receiptNumber, caseType, caseCreation, extraData ));
 	}
 
+	/** Create an open issue for this case, with the same creation date as the case itself */
+	public CaseIssue initOpenIssue(TroubleCase troubleCase, String issueType) {
+		return initIssue(troubleCase, issueType, troubleCase.getCaseCreation(), null);
+	}
+
+	/** Create an open issue for this case */
+	public CaseIssue initOpenIssue(TroubleCase troubleCase, String issueType, ZonedDateTime issueStart) {
+		return initIssue(troubleCase, issueType, issueStart, null);
+	}
+
+	/** Create an issue for this case with the given open and close dates */
 	public CaseIssue initIssue(TroubleCase troubleCase, String issueType, ZonedDateTime issueStart, ZonedDateTime issueEnd) {
 		CaseIssue issue = new CaseIssue(troubleCase, issueType, issueStart);
 		if (issueEnd != null) {

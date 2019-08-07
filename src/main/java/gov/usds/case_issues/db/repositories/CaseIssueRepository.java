@@ -2,10 +2,13 @@ package gov.usds.case_issues.db.repositories;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import gov.usds.case_issues.db.model.CaseIssue;
+import gov.usds.case_issues.db.model.CaseManagementSystem;
+import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
 
@@ -14,4 +17,11 @@ public interface CaseIssueRepository extends PagingAndSortingRepository<CaseIssu
 
 	List<CaseIssueSummary> findAllByIssueCaseOrderByIssueCreated(TroubleCase mainCase);
 
+	@Query(
+		"select i from #{#entityName} i where i.issueCase.caseManagementSystem = :caseManagementSystem "
+		+ "and i.issueCase.caseType = :caseType "
+		+ "and i.issueType = :issueType "
+		+ "and i.issueClosed is null "
+	)
+	List<CaseIssue> findActiveIssues(CaseManagementSystem caseManagementSystem, CaseType caseType, String issueType);
 }
