@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,8 @@ public class FixtureDataInitializationService {
 
 	private static final int DEFAULT_SNOOZE = 30;
 
+	private static final Logger LOG = LoggerFactory.getLogger(FixtureDataInitializationService.class);
+
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
 	@Autowired
@@ -39,6 +43,7 @@ public class FixtureDataInitializationService {
 	private CaseSnoozeRepository _snoozeRepo;
 
 	public CaseManagementSystem ensureCaseManagementSystemInitialized(String tag, String name, String description) {
+		LOG.debug("(Re)initializing case management system '{}'", tag);
 		Optional<CaseManagementSystem> found = _caseManagementSystemRepo.findByCaseManagementSystemTag(tag);
 		if (found.isPresent()) {
 			return found.get();
@@ -47,6 +52,7 @@ public class FixtureDataInitializationService {
 	}
 
 	public CaseType ensureCaseTypeInitialized(String tag, String name, String description) {
+		LOG.debug("(Re)initializing case type '{}'", tag);
 		Optional<CaseType> found = _caseTypeRepository.findByCaseTypeTag(tag);
 		if (found.isPresent()) {
 			return found.get();
