@@ -1,9 +1,13 @@
 package gov.usds.case_issues.db.repositories;
 
+import java.util.Collection;
 import java.util.Optional;
+
+import javax.persistence.LockModeType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.Description;
@@ -28,6 +32,9 @@ public interface TroubleCaseRepository extends PagingAndSortingRepository<Troubl
 	public Page<TroubleCase> getAllByCaseManagementSystemAndCaseType(CaseManagementSystem caseManager, CaseType caseType, Pageable pageable);
 
 	public Optional<TroubleCase> findByCaseManagementSystemAndReceiptNumber(CaseManagementSystem caseManager, String receiptNumber);
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE) // might need to be more aggressive when postgresql table-level LOCK is available
+	public Collection<TroubleCase> getAllByCaseManagementSystemAndReceiptNumberIn(CaseManagementSystem caseManager, Collection<String> receiptNumbers);
 
 	@Query(ACTIVE_CASE_QUERY)
 	public Page<TroubleCase> getWithOpenIssues(CaseManagementSystem caseManagementSystem, CaseType caseType, Pageable pageable);
