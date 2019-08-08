@@ -8,3 +8,4 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        generate_statistics: false # way too noisy to be worth it
