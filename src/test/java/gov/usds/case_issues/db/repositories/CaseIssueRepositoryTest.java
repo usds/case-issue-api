@@ -8,34 +8,22 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
-import gov.usds.case_issues.test_util.FixtureDataInitializationService;
-import gov.usds.case_issues.test_util.HsqlDbTruncator;
+import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("autotest")
-public class CaseIssueRepositoryTest {
+public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 
 	private static final String VALID_ISSUE = "RELEVANT";
 	private static final String VALID_TYPE = "CT1";
 	private static final String VALID_MGT_SYS = "CS1";
 
-	@Autowired
-	private HsqlDbTruncator _truncator;
-	@Autowired
-	private FixtureDataInitializationService _dataService;
 	@Autowired
 	private CaseIssueRepository _repo;
 
@@ -45,7 +33,7 @@ public class CaseIssueRepositoryTest {
 
 	@Before
 	public void reset() {
-		_truncator.truncateAll();
+		truncateDb();
 		_now = ZonedDateTime.now();
 		_system = _dataService.ensureCaseManagementSystemInitialized(VALID_MGT_SYS, "Anonymouse", null);
 		_type = _dataService.ensureCaseTypeInitialized(VALID_TYPE, "Nobody", null);
