@@ -3,6 +3,7 @@ logging:
       org.hibernate:
         SQL: DEBUG
         stat: ERROR
+      gov.usds.case_issues: DEBUG
 spring:
   jpa:
     properties:

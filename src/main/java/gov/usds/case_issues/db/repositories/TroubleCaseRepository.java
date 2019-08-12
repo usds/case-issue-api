@@ -7,6 +7,7 @@ import javax.persistence.LockModeType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -45,5 +46,11 @@ public interface TroubleCaseRepository extends PagingAndSortingRepository<Troubl
 	// we will want to fetch the snooze info in a join: need to figure out how DTO works
 	@Query(ACTIVE_CASE_QUERY + " and " + ACTIVE_SNOOZE_CLAUSE)
 	public Page<TroubleCase> getSnoozedWithOpenIssues(CaseManagementSystem caseManagementSystem, CaseType caseType, Pageable pageable);
+
+	// this override is to make this method work in a testing context, since that is the only context in which this method
+	// should EVER BE CALLED
+	@Override
+	@EntityGraph(attributePaths="openIssues")
+	public Collection<TroubleCase> findAll();
 
 }

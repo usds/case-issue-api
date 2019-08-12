@@ -42,6 +42,10 @@ public class FixtureDataInitializationService {
 	@Autowired
 	private CaseSnoozeRepository _snoozeRepo;
 
+	public CaseManagementSystem ensureCaseManagementSystemInitialized(String tag, String name) {
+		return ensureCaseManagementSystemInitialized(tag, name, null);
+	}
+
 	public CaseManagementSystem ensureCaseManagementSystemInitialized(String tag, String name, String description) {
 		LOG.debug("(Re)initializing case management system '{}'", tag);
 		Optional<CaseManagementSystem> found = _caseManagementSystemRepo.findByCaseManagementSystemTag(tag);
