@@ -1,6 +1,7 @@
 package gov.usds.case_issues.controllers;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -20,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
@@ -63,10 +68,26 @@ public class HitlistApiController {
 		return _listService.getSummaryInfo(caseManagementSystemTag, caseTypeTag);
 	}
 
+	@PutMapping(value="/{issueTag}",consumes= {"text/csv"})
+	public ResponseEntity<?> updateIssueListCsv(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
+			@RequestBody InputStream csvStream) throws IOException {
+		CsvSchema schema = CsvSchema.emptySchema().withHeader();
+		MappingIterator<Map<String, Object>> valueIterator = new CsvMapper()
+			.readerFor(Map.class)
+			.with(schema)
+			.readValues(csvStream);
+		List<CaseRequest> newIssueCases = new ArrayList<>();
+		valueIterator.forEachRemaining(m -> {
+			newIssueCases.add(new MapBasedCaseRequest(m));
+		});
+		_listService.putIssueList(caseManagementSystemTag, caseTypeTag, issueTag, newIssueCases, ZonedDateTime.now());
+		return ResponseEntity.accepted().build();
+	}
+
 	@PutMapping(value="/{issueTag}",consumes= {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<?> updateIssueListJson(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
-			@RequestBody List<Map<String,Object>> csvStream) throws IOException {
-		Iterator<Map<String,Object>> valueIterator = csvStream.listIterator();
+			@RequestBody List<Map<String,Object>> jsonData) throws IOException {
+		Iterator<Map<String,Object>> valueIterator = jsonData.listIterator();
 		List<CaseRequest> newIssueCases = new ArrayList<>();
 		valueIterator.forEachRemaining(m -> {
 			newIssueCases.add(new MapBasedCaseRequest(m));
