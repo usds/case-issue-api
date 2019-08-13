@@ -3,7 +3,6 @@ package gov.usds.case_issues.controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +25,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
+import gov.usds.case_issues.config.SampleDataFileSpec;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.CaseListService;
@@ -103,8 +103,11 @@ public class HitlistApiController {
 		private Map<String, Object> _rest;
 
 		public MapBasedCaseRequest(Map<String, Object> input) {
-			_receipt = input.remove("receiptNumber").toString();
-			_caseCreation = ZonedDateTime.parse(input.remove("creationDate").toString(), DateTimeFormatter.ISO_DATE_TIME);
+			_receipt = input.remove(SampleDataFileSpec.DEFAULT_RECEIPT_NUMBER_KEY).toString();
+			_caseCreation = ZonedDateTime.parse(
+				input.remove(SampleDataFileSpec.DEFAULT_CREATION_DATE_KEY).toString(),
+				SampleDataFileSpec.DEFAULT_DATETIME_FORMAT
+			);
 			_rest = input;
 		}
 
