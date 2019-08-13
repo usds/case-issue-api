@@ -28,7 +28,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	@Before
 	public void resetDb() {
-		_truncator.truncateAll();
+		truncateDb();
 		_system = _dataService.ensureCaseManagementSystemInitialized(VALID_CASE_MGT_SYS, "Fake 1", "Fakest");
 		_type = _dataService.ensureCaseTypeInitialized(VALID_CASE_TYPE, "Case type 1", "");
 	}
