@@ -4,7 +4,11 @@ spring:
     - local
 logging:
   level:
+      # NOTE: add any of the below in application-local.yml to turn on something interesting
+      #       (the first two are hibernate SQL query logging, which is pretty verbose, and hibernate
+      #       input and output value logging, which is *incredibly* verbose).
       # org.hibernate.SQL: DEBUG
+      # org.hibernate.type: TRACE
       # org.springframework.data.rest=DEBUG
       gov.usds: DEBUG
 sample-data:
