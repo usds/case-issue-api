@@ -17,6 +17,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import gov.usds.case_issues.config.SampleDataConfig;
+import gov.usds.case_issues.config.SampleDataConfig.CaseManagementSystemDefinition;
 import gov.usds.case_issues.config.SampleDataConfig.TaggedResource;
 import gov.usds.case_issues.config.SampleDataFileSpec;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
@@ -40,10 +41,15 @@ public class CaseIssueApi {
 				CaseManagementSystemRepository systemRepo, CaseTypeRepository typeRepo)
 			throws IOException {
 		return args -> {
-			for (TaggedResource spec : loaderConfig.getCaseManagementSystems()) {
-				systemRepo.save(new CaseManagementSystem(spec.getTag(), spec.getName(), spec.getDescription()));
+			for (CaseManagementSystemDefinition spec : loaderConfig.getCaseManagementSystems()) {
+				LOG.debug("Creating Case Management System {} ({}/{}): URLS are {} and {}", spec.getTag(),
+						spec.getName(), spec.getDescription(), spec.getApplicationUrl(), spec.getCaseDetailsUrlTemplate());
+				CaseManagementSystem entity = new CaseManagementSystem(
+					spec.getTag(), spec.getName(), spec.getDescription(), spec.getApplicationUrl(), spec.getCaseDetailsUrlTemplate());
+				systemRepo.save(entity);
 			}
 			for (TaggedResource spec : loaderConfig.getCaseTypes()) {
+				LOG.debug("Creating Case Type {} ({}/{})", spec.getTag(), spec.getName(), spec.getDescription());
 				typeRepo.save(new CaseType(spec.getTag(), spec.getName(), spec.getDescription()));
 			}
 			for (SampleDataFileSpec fileConfig : loaderConfig.getFiles()) {

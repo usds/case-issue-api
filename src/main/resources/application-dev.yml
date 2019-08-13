@@ -13,11 +13,24 @@ sample-data:
       name: Default Case Management System
       tag: DEFAULT
       description: Fictional System for tests and demos.
+      application-url: http://default.my-agency.example.gov
+      case-details-url-template: http://default.my-agency.example.gov/cases?case=
+    -
+      name: Other Case Management System
+      tag: OTHER
+      description: Empty system for tests and demos.
+      application-url: http://legacy-system.my-agency.example.gov
+      case-details-url-template: http://archives.my-agency.example.gov/casedetails/
   case-types:
     -
       name: Standard Case
       tag: STANDARD
       description: The type of case that is loaded for tests and demos.
+    -
+      name: Non-standard Case
+      tag: WEIRD
+      description: The type of case that is loaded for tests and demos but isn't standard.
+
  # to a more-specific file such as application-local.yml, add something that follows
  # this general shape (see SampleDataConfig for more insight):
  #  files:
