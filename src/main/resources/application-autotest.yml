@@ -1,0 +1,12 @@
+logging:
+  level:
+      org.hibernate:
+        SQL: DEBUG
+        stat: ERROR
+      gov.usds.case_issues: DEBUG
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        generate_statistics: false # way too noisy to be worth it

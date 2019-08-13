@@ -15,7 +15,7 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
  * previously-snoozed case (a shortcut for checking for snooze information and then checking if the
  * snooze has expired).
  */
-public class CaseSummary {
+public class CaseSummary implements CaseRequest {
 
 	private TroubleCase rootCase;
 	private CaseSnoozeSummary snoozeSummary;
@@ -26,14 +26,26 @@ public class CaseSummary {
 		this.snoozeSummary = summary;
 	}
 
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.model.CaseRequest#getReceiptNumber()
+	 */
+	@Override
 	public String getReceiptNumber() {
 		return rootCase.getReceiptNumber();
 	}
 
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.model.CaseRequest#getCaseCreation()
+	 */
+	@Override
 	public ZonedDateTime getCaseCreation() {
 		return rootCase.getCaseCreation();
 	}
 
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.model.CaseRequest#getExtraData()
+	 */
+	@Override
 	public Map<String, Object> getExtraData() {
 		return rootCase.getExtraData();
 	}
