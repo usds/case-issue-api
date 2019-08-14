@@ -104,11 +104,10 @@ public class CaseDetailsService {
 			oldSnooze.endSnoozeNow();
 		}
 		String reason = requestedSnooze.getSnoozeReason();
-		String details = requestedSnooze.getSnoozeDetails();
 		int duration = requestedSnooze.getDuration();
 		LOG.debug("Setting snooze on {}/{} to {} for {} days",
 				caseManagementSystemTag, receiptNumber, reason, duration);
-		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration, details);
+		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration);
 		_snoozeRepo.save(replacement);
 		return new CaseSnoozeSummaryFacade(replacement);
 	}

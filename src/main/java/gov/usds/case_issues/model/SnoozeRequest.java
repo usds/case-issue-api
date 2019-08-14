@@ -13,13 +13,11 @@ import gov.usds.case_issues.db.model.CaseSnooze;
 public class SnoozeRequest {
 
 	private String snoozeReason;
-	private String snoozeDetails;
 	private int duration;
 
 	public SnoozeRequest(String snoozeType, String snoozeDetails, int duration) {
 		super();
 		this.snoozeReason = snoozeType;
-		this.snoozeDetails = snoozeDetails;
 		this.duration = duration;
 	}
 
@@ -27,11 +25,6 @@ public class SnoozeRequest {
 	@Pattern(regexp="\\p{Alpha}[-_\\p{Alnum}]+")
 	public String getSnoozeReason() {
 		return snoozeReason;
-	}
-
-	@JsonProperty("details")
-	public String getSnoozeDetails() {
-		return snoozeDetails;
 	}
 
 	@Min(1)

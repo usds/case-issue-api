@@ -36,8 +36,4 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 	public ZonedDateTime getSnoozeEnd() {
 		return wrapped.getSnoozeEnd();
 	}
-
-	public String getSnoozeDetails() {
-		return wrapped.getSnoozeDetails();
-	}
 }

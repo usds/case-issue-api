@@ -37,7 +37,6 @@ public class CaseSnooze implements CaseSnoozeSummary {
 	private ZonedDateTime snoozeStart;
 	@NotNull
 	private ZonedDateTime snoozeEnd;
-	private String snoozeDetails; // probably ends up being a couple of FK or a JSON field
 	
 	protected CaseSnooze() { /* for hibernate/JPA */ }
 
@@ -46,11 +45,6 @@ public class CaseSnooze implements CaseSnoozeSummary {
 		snoozeReason = reason;
 		snoozeStart = ZonedDateTime.now();
 		snoozeEnd = getEndTime(snoozeStart, days);
-	}
-
-	public CaseSnooze(TroubleCase troubleCase, String reason, int days, String details) {
-		this(troubleCase, reason, days);
-		this.snoozeDetails = details;
 	}
 
 	public Long getCaseSnoozeId() {
@@ -70,10 +64,6 @@ public class CaseSnooze implements CaseSnoozeSummary {
 
 	public ZonedDateTime getSnoozeEnd() {
 		return snoozeEnd;
-	}
-
-	public String getSnoozeDetails() {
-		return snoozeDetails;
 	}
 
 	public void endSnoozeNow() {
