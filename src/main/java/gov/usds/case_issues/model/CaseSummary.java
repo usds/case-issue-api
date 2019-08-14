@@ -1,6 +1,8 @@
 package gov.usds.case_issues.model;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -45,5 +47,9 @@ public class CaseSummary {
 	@JsonSerialize(as=CaseSnoozeSummary.class)
 	public CaseSnoozeSummary getSnoozeInformation() {
 		return snoozeSummary;
+	}
+
+	public List<NoteSummary> getNotes() {
+		return Collections.emptyList();
 	}
 }

@@ -2,6 +2,8 @@ package gov.usds.case_issues.model;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -14,7 +16,7 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
 /**
  * API Model for the full details of a {@link TroubleCase}, including all issues (open and closed)
- * and all snoozes (active and past).
+ * and all snoozes (active and past) and notes.
  */
 public class CaseDetails {
 
@@ -53,5 +55,9 @@ public class CaseDetails {
 	@JsonSerialize(contentAs=CaseSnoozeSummary.class)
 	public Collection<? extends CaseSnoozeSummary> getSnoozes() {
 		return snoozes;
+	}
+
+	public List<NoteSummary> getNotes() {
+		return Collections.emptyList();
 	}
 }
