@@ -2,3 +2,11 @@ spring:
   data:
     rest:
       basePath: /resources
+  jpa:
+    # we do not want Hibernate to start making DB calls during Jackson rendering: much better to have that
+    # throw an exception so we know we have to update the persistence configuration.
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        generate_statistics: true # possibly too verbose, but useful to have around
