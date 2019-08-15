@@ -2,7 +2,6 @@ package gov.usds.case_issues.model;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,12 +22,17 @@ public class CaseDetails {
 	private TroubleCase rootCase;
 	private Collection<? extends CaseIssueSummary> issues;
 	private Collection<? extends CaseSnoozeSummary> snoozes;
+	private List<NoteSummary> notes;
 
-	public CaseDetails(TroubleCase rootCase, Collection<? extends CaseIssueSummary> issues, Collection<? extends CaseSnoozeSummary> snoozes) {
+	public CaseDetails(TroubleCase rootCase,
+			Collection<? extends CaseIssueSummary> issues,
+			Collection<? extends CaseSnoozeSummary> snoozes,
+			List<NoteSummary> notes) {
 		super();
 		this.rootCase = rootCase;
 		this.issues = issues;
 		this.snoozes = snoozes;
+		this.notes = notes;
 	}
 
 	public CaseManagementSystem getCaseManagementSystem() {
@@ -58,6 +62,6 @@ public class CaseDetails {
 	}
 
 	public List<NoteSummary> getNotes() {
-		return Collections.emptyList();
+		return notes;
 	}
 }

@@ -1,5 +1,6 @@
 package gov.usds.case_issues.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -16,9 +17,9 @@ public class SnoozeRequest {
 
 	private String snoozeReason;
 	private int duration;
-	private List<NoteRequest> notes;
+	private List<NoteRequest> notes = new ArrayList<>();
 
-	public SnoozeRequest(String snoozeType, String snoozeDetails, int duration) {
+	public SnoozeRequest(String snoozeType, int duration) {
 		super();
 		this.snoozeReason = snoozeType;
 		this.duration = duration;

@@ -27,9 +27,11 @@ public class NoteSubtype {
 	private String description;
 	private String urlTemplate;
 
+	private NoteSubtype() { /* for hibernate */}
+
 	public NoteSubtype(String noteSubtypeTag, NoteType forNoteType, String name, String description,
 			String urlTemplate) {
-		super();
+		this();
 		this.noteSubtypeTag = noteSubtypeTag;
 		this.forNoteType = forNoteType;
 		this.name = name;

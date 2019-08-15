@@ -2,7 +2,9 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -24,6 +26,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
+import gov.usds.case_issues.model.NoteSummary;
 import gov.usds.case_issues.model.SnoozeRequest;
 
 /**
@@ -44,6 +47,8 @@ public class CaseDetailsService {
 	private CaseSnoozeRepository _snoozeRepo;
 	@Autowired
 	private CaseIssueRepository _issueRepo;
+	@Autowired
+	private CaseAttachmentService _attachmentService;
 
 	public TroubleCase findCaseByTags(String caseManagementSystemTag, String receiptNumber) {
 		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
@@ -68,7 +73,8 @@ public class CaseDetailsService {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Collection<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase);
 		Collection<CaseSnoozeSummary> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase);
-		return new CaseDetails(mainCase, issues, snoozes);
+		List<NoteSummary> notes = _attachmentService.findNotesForCase(mainCase).stream().map(NoteSummary::new).collect(Collectors.toList());
+		return new CaseDetails(mainCase, issues, snoozes, notes);
 	}
 
 	public Optional<CaseSnoozeSummary> findActiveSnooze(String caseManagementSystemTag, String receiptNumber) {
@@ -109,6 +115,7 @@ public class CaseDetailsService {
 				caseManagementSystemTag, receiptNumber, reason, duration);
 		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration);
 		_snoozeRepo.save(replacement);
+		requestedSnooze.getNotes().forEach(r->_attachmentService.attachNote(r, replacement));
 		return new CaseSnoozeSummaryFacade(replacement);
 	}
 
