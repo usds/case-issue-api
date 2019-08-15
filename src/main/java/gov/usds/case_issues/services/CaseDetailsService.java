@@ -116,8 +116,11 @@ public class CaseDetailsService {
 				caseManagementSystemTag, receiptNumber, reason, duration);
 		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration);
 		_snoozeRepo.save(replacement);
-		requestedSnooze.getNotes().forEach(r->_attachmentService.attachNote(r, replacement));
-		return new CaseSnoozeSummaryFacade(replacement);
+		List<NoteSummary> savedNotes = requestedSnooze.getNotes().stream()
+				.map(r->_attachmentService.attachNote(r, replacement))
+				.map(NoteSummary::new)
+				.collect(Collectors.toList());
+		return new CaseSnoozeSummaryFacade(replacement, savedNotes);
 	}
 
 	private static boolean snoozeIsActive(Optional<CaseSnooze> snooze) {
