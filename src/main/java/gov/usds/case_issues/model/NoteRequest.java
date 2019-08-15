@@ -20,7 +20,7 @@ public class NoteRequest {
 	}
 
 	@JsonProperty("content")
-	public String getNoteContent() {
+	public String getContent() {
 		return noteContent;
 	}
 

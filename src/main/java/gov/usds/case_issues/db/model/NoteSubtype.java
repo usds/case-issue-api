@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-public class NoteSubType {
+public class NoteSubtype {
 
 	@Id
 	@GeneratedValue
@@ -27,7 +27,7 @@ public class NoteSubType {
 	private String description;
 	private String urlTemplate;
 
-	public NoteSubType(String noteSubtypeTag, NoteType forNoteType, String name, String description,
+	public NoteSubtype(String noteSubtypeTag, NoteType forNoteType, String name, String description,
 			String urlTemplate) {
 		super();
 		this.noteSubtypeTag = noteSubtypeTag;
