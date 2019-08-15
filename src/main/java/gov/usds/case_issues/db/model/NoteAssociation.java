@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NaturalId;
 import org.springframework.data.annotation.CreatedDate;
 
 @Entity
@@ -15,10 +17,13 @@ public class NoteAssociation {
 	@Id
 	@GeneratedValue
 	private Long associationId;
-	@CreatedDate
-	private ZonedDateTime associationTimestamp; 
+	@CreatedDate       // this one should probably work, but didn't on first try...
+	@CreationTimestamp // this works, but gets the time from Java: just make postgresql do it on insert
+	private ZonedDateTime associationTimestamp;
+	@NaturalId
 	@ManyToOne(optional=false)
 	private CaseSnooze snooze;
+	@NaturalId
 	@ManyToOne(optional=false)
 	private CaseNote note;
 
