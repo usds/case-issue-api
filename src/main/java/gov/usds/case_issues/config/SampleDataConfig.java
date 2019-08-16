@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @ConfigurationProperties("sample-data")
-@EnableConfigurationProperties
 @Configuration
 @Profile({"dev","test"})
 public class SampleDataConfig {

@@ -2,8 +2,12 @@ package gov.usds.case_issues.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -12,6 +16,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -19,6 +24,25 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class);
+
+	@Autowired
+	private WebConfigurationProperties _customProperties;
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		String[] origins = _customProperties.getCorsOrigins();
+		LOG.info("Configuring CORS allowed origins for API to {}", Arrays.toString(origins));
+		if (origins != null && 0 < origins.length) {
+			registry
+				.addMapping("/api/**")
+					.allowCredentials(true)
+					.allowedMethods("*")
+					.allowedOrigins(origins)
+			;
+		}
+	}
 
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
