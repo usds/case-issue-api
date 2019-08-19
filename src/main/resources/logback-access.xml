@@ -1,9 +1,10 @@
 <!DOCTYPE configuration>
 
 <configuration>
+    <springProperty name="accessLogFormat" source="access-log-format" defaultValue="combined"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>combined</pattern>
+            <pattern>${accessLogFormat}</pattern>
         </encoder>
     </appender>
     <appender-ref ref="CONSOLE" />

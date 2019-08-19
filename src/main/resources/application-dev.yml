@@ -15,6 +15,7 @@ web-customization:
   cors-origins:
     - http://localhost:3000
     - http://localhost:3001
+access-log-format: combined
 sample-data:
   case-management-systems:
     -
