@@ -25,10 +25,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
 
+	// access logging:
+	implementation 'net.rakugakibox.spring.boot:logback-access-spring-boot-starter:2.7.1'
+
 	implementation "io.springfox:springfox-swagger2:${springFoxVersion}"
 	implementation "io.springfox:springfox-swagger-ui:${springFoxVersion}"
 	implementation "io.springfox:springfox-bean-validators:${springFoxVersion}"
-// try this again when springfox 3.0 comes out:
+//	try this again if and when springfox 3.0 comes out:
 //	implementation "io.springfox:springfox-data-rest:${springFoxVersion}"
 
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
@@ -37,6 +40,7 @@ dependencies {
 
 	runtimeOnly 'org.hsqldb:hsqldb'
 	runtimeOnly 'org.postgresql:postgresql'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
