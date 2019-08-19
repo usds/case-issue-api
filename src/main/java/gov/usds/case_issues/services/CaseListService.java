@@ -31,6 +31,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
+import gov.usds.case_issues.model.NoteSummary;
 
 /**
  * Service object for fetching paged lists of cases (and information about case counts)
@@ -55,13 +56,15 @@ public class CaseListService {
 	private CaseIssueRepository _issueRepo;
 	@Autowired
 	private TroubleCaseRepository _caseRepo;
+	@Autowired
+	private CaseAttachmentService _attachmentService;
 
 	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for active cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
 		Page<Object[]> cases = _bulkRepo.getActiveCases(
 			translated.getCaseManagementSystemId(), translated.getCaseTypeId(), pageRequest);
-		return rewrap(cases.getContent());
+		return rewrap(cases.getContent(), false);
 	}
 
 	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
@@ -69,7 +72,7 @@ public class CaseListService {
 		LOG.debug("Paged request for snoozed cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
 		Page<Object[]> cases = _bulkRepo.getSnoozedCases(
 			translated.getCaseManagementSystemId(), translated.getCaseTypeId(), pageRequest);
-		return rewrap(cases.getContent());
+		return rewrap(cases.getContent(), true);
 	}
 
 	public Map<String, Number> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
@@ -183,12 +186,16 @@ public class CaseListService {
 		);
 	}
 
-	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
+	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {
 		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null : _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			return new CaseSummary(rootCase, summary);
+			List<NoteSummary> notes = null;
+			if(includeNotes) {
+				notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
+			}
+			return new CaseSummary(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
 	}
