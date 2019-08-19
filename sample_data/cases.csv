@@ -1,0 +1,301 @@
+receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus
+FKE5250608,2014-08-29T00:00:00-04:00,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing
+FKE5194135,2014-10-14T00:00:00-04:00,1770,Semaphore,Happy,false,Eschewing Obfuscation,Boredom,86636,Printing
+FKE2278368,2014-08-06T00:00:00-04:00,1839,Semaphore,Happy,false,Processing,Boredom,61834,Amazingly Successful
+FKE4112038,2015-06-08T00:00:00-04:00,1533,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,34425,Scrutinizing
+FKE5039309,2015-03-16T00:00:00-04:00,1617,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Boredom,72788,Printing
+FKE3382460,2015-07-05T00:00:00-04:00,1506,Semaphore,Happy,false,Processing,Enthusiasm,46544,Amazingly Successful
+FKE2704182,2014-12-04T00:00:00-04:00,1719,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,23898,Printing
+FKE8381189,2015-11-06T00:00:00-04:00,1382,Semaphore,Happy,true,Eschewing Obfuscation,Ennui,40691,Amazingly Successful
+FKE1208241,2014-12-12T00:00:00-04:00,1711,Semaphore,Despondent,true,Processing,Ennui,85950,Unfortunately Unclear
+FKE3030057,2015-01-10T00:00:00-04:00,1682,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Boredom,35513,Printing
+FKE3844906,2014-09-22T00:00:00-04:00,1792,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Ennui,26490,Printing
+FKE8391850,2015-02-02T00:00:00-04:00,1659,Pigeon,Despondent,false,Pending,Enthusiasm,14637,Unfortunately Unclear
+FKE7294758,2015-04-02T00:00:00-04:00,1600,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,89356,Amazingly Successful
+FKE5513330,2014-12-21T00:00:00-04:00,1702,Pigeon,Despondent,false,Pending,Ennui,30476,Amazingly Successful
+FKE5962107,2015-06-06T00:00:00-04:00,1535,Semaphore,Despondent,true,Eschewing Obfuscation,Boredom,64152,Printing
+FKE9795021,2014-10-29T00:00:00-04:00,1755,Pigeon,Despondent,false,Eschewing Obfuscation,Boredom,80767,Printing
+FKE9324598,2015-04-09T00:00:00-04:00,1593,Semaphore,Despondent,false,Eschewing Obfuscation,Ennui,73704,Printing
+FKE1362749,2015-02-07T00:00:00-04:00,1654,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,60347,Scrutinizing
+FKE1209508,2015-12-08T00:00:00-04:00,1350,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Boredom,78413,Unfortunately Unclear
+FKE9233069,2015-08-08T00:00:00-04:00,1472,Semaphore,Happy,false,Eschewing Obfuscation,Ennui,14209,Printing
+FKE3918714,2014-11-11T00:00:00-04:00,1742,Pigeon,Happy,false,Processing,Ennui,32017,Unfortunately Unclear
+FKE7743275,2015-12-09T00:00:00-04:00,1349,Semaphore,Happy,false,Pending,Ennui,55348,Amazingly Successful
+FKE6696543,2015-09-19T00:00:00-04:00,1430,Pigeon,Happy,false,Eschewing Obfuscation,Boredom,45662,Scrutinizing
+FKE3869316,2015-08-25T00:00:00-04:00,1455,Semaphore,Despondent,false,Processing,Ennui,82753,Unfortunately Unclear
+FKE1803622,2015-07-11T00:00:00-04:00,1500,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Enthusiasm,33072,Printing
+FKE8873295,2015-09-26T00:00:00-04:00,1423,Pigeon,Despondent,false,Pending,Ennui,22096,Unfortunately Unclear
+FKE5369954,2014-08-02T00:00:00-04:00,1843,Semaphore,Happy,true,Processing,Boredom,41464,Printing
+FKE1147795,2014-08-22T00:00:00-04:00,1823,Semaphore,Happy,true,Eschewing Obfuscation,Enthusiasm,51761,Scrutinizing
+FKE9941505,2015-04-02T00:00:00-04:00,1600,Semaphore,Despondent,false,Eschewing Obfuscation,Boredom,46970,Printing
+FKE8738994,2015-07-25T00:00:00-04:00,1486,Semaphore,Despondent,false,Pending,Enthusiasm,36484,Printing
+FKE2844653,2014-10-11T00:00:00-04:00,1773,Pigeon,Despondent,false,Processing,Enthusiasm,82608,Unfortunately Unclear
+FKE9712593,2015-05-25T00:00:00-04:00,1547,Semaphore,Despondent,false,Processing,Ennui,26556,Printing
+FKE2793782,2015-05-04T00:00:00-04:00,1568,Pigeon,Happy,true,Pending,Boredom,95359,Amazingly Successful
+FKE9925575,2015-12-14T00:00:00-04:00,1344,Semaphore,Happy,false,Processing,Boredom,55316,Scrutinizing
+FKE9457244,2014-11-07T00:00:00-04:00,1746,Pigeon,Happy,false,Pending,Enthusiasm,22273,Scrutinizing
+FKE9962417,2014-08-26T00:00:00-04:00,1819,Semaphore,Happy,false,Pending,Ennui,90447,Amazingly Successful
+FKE9359394,2015-05-20T00:00:00-04:00,1552,Pigeon,Despondent,false,Processing,Enthusiasm,71517,Amazingly Successful
+FKE3089732,2015-01-20T00:00:00-04:00,1672,Pigeon,Despondent,false,Processing,Enthusiasm,74134,Scrutinizing
+FKE9154183,2014-12-05T00:00:00-04:00,1718,Pigeon,Happy,false,Pending,Boredom,48106,Printing
+FKE7624113,2015-02-07T00:00:00-04:00,1654,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,95759,Printing
+FKE5633378,2015-04-19T00:00:00-04:00,1583,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Boredom,42402,Unfortunately Unclear
+FKE3695002,2014-09-02T00:00:00-04:00,1812,Pigeon,Despondent,true,Ask a Silly Question get a Silly Answer,Enthusiasm,55108,Printing
+FKE1503368,2015-06-09T00:00:00-04:00,1532,Pigeon,Happy,true,Eschewing Obfuscation,Ennui,86973,Amazingly Successful
+FKE3821536,2015-01-24T00:00:00-04:00,1668,Pigeon,Despondent,false,Processing,Ennui,21902,Amazingly Successful
+FKE9262324,2015-01-12T00:00:00-04:00,1680,Pigeon,Happy,false,Pending,Boredom,30051,Amazingly Successful
+FKE2210816,2015-12-12T00:00:00-04:00,1346,Semaphore,Despondent,true,Pending,Ennui,29830,Unfortunately Unclear
+FKE3668667,2015-02-20T00:00:00-04:00,1641,Semaphore,Happy,false,Pending,Ennui,98578,Unfortunately Unclear
+FKE4036156,2014-09-17T00:00:00-04:00,1797,Semaphore,Despondent,true,Ask a Silly Question get a Silly Answer,Enthusiasm,41453,Scrutinizing
+FKE9765671,2014-10-08T00:00:00-04:00,1776,Pigeon,Despondent,false,Eschewing Obfuscation,Ennui,12973,Amazingly Successful
+FKE2910744,2015-11-26T00:00:00-04:00,1362,Pigeon,Despondent,false,Pending,Ennui,31931,Amazingly Successful
+FKE1934438,2015-01-20T00:00:00-04:00,1672,Pigeon,Despondent,false,Eschewing Obfuscation,Enthusiasm,32741,Scrutinizing
+FKE3410393,2015-09-10T00:00:00-04:00,1439,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,93695,Printing
+FKE3658246,2014-12-24T00:00:00-04:00,1699,Pigeon,Despondent,false,Pending,Ennui,73242,Printing
+FKE1746944,2015-08-08T00:00:00-04:00,1472,Pigeon,Happy,false,Eschewing Obfuscation,Ennui,12106,Scrutinizing
+FKE7368132,2015-11-22T00:00:00-04:00,1366,Semaphore,Happy,false,Pending,Enthusiasm,82198,Scrutinizing
+FKE6846361,2015-04-15T00:00:00-04:00,1587,Pigeon,Despondent,false,Eschewing Obfuscation,Boredom,50153,Scrutinizing
+FKE2594673,2015-03-25T00:00:00-04:00,1608,Pigeon,Happy,false,Eschewing Obfuscation,Enthusiasm,37268,Printing
+FKE3948148,2015-03-25T00:00:00-04:00,1608,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,79172,Printing
+FKE5835189,2015-03-10T00:00:00-04:00,1623,Semaphore,Despondent,false,Eschewing Obfuscation,Boredom,53362,Amazingly Successful
+FKE9472558,2015-03-21T00:00:00-04:00,1612,Semaphore,Happy,false,Eschewing Obfuscation,Ennui,12392,Amazingly Successful
+FKE2587740,2015-04-09T00:00:00-04:00,1593,Pigeon,Despondent,true,Eschewing Obfuscation,Ennui,47289,Amazingly Successful
+FKE1343779,2015-05-29T00:00:00-04:00,1543,Pigeon,Happy,true,Processing,Enthusiasm,58466,Scrutinizing
+FKE8124362,2015-10-26T00:00:00-04:00,1393,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,78996,Scrutinizing
+FKE1675229,2015-06-25T00:00:00-04:00,1516,Semaphore,Happy,false,Pending,Boredom,33136,Amazingly Successful
+FKE4579178,2014-09-01T00:00:00-04:00,1813,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,53788,Amazingly Successful
+FKE3435309,2015-04-06T00:00:00-04:00,1596,Semaphore,Despondent,false,Processing,Ennui,19264,Printing
+FKE9034832,2015-04-25T00:00:00-04:00,1577,Semaphore,Happy,false,Processing,Boredom,82228,Amazingly Successful
+FKE6781655,2015-09-12T00:00:00-04:00,1437,Pigeon,Despondent,false,Processing,Enthusiasm,87644,Scrutinizing
+FKE6430428,2015-01-26T00:00:00-04:00,1666,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Boredom,83276,Unfortunately Unclear
+FKE7435592,2015-10-12T00:00:00-04:00,1407,Pigeon,Happy,false,Processing,Enthusiasm,41196,Printing
+FKE7333212,2015-08-11T00:00:00-04:00,1469,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,59216,Printing
+FKE9107417,2015-05-26T00:00:00-04:00,1546,Pigeon,Happy,true,Processing,Boredom,36654,Amazingly Successful
+FKE4216971,2015-07-25T00:00:00-04:00,1486,Pigeon,Happy,false,Processing,Ennui,47457,Unfortunately Unclear
+FKE4301262,2015-07-13T00:00:00-04:00,1498,Pigeon,Happy,false,Pending,Ennui,27703,Amazingly Successful
+FKE3273308,2014-10-15T00:00:00-04:00,1769,Pigeon,Despondent,false,Processing,Enthusiasm,93948,Scrutinizing
+FKE8193009,2014-12-21T00:00:00-04:00,1702,Pigeon,Despondent,true,Processing,Ennui,31712,Printing
+FKE4884684,2015-11-07T00:00:00-04:00,1381,Semaphore,Happy,false,Processing,Boredom,97529,Printing
+FKE8128677,2015-10-19T00:00:00-04:00,1400,Pigeon,Despondent,false,Processing,Enthusiasm,39319,Scrutinizing
+FKE1926621,2015-02-26T00:00:00-04:00,1635,Semaphore,Despondent,false,Eschewing Obfuscation,Ennui,36350,Scrutinizing
+FKE7067138,2014-09-05T00:00:00-04:00,1809,Semaphore,Happy,false,Processing,Enthusiasm,79404,Printing
+FKE4408024,2015-10-12T00:00:00-04:00,1407,Pigeon,Happy,true,Ask a Silly Question get a Silly Answer,Boredom,77957,Printing
+FKE4135873,2015-01-01T00:00:00-04:00,1691,Pigeon,Happy,false,Pending,Boredom,87848,Unfortunately Unclear
+FKE9275723,2015-04-23T00:00:00-04:00,1579,Pigeon,Happy,false,Pending,Enthusiasm,79079,Unfortunately Unclear
+FKE8492765,2015-09-25T00:00:00-04:00,1424,Pigeon,Happy,false,Pending,Ennui,14938,Scrutinizing
+FKE7354848,2014-10-13T00:00:00-04:00,1771,Semaphore,Despondent,true,Processing,Enthusiasm,96749,Scrutinizing
+FKE6638557,2015-04-20T00:00:00-04:00,1582,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,36711,Amazingly Successful
+FKE2240936,2015-04-19T00:00:00-04:00,1583,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,70121,Amazingly Successful
+FKE3742810,2014-08-08T00:00:00-04:00,1837,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,14536,Amazingly Successful
+FKE6783777,2014-10-30T00:00:00-04:00,1754,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Boredom,12115,Amazingly Successful
+FKE9177589,2015-11-05T00:00:00-04:00,1383,Pigeon,Happy,true,Processing,Ennui,76910,Amazingly Successful
+FKE8814089,2014-12-12T00:00:00-04:00,1711,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Ennui,12397,Scrutinizing
+FKE7511607,2015-09-21T00:00:00-04:00,1428,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,54877,Unfortunately Unclear
+FKE7741640,2014-10-19T00:00:00-04:00,1765,Pigeon,Happy,false,Eschewing Obfuscation,Enthusiasm,75841,Amazingly Successful
+FKE1289575,2015-11-07T00:00:00-04:00,1381,Semaphore,Happy,true,Pending,Enthusiasm,93519,Printing
+FKE7243549,2014-09-09T00:00:00-04:00,1805,Semaphore,Happy,true,Eschewing Obfuscation,Enthusiasm,63043,Amazingly Successful
+FKE3954130,2015-07-20T00:00:00-04:00,1491,Pigeon,Despondent,false,Processing,Boredom,93904,Printing
+FKE2504396,2015-03-17T00:00:00-04:00,1616,Semaphore,Despondent,true,Eschewing Obfuscation,Ennui,12536,Unfortunately Unclear
+FKE8113683,2015-08-03T00:00:00-04:00,1477,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,81828,Amazingly Successful
+FKE8638961,2015-12-09T00:00:00-04:00,1349,Pigeon,Despondent,false,Eschewing Obfuscation,Boredom,78147,Unfortunately Unclear
+FKE4449249,2015-01-13T00:00:00-04:00,1679,Semaphore,Happy,true,Processing,Enthusiasm,47367,Unfortunately Unclear
+FKE5438505,2015-09-16T00:00:00-04:00,1433,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,85833,Scrutinizing
+FKE2169534,2015-04-01T00:00:00-04:00,1601,Pigeon,Despondent,true,Eschewing Obfuscation,Boredom,83004,Scrutinizing
+FKE1674131,2015-11-30T00:00:00-04:00,1358,Pigeon,Happy,true,Eschewing Obfuscation,Ennui,91138,Amazingly Successful
+FKE9941802,2014-10-28T00:00:00-04:00,1756,Pigeon,Despondent,true,Processing,Boredom,89668,Amazingly Successful
+FKE9292446,2015-11-01T00:00:00-04:00,1387,Semaphore,Despondent,false,Pending,Enthusiasm,56786,Scrutinizing
+FKE2827251,2015-06-20T00:00:00-04:00,1521,Semaphore,Despondent,false,Pending,Enthusiasm,45825,Amazingly Successful
+FKE2117718,2014-10-12T00:00:00-04:00,1772,Semaphore,Despondent,false,Processing,Boredom,24810,Unfortunately Unclear
+FKE3940182,2014-10-21T00:00:00-04:00,1763,Pigeon,Despondent,true,Ask a Silly Question get a Silly Answer,Ennui,10634,Amazingly Successful
+FKE9632181,2015-07-20T00:00:00-04:00,1491,Pigeon,Despondent,false,Eschewing Obfuscation,Enthusiasm,16232,Unfortunately Unclear
+FKE1602921,2015-02-12T00:00:00-04:00,1649,Pigeon,Despondent,true,Ask a Silly Question get a Silly Answer,Boredom,15008,Scrutinizing
+FKE6083131,2015-11-21T00:00:00-04:00,1367,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,53572,Amazingly Successful
+FKE5613469,2015-07-21T00:00:00-04:00,1490,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,73768,Printing
+FKE2153786,2015-03-22T00:00:00-04:00,1611,Pigeon,Happy,false,Eschewing Obfuscation,Ennui,95148,Amazingly Successful
+FKE5485010,2015-07-03T00:00:00-04:00,1508,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Enthusiasm,26260,Unfortunately Unclear
+FKE2692156,2015-03-01T00:00:00-04:00,1632,Pigeon,Despondent,false,Eschewing Obfuscation,Ennui,57272,Scrutinizing
+FKE8690155,2015-05-09T00:00:00-04:00,1563,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Boredom,19759,Unfortunately Unclear
+FKE4702702,2015-11-04T00:00:00-04:00,1384,Semaphore,Despondent,true,Eschewing Obfuscation,Enthusiasm,86548,Scrutinizing
+FKE9791836,2015-08-25T00:00:00-04:00,1455,Semaphore,Despondent,false,Processing,Boredom,25317,Printing
+FKE7806345,2014-08-28T00:00:00-04:00,1817,Pigeon,Despondent,false,Pending,Ennui,76055,Printing
+FKE5582280,2015-03-09T00:00:00-04:00,1624,Pigeon,Despondent,false,Pending,Ennui,75498,Scrutinizing
+FKE6810668,2015-06-30T00:00:00-04:00,1511,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,55620,Printing
+FKE3682129,2015-08-19T00:00:00-04:00,1461,Pigeon,Despondent,true,Eschewing Obfuscation,Ennui,51216,Scrutinizing
+FKE3856846,2015-03-06T00:00:00-04:00,1627,Semaphore,Happy,true,Pending,Ennui,59903,Scrutinizing
+FKE2345931,2015-03-22T00:00:00-04:00,1611,Pigeon,Happy,true,Eschewing Obfuscation,Ennui,64491,Printing
+FKE1203981,2014-11-10T00:00:00-04:00,1743,Semaphore,Happy,false,Processing,Ennui,71244,Printing
+FKE6571454,2015-12-03T00:00:00-04:00,1355,Semaphore,Happy,false,Eschewing Obfuscation,Enthusiasm,84718,Printing
+FKE8202029,2015-01-06T00:00:00-04:00,1686,Pigeon,Despondent,false,Eschewing Obfuscation,Ennui,43927,Scrutinizing
+FKE5084122,2015-04-04T00:00:00-04:00,1598,Semaphore,Despondent,false,Processing,Enthusiasm,76915,Scrutinizing
+FKE2010574,2015-06-15T00:00:00-04:00,1526,Pigeon,Despondent,false,Eschewing Obfuscation,Ennui,98735,Printing
+FKE2914200,2014-10-29T00:00:00-04:00,1755,Semaphore,Happy,false,Eschewing Obfuscation,Ennui,48980,Scrutinizing
+FKE7978170,2014-12-26T00:00:00-04:00,1697,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Boredom,60075,Scrutinizing
+FKE2847164,2015-07-19T00:00:00-04:00,1492,Semaphore,Despondent,true,Pending,Ennui,10831,Printing
+FKE2160635,2015-09-26T00:00:00-04:00,1423,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,83301,Printing
+FKE5262912,2015-03-30T00:00:00-04:00,1603,Semaphore,Happy,false,Processing,Ennui,39660,Scrutinizing
+FKE2197814,2015-09-14T00:00:00-04:00,1435,Pigeon,Happy,false,Pending,Enthusiasm,25937,Printing
+FKE6680285,2014-12-18T00:00:00-04:00,1705,Semaphore,Despondent,false,Processing,Boredom,76648,Printing
+FKE5878644,2015-02-14T00:00:00-04:00,1647,Semaphore,Despondent,true,Eschewing Obfuscation,Ennui,33350,Unfortunately Unclear
+FKE5385379,2015-02-10T00:00:00-04:00,1651,Semaphore,Despondent,true,Pending,Boredom,49028,Amazingly Successful
+FKE1157248,2015-09-12T00:00:00-04:00,1437,Semaphore,Despondent,true,Ask a Silly Question get a Silly Answer,Ennui,85750,Printing
+FKE3452333,2014-11-14T00:00:00-04:00,1739,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,12091,Scrutinizing
+FKE5390769,2015-05-10T00:00:00-04:00,1562,Pigeon,Despondent,false,Processing,Ennui,52250,Scrutinizing
+FKE5154977,2014-09-01T00:00:00-04:00,1813,Semaphore,Despondent,true,Ask a Silly Question get a Silly Answer,Boredom,49824,Amazingly Successful
+FKE2899453,2015-11-03T00:00:00-04:00,1385,Semaphore,Happy,true,Pending,Boredom,42254,Printing
+FKE7657520,2015-03-06T00:00:00-04:00,1627,Semaphore,Happy,true,Eschewing Obfuscation,Enthusiasm,95188,Amazingly Successful
+FKE3811465,2015-11-27T00:00:00-04:00,1361,Semaphore,Despondent,false,Eschewing Obfuscation,Ennui,90838,Scrutinizing
+FKE8411480,2015-09-21T00:00:00-04:00,1428,Pigeon,Despondent,true,Pending,Boredom,55698,Unfortunately Unclear
+FKE2273065,2015-01-13T00:00:00-04:00,1679,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,16149,Scrutinizing
+FKE9695070,2014-08-22T00:00:00-04:00,1823,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,81539,Unfortunately Unclear
+FKE4761684,2015-05-17T00:00:00-04:00,1555,Pigeon,Happy,false,Pending,Ennui,73237,Amazingly Successful
+FKE4067097,2015-09-14T00:00:00-04:00,1435,Pigeon,Despondent,false,Processing,Enthusiasm,89181,Scrutinizing
+FKE1903439,2015-09-16T00:00:00-04:00,1433,Pigeon,Happy,true,Eschewing Obfuscation,Enthusiasm,19077,Printing
+FKE9975954,2014-10-02T00:00:00-04:00,1782,Pigeon,Despondent,true,Processing,Ennui,14672,Amazingly Successful
+FKE8107691,2014-09-05T00:00:00-04:00,1809,Pigeon,Happy,false,Pending,Enthusiasm,60670,Printing
+FKE7759638,2015-01-16T00:00:00-04:00,1676,Semaphore,Happy,false,Pending,Ennui,33288,Unfortunately Unclear
+FKE2142294,2014-11-02T00:00:00-04:00,1751,Pigeon,Despondent,true,Eschewing Obfuscation,Boredom,46862,Amazingly Successful
+FKE6694206,2014-09-07T00:00:00-04:00,1807,Semaphore,Despondent,false,Eschewing Obfuscation,Ennui,77175,Scrutinizing
+FKE4559378,2015-04-03T00:00:00-04:00,1599,Semaphore,Happy,true,Eschewing Obfuscation,Enthusiasm,46649,Scrutinizing
+FKE2153244,2015-08-24T00:00:00-04:00,1456,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,61937,Amazingly Successful
+FKE7507241,2015-10-26T00:00:00-04:00,1393,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,84722,Scrutinizing
+FKE1480228,2015-10-25T00:00:00-04:00,1394,Semaphore,Happy,false,Eschewing Obfuscation,Boredom,95501,Amazingly Successful
+FKE9719002,2014-12-18T00:00:00-04:00,1705,Semaphore,Happy,false,Processing,Enthusiasm,87849,Amazingly Successful
+FKE2815160,2015-01-19T00:00:00-04:00,1673,Pigeon,Happy,true,Ask a Silly Question get a Silly Answer,Ennui,12381,Printing
+FKE9690726,2015-11-14T00:00:00-04:00,1374,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Boredom,86858,Amazingly Successful
+FKE7031135,2015-05-19T00:00:00-04:00,1553,Semaphore,Happy,false,Processing,Boredom,10581,Amazingly Successful
+FKE1096887,2015-04-29T00:00:00-04:00,1573,Pigeon,Despondent,false,Pending,Ennui,92784,Printing
+FKE5500622,2015-05-20T00:00:00-04:00,1552,Semaphore,Happy,false,Eschewing Obfuscation,Enthusiasm,12855,Printing
+FKE6132384,2014-08-16T00:00:00-04:00,1829,Semaphore,Despondent,true,Eschewing Obfuscation,Enthusiasm,36627,Scrutinizing
+FKE8159497,2015-05-08T00:00:00-04:00,1564,Pigeon,Despondent,false,Eschewing Obfuscation,Boredom,48137,Unfortunately Unclear
+FKE1923148,2015-10-17T00:00:00-04:00,1402,Pigeon,Despondent,false,Processing,Ennui,74535,Printing
+FKE5908508,2015-03-22T00:00:00-04:00,1611,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,28889,Printing
+FKE8745669,2015-12-06T00:00:00-04:00,1352,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Enthusiasm,12658,Unfortunately Unclear
+FKE9672424,2015-01-30T00:00:00-04:00,1662,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,83813,Scrutinizing
+FKE2563591,2015-07-03T00:00:00-04:00,1508,Semaphore,Happy,true,Eschewing Obfuscation,Enthusiasm,29903,Scrutinizing
+FKE8222323,2014-12-12T00:00:00-04:00,1711,Semaphore,Despondent,true,Eschewing Obfuscation,Ennui,99227,Amazingly Successful
+FKE8037850,2015-02-16T00:00:00-04:00,1645,Pigeon,Happy,true,Ask a Silly Question get a Silly Answer,Boredom,64822,Scrutinizing
+FKE1347486,2014-12-01T00:00:00-04:00,1722,Semaphore,Despondent,true,Pending,Ennui,68950,Amazingly Successful
+FKE1947076,2015-12-13T00:00:00-04:00,1345,Semaphore,Happy,false,Eschewing Obfuscation,Boredom,62224,Unfortunately Unclear
+FKE5630272,2015-05-26T00:00:00-04:00,1546,Semaphore,Despondent,true,Pending,Boredom,12034,Scrutinizing
+FKE8350621,2015-04-29T00:00:00-04:00,1573,Semaphore,Despondent,false,Processing,Enthusiasm,56556,Scrutinizing
+FKE1217913,2014-11-12T00:00:00-04:00,1741,Pigeon,Happy,false,Processing,Boredom,75229,Amazingly Successful
+FKE3798484,2014-12-05T00:00:00-04:00,1718,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Boredom,75883,Printing
+FKE1182883,2014-12-11T00:00:00-04:00,1712,Semaphore,Happy,true,Processing,Boredom,77649,Scrutinizing
+FKE3660674,2014-11-07T00:00:00-04:00,1746,Pigeon,Despondent,false,Pending,Boredom,16312,Printing
+FKE7563749,2014-09-18T00:00:00-04:00,1796,Pigeon,Happy,false,Processing,Enthusiasm,74741,Scrutinizing
+FKE8815524,2015-01-31T00:00:00-04:00,1661,Semaphore,Happy,false,Pending,Ennui,35934,Amazingly Successful
+FKE8369721,2015-02-04T00:00:00-04:00,1657,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Enthusiasm,83437,Scrutinizing
+FKE9703329,2014-08-05T00:00:00-04:00,1840,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Enthusiasm,89172,Unfortunately Unclear
+FKE1067004,2015-02-18T00:00:00-04:00,1643,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,46067,Unfortunately Unclear
+FKE2490173,2014-12-05T00:00:00-04:00,1718,Pigeon,Despondent,true,Ask a Silly Question get a Silly Answer,Enthusiasm,19024,Unfortunately Unclear
+FKE7386814,2015-04-21T00:00:00-04:00,1581,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,25166,Scrutinizing
+FKE7160552,2015-04-21T00:00:00-04:00,1581,Pigeon,Happy,false,Pending,Boredom,39853,Unfortunately Unclear
+FKE5303115,2015-03-26T00:00:00-04:00,1607,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Boredom,75059,Scrutinizing
+FKE4022832,2014-12-13T00:00:00-04:00,1710,Pigeon,Despondent,false,Processing,Boredom,98140,Scrutinizing
+FKE3773254,2015-07-18T00:00:00-04:00,1493,Pigeon,Happy,false,Pending,Boredom,58402,Printing
+FKE1772589,2015-02-25T00:00:00-04:00,1636,Pigeon,Happy,false,Eschewing Obfuscation,Boredom,81015,Unfortunately Unclear
+FKE9944596,2014-09-26T00:00:00-04:00,1788,Pigeon,Happy,false,Processing,Boredom,97698,Unfortunately Unclear
+FKE2758079,2015-06-21T00:00:00-04:00,1520,Pigeon,Despondent,false,Pending,Enthusiasm,78369,Unfortunately Unclear
+FKE3822519,2015-07-24T00:00:00-04:00,1487,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,80384,Amazingly Successful
+FKE7781089,2015-05-28T00:00:00-04:00,1544,Semaphore,Happy,false,Eschewing Obfuscation,Boredom,77270,Scrutinizing
+FKE9274314,2015-12-05T00:00:00-04:00,1353,Semaphore,Despondent,true,Processing,Ennui,88202,Unfortunately Unclear
+FKE4875508,2014-09-10T00:00:00-04:00,1804,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,94313,Printing
+FKE7307612,2015-03-04T00:00:00-04:00,1629,Pigeon,Despondent,false,Pending,Ennui,14409,Amazingly Successful
+FKE2248904,2015-06-29T00:00:00-04:00,1512,Semaphore,Happy,true,Processing,Boredom,86109,Printing
+FKE9651980,2014-12-14T00:00:00-04:00,1709,Semaphore,Happy,true,Pending,Enthusiasm,38264,Unfortunately Unclear
+FKE3442397,2015-01-19T00:00:00-04:00,1673,Semaphore,Happy,true,Eschewing Obfuscation,Ennui,60164,Printing
+FKE7011889,2014-09-04T00:00:00-04:00,1810,Pigeon,Despondent,true,Processing,Boredom,83608,Scrutinizing
+FKE4133515,2014-08-26T00:00:00-04:00,1819,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Boredom,87546,Printing
+FKE4452610,2015-07-10T00:00:00-04:00,1501,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,53437,Scrutinizing
+FKE7487700,2014-08-12T00:00:00-04:00,1833,Pigeon,Despondent,true,Ask a Silly Question get a Silly Answer,Enthusiasm,59026,Amazingly Successful
+FKE3531938,2015-04-25T00:00:00-04:00,1577,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,93229,Unfortunately Unclear
+FKE7881291,2015-11-15T00:00:00-04:00,1373,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Enthusiasm,85098,Unfortunately Unclear
+FKE2423395,2015-09-05T00:00:00-04:00,1444,Pigeon,Despondent,true,Eschewing Obfuscation,Boredom,90539,Amazingly Successful
+FKE9205689,2015-07-26T00:00:00-04:00,1485,Semaphore,Despondent,false,Processing,Ennui,17512,Unfortunately Unclear
+FKE4694642,2015-09-17T00:00:00-04:00,1432,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,60931,Amazingly Successful
+FKE9680877,2015-05-29T00:00:00-04:00,1543,Pigeon,Happy,false,Eschewing Obfuscation,Boredom,50579,Printing
+FKE9836345,2014-09-25T00:00:00-04:00,1789,Semaphore,Happy,true,Eschewing Obfuscation,Enthusiasm,39614,Amazingly Successful
+FKE8452127,2014-10-27T00:00:00-04:00,1757,Semaphore,Despondent,false,Processing,Enthusiasm,86674,Unfortunately Unclear
+FKE2982386,2014-10-05T00:00:00-04:00,1779,Semaphore,Despondent,true,Eschewing Obfuscation,Ennui,29471,Printing
+FKE8155848,2014-11-15T00:00:00-04:00,1738,Pigeon,Despondent,false,Eschewing Obfuscation,Ennui,67391,Amazingly Successful
+FKE8330932,2015-10-11T00:00:00-04:00,1408,Semaphore,Happy,false,Processing,Ennui,19586,Scrutinizing
+FKE4680596,2015-10-09T00:00:00-04:00,1410,Semaphore,Despondent,false,Pending,Boredom,98939,Unfortunately Unclear
+FKE2667498,2015-04-12T00:00:00-04:00,1590,Pigeon,Happy,false,Processing,Enthusiasm,98502,Scrutinizing
+FKE2105890,2015-06-30T00:00:00-04:00,1511,Pigeon,Happy,false,Eschewing Obfuscation,Enthusiasm,80483,Unfortunately Unclear
+FKE4422713,2015-02-05T00:00:00-04:00,1656,Semaphore,Despondent,true,Eschewing Obfuscation,Enthusiasm,85712,Unfortunately Unclear
+FKE7586911,2015-05-02T00:00:00-04:00,1570,Semaphore,Happy,true,Eschewing Obfuscation,Ennui,30666,Printing
+FKE8980233,2014-09-19T00:00:00-04:00,1795,Semaphore,Happy,false,Pending,Enthusiasm,76095,Scrutinizing
+FKE7834865,2015-03-16T00:00:00-04:00,1617,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Boredom,30392,Scrutinizing
+FKE3952296,2015-11-10T00:00:00-04:00,1378,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,97246,Scrutinizing
+FKE9256571,2015-05-27T00:00:00-04:00,1545,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,36158,Scrutinizing
+FKE2357416,2015-06-29T00:00:00-04:00,1512,Pigeon,Despondent,true,Pending,Ennui,39664,Printing
+FKE7484874,2015-07-27T00:00:00-04:00,1484,Pigeon,Despondent,true,Processing,Ennui,19737,Unfortunately Unclear
+FKE1346869,2015-04-21T00:00:00-04:00,1581,Semaphore,Despondent,true,Ask a Silly Question get a Silly Answer,Ennui,65806,Unfortunately Unclear
+FKE2131564,2014-12-06T00:00:00-04:00,1717,Pigeon,Despondent,false,Pending,Enthusiasm,38741,Amazingly Successful
+FKE8470178,2014-11-29T00:00:00-04:00,1724,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,34154,Unfortunately Unclear
+FKE9169505,2015-02-15T00:00:00-04:00,1646,Semaphore,Happy,false,Pending,Enthusiasm,53202,Amazingly Successful
+FKE8741678,2015-04-06T00:00:00-04:00,1596,Pigeon,Happy,true,Eschewing Obfuscation,Enthusiasm,35082,Amazingly Successful
+FKE4187068,2015-04-18T00:00:00-04:00,1584,Semaphore,Despondent,false,Pending,Ennui,72325,Unfortunately Unclear
+FKE5335964,2015-05-01T00:00:00-04:00,1571,Pigeon,Happy,false,Eschewing Obfuscation,Boredom,79500,Amazingly Successful
+FKE2833314,2015-03-31T00:00:00-04:00,1602,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,69804,Scrutinizing
+FKE8752066,2015-05-06T00:00:00-04:00,1566,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,47436,Amazingly Successful
+FKE9307360,2015-02-22T00:00:00-04:00,1639,Pigeon,Despondent,true,Processing,Ennui,69680,Printing
+FKE5235005,2015-10-05T00:00:00-04:00,1414,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,35386,Unfortunately Unclear
+FKE8999990,2014-08-18T00:00:00-04:00,1827,Semaphore,Despondent,true,Eschewing Obfuscation,Enthusiasm,61659,Amazingly Successful
+FKE5924722,2015-09-29T00:00:00-04:00,1420,Pigeon,Despondent,false,Pending,Ennui,90767,Unfortunately Unclear
+FKE5619038,2015-08-09T00:00:00-04:00,1471,Semaphore,Despondent,false,Processing,Enthusiasm,16875,Unfortunately Unclear
+FKE4476909,2015-12-10T00:00:00-04:00,1348,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Enthusiasm,38497,Amazingly Successful
+FKE3774694,2014-08-19T00:00:00-04:00,1826,Pigeon,Despondent,true,Pending,Enthusiasm,30799,Unfortunately Unclear
+FKE1061428,2015-08-08T00:00:00-04:00,1472,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,30511,Printing
+FKE4313736,2015-05-31T00:00:00-04:00,1541,Pigeon,Despondent,false,Eschewing Obfuscation,Enthusiasm,48687,Printing
+FKE2582046,2015-06-17T00:00:00-04:00,1524,Pigeon,Happy,true,Processing,Ennui,27547,Scrutinizing
+FKE9510288,2015-11-23T00:00:00-04:00,1365,Semaphore,Happy,false,Pending,Ennui,63671,Printing
+FKE3616709,2015-06-26T00:00:00-04:00,1515,Pigeon,Happy,true,Eschewing Obfuscation,Ennui,14338,Printing
+FKE1706049,2015-07-29T00:00:00-04:00,1482,Semaphore,Happy,false,Pending,Ennui,65175,Unfortunately Unclear
+FKE8089705,2014-12-06T00:00:00-04:00,1717,Pigeon,Despondent,true,Eschewing Obfuscation,Enthusiasm,48787,Printing
+FKE6340325,2015-02-08T00:00:00-04:00,1653,Semaphore,Happy,true,Processing,Ennui,84075,Unfortunately Unclear
+FKE2865885,2015-09-08T00:00:00-04:00,1441,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,20239,Scrutinizing
+FKE1165397,2015-10-21T00:00:00-04:00,1398,Semaphore,Happy,true,Ask a Silly Question get a Silly Answer,Enthusiasm,16602,Scrutinizing
+FKE9563449,2014-12-14T00:00:00-04:00,1709,Pigeon,Happy,true,Processing,Ennui,30235,Amazingly Successful
+FKE2663806,2015-03-23T00:00:00-04:00,1610,Semaphore,Happy,true,Eschewing Obfuscation,Enthusiasm,27808,Unfortunately Unclear
+FKE9516869,2015-09-29T00:00:00-04:00,1420,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Boredom,65496,Unfortunately Unclear
+FKE9607887,2015-03-10T00:00:00-04:00,1623,Semaphore,Despondent,false,Processing,Ennui,30130,Amazingly Successful
+FKE4380144,2014-11-22T00:00:00-04:00,1731,Pigeon,Despondent,true,Eschewing Obfuscation,Enthusiasm,47140,Printing
+FKE5591301,2015-06-25T00:00:00-04:00,1516,Pigeon,Happy,false,Pending,Boredom,44155,Unfortunately Unclear
+FKE9454929,2014-08-21T00:00:00-04:00,1824,Pigeon,Happy,true,Ask a Silly Question get a Silly Answer,Ennui,23021,Printing
+FKE8071532,2015-06-03T00:00:00-04:00,1538,Pigeon,Happy,true,Ask a Silly Question get a Silly Answer,Boredom,30300,Scrutinizing
+FKE4454499,2015-03-19T00:00:00-04:00,1614,Semaphore,Despondent,false,Eschewing Obfuscation,Ennui,88338,Unfortunately Unclear
+FKE4607444,2015-06-07T00:00:00-04:00,1534,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,55360,Amazingly Successful
+FKE2294419,2015-09-12T00:00:00-04:00,1437,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,65266,Printing
+FKE6282874,2015-08-26T00:00:00-04:00,1454,Semaphore,Despondent,false,Processing,Boredom,20118,Scrutinizing
+FKE9401525,2015-06-14T00:00:00-04:00,1527,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,99228,Amazingly Successful
+FKE4818284,2015-10-01T00:00:00-04:00,1418,Semaphore,Despondent,false,Pending,Ennui,49718,Scrutinizing
+FKE1233629,2015-11-07T00:00:00-04:00,1381,Pigeon,Despondent,true,Eschewing Obfuscation,Enthusiasm,57637,Scrutinizing
+FKE5048709,2015-02-24T00:00:00-04:00,1637,Pigeon,Despondent,true,Pending,Enthusiasm,29650,Unfortunately Unclear
+FKE7947145,2015-01-01T00:00:00-04:00,1691,Pigeon,Happy,false,Pending,Ennui,51652,Amazingly Successful
+FKE3519664,2015-05-13T00:00:00-04:00,1559,Pigeon,Despondent,false,Eschewing Obfuscation,Ennui,10574,Printing
+FKE5067411,2015-06-26T00:00:00-04:00,1515,Semaphore,Happy,true,Processing,Boredom,76067,Printing
+FKE6509876,2015-06-13T00:00:00-04:00,1528,Pigeon,Happy,false,Pending,Ennui,94432,Printing
+FKE3580362,2014-12-24T00:00:00-04:00,1699,Pigeon,Despondent,false,Eschewing Obfuscation,Enthusiasm,48566,Unfortunately Unclear
+FKE7209266,2014-08-08T00:00:00-04:00,1837,Semaphore,Despondent,true,Pending,Enthusiasm,69196,Unfortunately Unclear
+FKE5109873,2015-02-17T00:00:00-04:00,1644,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,90164,Unfortunately Unclear
+FKE9637266,2015-02-07T00:00:00-04:00,1654,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Enthusiasm,80868,Unfortunately Unclear
+FKE7120385,2014-11-05T00:00:00-04:00,1748,Semaphore,Happy,false,Ask a Silly Question get a Silly Answer,Boredom,64738,Amazingly Successful
+FKE2430089,2015-05-15T00:00:00-04:00,1557,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Boredom,85777,Scrutinizing
+FKE1621001,2015-10-07T00:00:00-04:00,1412,Semaphore,Happy,false,Processing,Ennui,58081,Unfortunately Unclear
+FKE4819141,2014-12-20T00:00:00-04:00,1703,Semaphore,Despondent,true,Eschewing Obfuscation,Ennui,85220,Unfortunately Unclear
+FKE1050646,2015-05-30T00:00:00-04:00,1542,Pigeon,Happy,false,Pending,Ennui,44006,Amazingly Successful
+FKE7110890,2014-10-12T00:00:00-04:00,1772,Semaphore,Happy,false,Pending,Enthusiasm,62718,Scrutinizing
+FKE5306552,2015-06-21T00:00:00-04:00,1520,Semaphore,Despondent,false,Eschewing Obfuscation,Enthusiasm,87400,Printing
+FKE9973179,2015-08-03T00:00:00-04:00,1477,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Ennui,24725,Printing
+FKE4584360,2015-02-03T00:00:00-04:00,1658,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,44631,Amazingly Successful
+FKE2837845,2014-09-19T00:00:00-04:00,1795,Semaphore,Despondent,true,Ask a Silly Question get a Silly Answer,Ennui,56214,Amazingly Successful
+FKE3453274,2014-10-14T00:00:00-04:00,1770,Pigeon,Happy,false,Ask a Silly Question get a Silly Answer,Enthusiasm,74509,Unfortunately Unclear
+FKE1009204,2014-12-26T00:00:00-04:00,1697,Semaphore,Despondent,true,Pending,Enthusiasm,46092,Amazingly Successful
+FKE2886063,2015-09-09T00:00:00-04:00,1440,Semaphore,Happy,true,Pending,Enthusiasm,28751,Printing
+FKE1516189,2015-08-17T00:00:00-04:00,1463,Pigeon,Despondent,false,Ask a Silly Question get a Silly Answer,Ennui,41918,Printing
+FKE1118000,2015-11-13T00:00:00-04:00,1375,Semaphore,Despondent,false,Ask a Silly Question get a Silly Answer,Enthusiasm,20173,Unfortunately Unclear
+FKE5922802,2015-07-28T00:00:00-04:00,1483,Pigeon,Happy,false,Processing,Enthusiasm,42428,Amazingly Successful
+FKE9452417,2015-11-27T00:00:00-04:00,1361,Semaphore,Despondent,false,Pending,Enthusiasm,91890,Printing
+FKE2430386,2015-08-07T00:00:00-04:00,1473,Pigeon,Despondent,true,Ask a Silly Question get a Silly Answer,Ennui,88730,Printing
+FKE7615014,2015-07-22T00:00:00-04:00,1489,Semaphore,Happy,true,Eschewing Obfuscation,Boredom,92150,Scrutinizing
