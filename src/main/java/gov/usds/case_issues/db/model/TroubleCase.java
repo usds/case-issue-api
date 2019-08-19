@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityResult;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
@@ -20,6 +21,7 @@ import javax.persistence.SqlResultSetMappings;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -34,6 +36,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
  */
 /* And yes, "Case" would be a simpler name, until you remember that it's a reserved word in every language ever */
 @Entity
+@DynamicUpdate
 @TypeDef(name="json", typeClass=JsonStringType.class)
 @NamedNativeQueries({
 	@NamedNativeQuery(
@@ -106,13 +109,16 @@ public class TroubleCase {
 
 	@NaturalId
 	@ManyToOne(optional=false)
+	@JoinColumn(updatable=false)
 	private CaseManagementSystem caseManagementSystem;
 	@NaturalId
 	@NotNull
 	@Pattern(regexp="[-\\w]+")
+	@Column(updatable=false)
 	private String receiptNumber;
 
 	@ManyToOne(optional=false)
+	@JoinColumn(nullable=false, updatable=false)
 	private CaseType caseType;
 	@NotNull
 	private ZonedDateTime caseCreation;

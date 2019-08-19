@@ -13,6 +13,7 @@ import gov.usds.case_issues.config.SampleDataConfig.ColumnSpec;
 public class SampleDataFileSpec {
 	public static final String DEFAULT_CREATION_DATE_KEY = "creationDate";
 	public static final String DEFAULT_RECEIPT_NUMBER_KEY = "receiptNumber";
+	public static final DateTimeFormatter DEFAULT_DATETIME_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
 	private String filename;
 	private String creationDateFormat;
@@ -27,7 +28,7 @@ public class SampleDataFileSpec {
 		if (null != creationDateFormat) {
 			return DateTimeFormatter.ofPattern(creationDateFormat);
 		}
-		return DateTimeFormatter.ISO_DATE_TIME;
+		return DEFAULT_DATETIME_FORMAT;
 	}
 
 	/* dumb accessors */

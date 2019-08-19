@@ -42,13 +42,23 @@ dependencies {
 }
 
 jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.62 // please ratchet this up!
-            }
-        }
-    }
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.7
+			}
+		}
+
+		rule {
+			enabled = true
+			includes = ['gov.usds.case_issues.services']
+			element = 'PACKAGE'
+
+			limit {
+				minimum = 0.85
+			}
+		}
+	}
 }
 
 test.finalizedBy jacocoTestReport
