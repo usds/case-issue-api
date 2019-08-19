@@ -1,0 +1,23 @@
+sample-data:
+    files:
+        - filename: sample_data/cases.csv
+          case-management-system: DEFAULT
+          case-type: STANDARD
+          # creation_date_format: "yyyy-MM-dd'T'HH:mm:ssZ"
+          extra-data-keys:
+            - internalKey: caseAge
+              column-type: INTEGER
+            - internalKey: channelType
+              column-type: STRING
+            - internalKey: caseState
+              column-type: STRING
+            - internalKey: i90SP
+              column-type: BOOLEAN
+            - internalKey: caseStatus
+              column-type: STRING
+            - internalKey: applicationReason
+              column-type: STRING
+            - internalKey: caseId
+              column-type: INTEGER
+            - internalKey: caseSubstatus
+              column-type: STRING

@@ -51,10 +51,15 @@ The main files to be aware of are:
   setup, rather than being common characteristics of everybody's local development environments.
 
 ## Loading Sample Data
-
 Unless you want to create all the data by hand using the `resources` API (not recommended),
 you will want to configure the application to load some sample data. This is most easily done
-by adding configuration to `application-local.yml`.
+by running the following command from the root of this project
+
+```bash
+$ cp src/main/resources/_application-local.yml src/main/resources/application-local.yml
+```
+
+See see (SampleDataConfig)[src/main/java/gov/usds/case_issues/config/SampleDataConfig.java] for more insight.
 
 ## Exploring the API
 
