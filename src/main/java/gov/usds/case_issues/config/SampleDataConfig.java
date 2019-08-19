@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
 import gov.usds.case_issues.db.model.NoteType;
 
 @ConfigurationProperties(prefix="sample-data", ignoreUnknownFields=false)
@@ -154,6 +155,7 @@ public class SampleDataConfig {
 		}
 		public void setCaseDetailsUrlTemplate(String caseDetailsUrlTemplate) {
 			this.caseDetailsUrlTemplate = caseDetailsUrlTemplate;
+		}
 	}
 
 	public static class NoteSubtypeDefinition extends TaggedResource {
