@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import gov.usds.case_issues.config.SampleDataFileSpec;
+import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.CaseListService;
@@ -40,6 +42,14 @@ public class HitlistApiController {
 
 	@Autowired
 	private CaseListService _listService;
+
+	@GetMapping("search")
+	public List<TroubleCase> getCases(
+		@PathVariable String caseManagementSystemTag,
+		@PathVariable String caseTypeTag,
+		@RequestParam("query") String query) {
+		return _listService.getCases(caseManagementSystemTag, caseTypeTag, query);
+	}
 
 	@GetMapping("snoozed")
 	@ApiImplicitParams({
