@@ -13,7 +13,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +22,7 @@ import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import springfox.documentation.service.ApiInfo;
 
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled=true)
+@EnableGlobalMethodSecurity(securedEnabled=false, prePostEnabled=true)
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -63,7 +62,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		List<UserDetails> users = _webProperties.getUsers().stream()
 			.map(u -> User.withUsername(u.getName())
 						.password("{noop}"+ u.getName())
-						.authorities(u.getGrants().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()))
+						.authorities(u.getGrants())
 						.build())
 			.collect(Collectors.toList()
 		);

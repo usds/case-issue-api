@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import gov.usds.case_issues.authorization.CaseIssuePermission;
+
 @Component
 @ConfigurationProperties(prefix="web-customization", ignoreUnknownFields=false)
 public class WebConfigurationProperties {
@@ -30,7 +32,7 @@ public class WebConfigurationProperties {
 
 	public static class UserDefinition {
 		private String _name;
-		private List<String> _grants;
+		private List<CaseIssuePermission> _grants;
 
 		public String getName() {
 			return _name;
@@ -39,10 +41,10 @@ public class WebConfigurationProperties {
 			this._name = _name;
 		}
 
-		public List<String> getGrants() {
+		public List<CaseIssuePermission> getGrants() {
 			return _grants;
 		}
-		public void setGrants(List<String> _grants) {
+		public void setGrants(List<CaseIssuePermission> _grants) {
 			this._grants = _grants;
 		}
 	}

@@ -18,15 +18,16 @@ web-customization:
   users:
     - name: admin
       grants:
-        - ADMIN
-        - USER
-        - FOO
-    - name: boring
+        - READ_CASES
+        - UPDATE_CASES
+        - UPDATE_STRUCTURE
+    - name: boring_user
       grants:
-        - USER
+        - READ_CASES
+        - UPDATE_CASES
     - name: service
       grants:
-        - UPLOAD
+        - UPDATE_ISSUES
 sample-data:
   case-management-systems:
     -
