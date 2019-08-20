@@ -11,14 +11,14 @@ import org.springframework.context.annotation.Profile;
 
 import gov.usds.case_issues.db.model.NoteType;
 
-@ConfigurationProperties("sample-data")
+@ConfigurationProperties(prefix="sample-data", ignoreUnknownFields=false)
 @EnableConfigurationProperties
 @Configuration
 @Profile({"dev","test"})
 public class SampleDataConfig {
 
 	private List<SampleDataFileSpec> files = new ArrayList<>();
-	private List<TaggedResource> caseManagementSystems = new ArrayList<>();;
+	private List<CaseManagementSystemDefinition> caseManagementSystems = new ArrayList<>();;
 	private List<TaggedResource> caseTypes = new ArrayList<>();
 	private List<NoteSubtypeDefinition> noteSubtypes = new ArrayList<>();
 
@@ -34,11 +34,11 @@ public class SampleDataConfig {
 		this.files = files;
 	}
 
-	public List<TaggedResource> getCaseManagementSystems() {
+	public List<CaseManagementSystemDefinition> getCaseManagementSystems() {
 		return caseManagementSystems;
 	}
 
-	public void setCaseManagementSystems(List<TaggedResource> caseManagementSystems) {
+	public void setCaseManagementSystems(List<CaseManagementSystemDefinition> caseManagementSystems) {
 		this.caseManagementSystems = caseManagementSystems;
 	}
 
@@ -136,6 +136,25 @@ public class SampleDataConfig {
 		}
 		public void setDescription(String description) {
 			this.description = description;
+		}
+	}
+
+	/** Resource definition for a case management system (adds a couple of URLs to the basic {@link TaggedResource} */
+	public static class CaseManagementSystemDefinition extends TaggedResource {
+		private String applicationUrl;
+		private String caseDetailsUrlTemplate;
+
+		public String getApplicationUrl() {
+			return applicationUrl;
+		}
+		public void setApplicationUrl(String applicationUrl) {
+			this.applicationUrl = applicationUrl;
+		}
+		public String getCaseDetailsUrlTemplate() {
+			return caseDetailsUrlTemplate;
+		}
+		public void setCaseDetailsUrlTemplate(String caseDetailsUrlTemplate) {
+			this.caseDetailsUrlTemplate = caseDetailsUrlTemplate;
 		}
 	}
 
