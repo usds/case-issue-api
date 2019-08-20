@@ -15,6 +15,18 @@ web-customization:
   cors-origins:
     - http://localhost:3000
     - http://localhost:3001
+  users:
+    - name: admin
+      grants:
+        - ADMIN
+        - USER
+        - FOO
+    - name: boring
+      grants:
+        - USER
+    - name: service
+      grants:
+        - UPLOAD
 sample-data:
   case-management-systems:
     -
