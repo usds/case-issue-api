@@ -1,6 +1,7 @@
 package gov.usds.case_issues.model;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import gov.usds.case_issues.db.model.CaseSnooze;
@@ -15,6 +16,7 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 
 	private CaseSnoozeSummary wrapped;
+	private List<NoteSummary> notes;
 
 	public CaseSnoozeSummaryFacade(Optional<? extends CaseSnoozeSummary> optionalWrapped) {
 		this(optionalWrapped.get());
@@ -23,6 +25,11 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 	public CaseSnoozeSummaryFacade(CaseSnoozeSummary wrapped) {
 		super();
 		this.wrapped = wrapped;
+	}
+
+	public CaseSnoozeSummaryFacade(CaseSnooze wrapped, List<NoteSummary> savedNotes) {
+		this(wrapped);
+		this.notes = savedNotes;
 	}
 
 	public String getSnoozeReason() {
@@ -37,7 +44,7 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		return wrapped.getSnoozeEnd();
 	}
 
-	public String getSnoozeDetails() {
-		return wrapped.getSnoozeDetails();
+	public List<NoteSummary> getNotes() {
+		return notes;
 	}
 }

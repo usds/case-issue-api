@@ -9,6 +9,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import gov.usds.case_issues.db.model.NoteType;
+
 @ConfigurationProperties(prefix="sample-data", ignoreUnknownFields=false)
 @EnableConfigurationProperties
 @Configuration
@@ -17,7 +19,8 @@ public class SampleDataConfig {
 
 	private List<SampleDataFileSpec> files = new ArrayList<>();
 	private List<CaseManagementSystemDefinition> caseManagementSystems = new ArrayList<>();;
-	private List<TaggedResource> caseTypes = new ArrayList<>();;
+	private List<TaggedResource> caseTypes = new ArrayList<>();
+	private List<NoteSubtypeDefinition> noteSubtypes = new ArrayList<>();
 
 	public SampleDataConfig() {
 		super();
@@ -45,6 +48,14 @@ public class SampleDataConfig {
 
 	public void setCaseTypes(List<TaggedResource> caseTypes) {
 		this.caseTypes = caseTypes;
+	}
+
+	public List<NoteSubtypeDefinition> getNoteSubtypes() {
+		return noteSubtypes;
+	}
+
+	public void setNoteSubtypes(List<NoteSubtypeDefinition> noteSubtypes) {
+		this.noteSubtypes = noteSubtypes;
 	}
 
 	/** Data type of a column, to allow conversion from strings to appropriate native values. */
@@ -144,6 +155,24 @@ public class SampleDataConfig {
 		}
 		public void setCaseDetailsUrlTemplate(String caseDetailsUrlTemplate) {
 			this.caseDetailsUrlTemplate = caseDetailsUrlTemplate;
+		}
+	}
+
+	public static class NoteSubtypeDefinition extends TaggedResource {
+		private String urlTemplate;
+		private NoteType noteType;
+
+		public String getUrlTemplate() {
+			return urlTemplate;
+		}
+		public NoteType getNoteType() {
+			return noteType;
+		}
+		public void setUrlTemplate(String urlTemplate) {
+			this.urlTemplate = urlTemplate;
+		}
+		public void setNoteType(NoteType noteType) {
+			this.noteType = noteType;
 		}
 	}
 }

@@ -15,6 +15,4 @@ public interface CaseSnoozeSummary {
 
 	ZonedDateTime getSnoozeEnd();
 
-	String getSnoozeDetails();
-
 }

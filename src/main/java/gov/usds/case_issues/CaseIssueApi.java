@@ -17,13 +17,16 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import gov.usds.case_issues.config.SampleDataConfig;
+import gov.usds.case_issues.config.SampleDataConfig.NoteSubtypeDefinition;
 import gov.usds.case_issues.config.SampleDataConfig.CaseManagementSystemDefinition;
 import gov.usds.case_issues.config.SampleDataConfig.TaggedResource;
 import gov.usds.case_issues.config.SampleDataFileSpec;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
+import gov.usds.case_issues.db.model.NoteSubtype;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
+import gov.usds.case_issues.db.repositories.NoteSubtypeRepository;
 import gov.usds.case_issues.services.CsvLoader;
 
 @SpringBootApplication
@@ -38,7 +41,7 @@ public class CaseIssueApi {
 	@Bean
 	@Profile({"dev"})
 	public CommandLineRunner loadSampleData(CsvLoader loader, SampleDataConfig loaderConfig,
-				CaseManagementSystemRepository systemRepo, CaseTypeRepository typeRepo)
+				CaseManagementSystemRepository systemRepo, CaseTypeRepository typeRepo, NoteSubtypeRepository subtypeRepo)
 			throws IOException {
 		return args -> {
 			for (CaseManagementSystemDefinition spec : loaderConfig.getCaseManagementSystems()) {
@@ -51,6 +54,9 @@ public class CaseIssueApi {
 			for (TaggedResource spec : loaderConfig.getCaseTypes()) {
 				LOG.debug("Creating Case Type {} ({}/{})", spec.getTag(), spec.getName(), spec.getDescription());
 				typeRepo.save(new CaseType(spec.getTag(), spec.getName(), spec.getDescription()));
+			}
+			for (NoteSubtypeDefinition spec : loaderConfig.getNoteSubtypes()) {
+				subtypeRepo.save(new NoteSubtype(spec.getTag(), spec.getNoteType(), spec.getName(), spec.getDescription(), spec.getUrlTemplate()));
 			}
 			for (SampleDataFileSpec fileConfig : loaderConfig.getFiles()) {
 				LOG.info("Loading data file {}", fileConfig.getFilename());

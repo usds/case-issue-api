@@ -1,5 +1,8 @@
 package gov.usds.case_issues.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
@@ -13,13 +16,12 @@ import gov.usds.case_issues.db.model.CaseSnooze;
 public class SnoozeRequest {
 
 	private String snoozeReason;
-	private String snoozeDetails;
 	private int duration;
+	private List<NoteRequest> notes = new ArrayList<>();
 
-	public SnoozeRequest(String snoozeType, String snoozeDetails, int duration) {
+	public SnoozeRequest(String snoozeType, int duration) {
 		super();
 		this.snoozeReason = snoozeType;
-		this.snoozeDetails = snoozeDetails;
 		this.duration = duration;
 	}
 
@@ -29,14 +31,13 @@ public class SnoozeRequest {
 		return snoozeReason;
 	}
 
-	@JsonProperty("details")
-	public String getSnoozeDetails() {
-		return snoozeDetails;
-	}
-
 	@Min(1)
 	@JsonProperty("duration")
 	public int getDuration() {
 		return duration;
+	}
+
+	public List<NoteRequest> getNotes() {
+		return notes;
 	}
 }

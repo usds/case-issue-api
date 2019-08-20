@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -50,8 +49,12 @@ public class WebConfig implements WebMvcConfigurer {
 		@Override
 		protected void writeInternal(InputStream t, HttpOutputMessage outputMessage)
 				throws IOException, HttpMessageNotWritableException {
-			// this is almost certainly a *terrible* idea
-			IOUtils.copy(t, outputMessage.getBody());
+			throw new IllegalArgumentException("This HttpMessageConverter does not support output.");
+		}
+
+		@Override
+		public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+			return false; // this is an input-only converter.
 		}
 	}
 }

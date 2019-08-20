@@ -7,6 +7,9 @@ an HTTP/JSON API that can be consumed by other clients if needed.
 
 # Development
 
+## Prerequisites
+- [Install Java Development Kit (JDK)](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
+
 ## Basic set-up
 
 This project uses the [gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) to avoid build tool versioning issues. Setting it up is as simple as typing `./gradlew build` in the project directory. Alternatively, you can set it up as a new Gradle project in Eclipse/Spring Tool Suite, or as a new Java project in your IDE of choice. (If you find yourself frequently typing `gradle test` instead of `./gradlew test`, you may wish to `alias gradle=./gradlew` to save yourself some aggravation.)
