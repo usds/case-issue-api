@@ -33,7 +33,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	@Before
 	public void resetDb() {
-		this._truncator.truncateAll();
+		truncateDb();
 		_sys = _dataService.ensureCaseManagementSystemInitialized(VALID_SYS, "Cases", "managed");
 	}
 

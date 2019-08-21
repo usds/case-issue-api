@@ -11,30 +11,19 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import gov.usds.case_issues.model.NavigationEntry;
-import gov.usds.case_issues.test_util.FixtureDataInitializationService;
-import gov.usds.case_issues.test_util.HsqlDbTruncator;
+import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class ApplicationMetadataServiceTest {
-
-	@Autowired
-	private HsqlDbTruncator _truncator;
-	@Autowired
-	private FixtureDataInitializationService _dataService;
+public class ApplicationMetadataServiceTest extends CaseIssueApiTestBase {
 
 	@Autowired
 	private ApplicationMetadataService _service;
 
 	@Before
 	public void resetDb() {
-		_truncator.truncateAll();
+		truncateDb();
 	}
 
 	@Test
