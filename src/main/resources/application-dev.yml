@@ -4,7 +4,11 @@ spring:
     - local
 logging:
   level:
+      # NOTE: add any of the below in application-local.yml to turn on something interesting
+      #       (the first two are hibernate SQL query logging, which is pretty verbose, and hibernate
+      #       input and output value logging, which is *incredibly* verbose).
       # org.hibernate.SQL: DEBUG
+      # org.hibernate.type: TRACE
       # org.springframework.data.rest=DEBUG
       gov.usds: DEBUG
 web-customization:
@@ -17,11 +21,34 @@ sample-data:
       name: Default Case Management System
       tag: DEFAULT
       description: Fictional System for tests and demos.
+      application-url: http://default.my-agency.example.gov
+      case-details-url-template: http://default.my-agency.example.gov/cases?case=
+    -
+      name: Other Case Management System
+      tag: OTHER
+      description: Empty system for tests and demos.
+      application-url: http://legacy-system.my-agency.example.gov
+      case-details-url-template: http://archives.my-agency.example.gov/casedetails/
   case-types:
     -
       name: Standard Case
       tag: STANDARD
       description: The type of case that is loaded for tests and demos.
+    -
+      name: Non-standard Case
+      tag: WEIRD
+      description: The type of case that is loaded for tests and demos but isn't standard.
+  note-subtypes:
+    -
+      name: Trouble Ticket
+      tag: troubleticket
+      note-type: LINK
+      url-template: http://tickets.example.com/ticket/%s/details
+    -
+      name: Assignee
+      tag: assignee
+      note-type: TAG
+      description: Who is the case assigned to?
  # to a more-specific file such as application-local.yml, add something that follows
  # this general shape (see SampleDataConfig for more insight):
  #  files:

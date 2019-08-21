@@ -1,6 +1,7 @@
 package gov.usds.case_issues.controllers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,6 +10,7 @@ import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
@@ -28,7 +30,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	@Before
 	public void resetDb() {
-		_truncator.truncateAll();
+		truncateDb();
 		_system = _dataService.ensureCaseManagementSystemInitialized(VALID_CASE_MGT_SYS, "Fake 1", "Fakest");
 		_type = _dataService.ensureCaseTypeInitialized(VALID_CASE_TYPE, "Case type 1", "");
 	}
@@ -92,6 +94,22 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isOk())
 			.andExpect(content().json("[{'receiptNumber': 'FFFF1112', 'snoozeInformation': {'snoozeReason': 'DONOTCARE'}}]", false))
 		;
+	}
+
+	@Test
+	public void putJson_emptyList_accepted() throws Exception {
+		MockHttpServletRequestBuilder jsonPut = put("/api/cases/{caseManagementSystemTag}/{caseTypeTag}/{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content("[]");
+		perform(jsonPut).andExpect(status().isAccepted());
+	}
+
+	@Test
+	public void putCsv_emptyList_accepted() throws Exception {
+		MockHttpServletRequestBuilder jsonPut = put("/api/cases/{caseManagementSystemTag}/{caseTypeTag}/{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
+			.contentType("text/csv")
+			.content("header1,header2\n");
+		perform(jsonPut).andExpect(status().isAccepted());
 	}
 
 	/**

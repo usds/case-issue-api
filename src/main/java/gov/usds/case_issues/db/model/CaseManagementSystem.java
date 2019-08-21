@@ -30,14 +30,23 @@ public class CaseManagementSystem {
 	@NotNull
 	private String name;
 	private String description;
+	private String applicationUrl;
+	private String caseDetailsUrlTemplate;
 
 	protected CaseManagementSystem() { /* for hibernate */ }
 
-	public CaseManagementSystem(String tag, String name, String description) {
+	public CaseManagementSystem(@NotNull @Pattern(regexp = "[-\\w]+") String tag, @NotNull String name, String description) {
 		this();
 		this.caseManagementSystemTag = tag;
 		this.name = name;
 		this.description = description;
+	}
+
+	public CaseManagementSystem(@NotNull @Pattern(regexp = "[-\\w]+") String tag,
+			@NotNull String name, String description, String applicationUrl, String caseDetailsUrlTemplate) {
+		this(tag, name, description);
+		this.applicationUrl = applicationUrl;
+		this.caseDetailsUrlTemplate = caseDetailsUrlTemplate;
 	}
 
 	@JsonIgnore
@@ -54,5 +63,13 @@ public class CaseManagementSystem {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public String getApplicationUrl() {
+		return applicationUrl;
+	}
+
+	public String getCaseDetailsUrlTemplate() {
+		return caseDetailsUrlTemplate;
 	}
 }
