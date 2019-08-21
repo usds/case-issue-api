@@ -99,6 +99,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
+	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putJson_emptyList_accepted() throws Exception {
 		MockHttpServletRequestBuilder jsonPut = put("/api/cases/{caseManagementSystemTag}/{caseTypeTag}/{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
 			.contentType(MediaType.APPLICATION_JSON)
@@ -107,6 +108,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
+	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_emptyList_accepted() throws Exception {
 		MockHttpServletRequestBuilder jsonPut = put("/api/cases/{caseManagementSystemTag}/{caseTypeTag}/{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
 			.contentType("text/csv")

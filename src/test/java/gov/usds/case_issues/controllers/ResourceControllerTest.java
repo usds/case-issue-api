@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.CaseIssue;
@@ -30,6 +31,7 @@ import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 
+@WithMockUser
 public class ResourceControllerTest extends ControllerTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceControllerTest.class);

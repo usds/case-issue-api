@@ -69,6 +69,7 @@ public class HitlistApiController {
 	}
 
 	@PutMapping(value="/{issueTag}",consumes= {"text/csv"})
+	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
 	public ResponseEntity<?> updateIssueListCsv(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
 			@RequestBody InputStream csvStream) throws IOException {
 		CsvSchema schema = CsvSchema.emptySchema().withHeader();
@@ -84,6 +85,7 @@ public class HitlistApiController {
 		return ResponseEntity.accepted().build();
 	}
 
+	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
 	@PutMapping(value="/{issueTag}",consumes= {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<?> updateIssueListJson(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
 			@RequestBody List<Map<String,Object>> jsonData) throws IOException {
