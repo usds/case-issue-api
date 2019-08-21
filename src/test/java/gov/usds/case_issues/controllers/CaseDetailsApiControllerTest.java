@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
@@ -24,6 +25,7 @@ import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.NoteType;
 import gov.usds.case_issues.model.NoteRequest;
 
+@WithMockUser(authorities = {"READ_CASES", "UPDATE_CASES"})
 public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	private static final String VALID_SYS = "C1";

@@ -11,12 +11,14 @@ import java.time.ZonedDateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 
+@WithMockUser(username = "default_hitlist_user", authorities = "READ_CASES")
 public class HitlistApiControllerTest extends ControllerTestBase {
 
 	private static final String VALID_CASE_TYPE = "C1";

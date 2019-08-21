@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import gov.usds.case_issues.services.CaseDetailsService;
 
 @RestController
 @RequestMapping("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}")
+@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).READ_CASES.name())")
 public class CaseDetailsApiController {
 
 	@Autowired
@@ -45,6 +47,7 @@ public class CaseDetailsApiController {
 	}
 
 	@DeleteMapping("activeSnooze")
+	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_CASES.name())")
 	public ResponseEntity<Void> endActiveSnooze(@PathVariable String caseManagementSystemTag, @PathVariable String receiptNumber) {
 		// e-tag could be added here with the end-time of the snooze
 		if (_caseDetailsService.endActiveSnooze(caseManagementSystemTag, receiptNumber)) {
@@ -55,6 +58,7 @@ public class CaseDetailsApiController {
 	}
 
 	@PutMapping("activeSnooze")
+	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_CASES.name())")
 	public ResponseEntity<CaseSnoozeSummary> changeActiveSnooze(
 			@PathVariable String caseManagementSystemTag,
 			@PathVariable String receiptNumber,

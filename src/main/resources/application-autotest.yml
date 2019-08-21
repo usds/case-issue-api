@@ -4,6 +4,7 @@ logging:
         SQL: DEBUG
         stat: ERROR
       gov.usds.case_issues: DEBUG
+      org.springframework.security.access: DEBUG
 spring:
   jpa:
     properties:
