@@ -8,6 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -16,6 +18,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -49,6 +52,11 @@ public class WebConfig implements WebMvcConfigurer {
 		converters.add(new InputStreamMessageConverter());
 	}
 
+	@Bean
+	public FilterRegistrationBean<ForwardedHeaderFilter> getForwardFilter() {
+		// do we need to use setRelativeRedirects?
+		return new FilterRegistrationBean<ForwardedHeaderFilter>(new ForwardedHeaderFilter());
+	}
 	/**
 	 * Trivial {@link HttpMessageConverter} implementation to allow handler methods to accept
 	 * "text/csv" input as a raw input stream.
