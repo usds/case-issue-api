@@ -5,14 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import gov.usds.case_issues.db.model.NoteType;
 
 @ConfigurationProperties(prefix="sample-data", ignoreUnknownFields=false)
-@EnableConfigurationProperties
 @Configuration
 @Profile({"dev","test"})
 public class SampleDataConfig {

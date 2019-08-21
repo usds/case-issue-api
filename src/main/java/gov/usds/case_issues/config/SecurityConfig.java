@@ -20,13 +20,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		LOGGER.info("Configuring HTTP Security");
 		http
+			.cors()
+				.and()
 			.authorizeRequests()
 				.antMatchers("/health")
 					.permitAll()
 				.and()
 			.csrf()
 				.ignoringRequestMatchers(AnyRequestMatcher.INSTANCE)
-			
 		;
 	}
 }

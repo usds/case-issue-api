@@ -11,6 +11,10 @@ logging:
       # org.hibernate.type: TRACE
       # org.springframework.data.rest=DEBUG
       gov.usds: DEBUG
+web-customization:
+  cors-origins:
+    - http://localhost:3000
+    - http://localhost:3001
 sample-data:
   case-management-systems:
     -
