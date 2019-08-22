@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.webmvc.support.RepositoryEntityLinks;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -31,7 +32,7 @@ import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 
-@WithMockUser
+@WithMockUser(authorities = "UPDATE_STRUCTURE")
 public class ResourceControllerTest extends ControllerTestBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceControllerTest.class);
@@ -192,18 +193,46 @@ public class ResourceControllerTest extends ControllerTestBase {
 
 	}
 
+	@Test
+	@WithAnonymousUser
+	public void fetchCases_anonymous_unauthorized() throws Exception {
+		perform(get(linkFor(TroubleCase.class))).andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	@WithMockUser
+	public void fetchCases_noAuthorities_forbidden() throws Exception {
+		perform(get(linkFor(TroubleCase.class))).andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser
+	public void createCase_noAuthorities_forbidden() throws Exception {
+		doCreate(TroubleCase.class, new JSONObject(), HttpStatus.FORBIDDEN);
+	}
+
+	@Test
+	@WithMockUser(authorities = "UPDATE_CASES")
+	public void createCase_writeCaseAuthority_forbidden() throws Exception {
+		doCreate(TroubleCase.class, new JSONObject(), HttpStatus.FORBIDDEN);
+	}
+
 	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body) throws Exception {
 		return doCreate(entityType, body, HttpStatus.CREATED);
 	}
 
 	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus expectedStatus) throws Exception {
-		MockHttpServletRequestBuilder postRequest = post(links.linkFor(entityType).toUri())
+		MockHttpServletRequestBuilder postRequest = post(linkFor(entityType))
 			.content(body.toString());
 		return _mvc.perform(postRequest)
 			.andExpect(status().is(expectedStatus.value()))
 			.andReturn()
 			.getResponse()
 			;
+	}
+
+	private URI linkFor(Class<?> entityType) {
+		return links.linkFor(entityType).toUri();
 	}
 
 	private void createFixtureEntities() throws Exception {

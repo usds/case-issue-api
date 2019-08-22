@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import gov.usds.case_issues.db.model.CaseIssue;
@@ -214,6 +215,18 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals("old", foundData.get("ignored"));
 		assertEquals("updated", foundData.get("state"));
 		assertEquals(2, foundData.size());
+	}
+
+	@Test(expected=AccessDeniedException.class)
+	@WithMockUser
+	public void putIssueList_unauthorizedUser_exception() {
+		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
+	}
+
+	@Test(expected=AccessDeniedException.class)
+	@WithMockUser(authorities="UPDATE_CASES")
+	public void putIssueList_insufficientlyAuthorizedUser_exception() {
+		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
 	}
 
 	@Test
