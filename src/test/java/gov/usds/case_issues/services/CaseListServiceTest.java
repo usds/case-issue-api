@@ -99,6 +99,38 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
+	public void getCases_noQuery_noCasesReturned() {
+		List<TroubleCase> cases = _service.getCases(VALID_SYS_TAG, VALID_TYPE_TAG, "");
+		assertEquals(0, cases.size());
+	}
+
+	@Test
+	public void getCases_exactRecipetNumber_returnsCaseWtihQuriedRecipetNumber() {
+		String receiptNumber = "ABC1234567";
+
+		CaseGroupInfo translated = _service.translatePath(VALID_SYS_TAG, VALID_TYPE_TAG);
+		_caseRepo.save(new TroubleCase(
+			translated.getCaseManagementSystem(),
+			receiptNumber,
+			translated.getCaseType(),
+			_now,
+			Collections.emptyMap()
+		));
+		_caseRepo.save(new TroubleCase(
+			translated.getCaseManagementSystem(),
+			"XYZ8901234",
+			translated.getCaseType(),
+			_now,
+			Collections.emptyMap()
+		));
+
+		List<TroubleCase> cases = _service.getCases(VALID_SYS_TAG, VALID_TYPE_TAG, receiptNumber);
+
+		assertEquals(1, cases.size());
+		assertEquals(receiptNumber, cases.get(0).getReceiptNumber());
+	}
+
+	@Test
 	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_noIssuesNoInput_nothingTerribleHappens() {
 		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "SUPER-OLD", Collections.emptyList(), _now);
