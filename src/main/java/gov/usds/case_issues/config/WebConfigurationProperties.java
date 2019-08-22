@@ -1,5 +1,6 @@
 package gov.usds.case_issues.config;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,7 +24,7 @@ public class WebConfigurationProperties {
 	}
 
 	public List<UserDefinition> getUsers() {
-		return _users;
+		return _users == null ? Collections.emptyList() : _users;
 	}
 
 	public void setUsers(List<UserDefinition> users) {
