@@ -1,11 +1,15 @@
-<!DOCTYPE configuration>
-
 <configuration>
     <springProperty name="accessLogFormat" source="access-log-format" defaultValue="combined"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>${accessLogFormat}</pattern>
-        </encoder>
+      <encoder>
+        <springProfile name="dev">
+          <pattern>${accessLogFormat}</pattern>
+        </springProfile>
+
+        <springProfile name="!dev">
+          <pattern>{"clientHost": "%h", "RemoteUser": "%u", "date": "%t", "RequestURL": "%m", "StatusCode": "%s", "ContentLength": "%b"}</pattern>
+        </springProfile>
+      </encoder>
     </appender>
     <appender-ref ref="CONSOLE" />
 </configuration>
