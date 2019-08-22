@@ -46,12 +46,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 			.cors()
 				.and()
-			.formLogin()
-				.defaultSuccessUrl("/user")
-				.and()
-			.httpBasic()
-				.realmName(_apiInfo.getTitle())
-				.and()
 			.authorizeRequests()
 				.antMatchers("/actuator/health", "/health")
 					.permitAll()
@@ -61,6 +55,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.csrf()
 				.ignoringRequestMatchers(AnyRequestMatcher.INSTANCE)
 		;
+	}
+
+	@Bean
+	@Profile("dev")
+	public WebSecurityConfigurerAdapter demoLoginConfig() {
+		return new WebSecurityConfigurerAdapter() {
+			protected void configure(HttpSecurity http) throws Exception {
+				http
+					.formLogin()
+					.defaultSuccessUrl("/user")
+					.and()
+				.httpBasic()
+					.realmName(_apiInfo.getTitle())
+				;
+			}
+		};
 	}
 
 	private void configureResourceUrls(HttpSecurity http) throws Exception {
