@@ -214,11 +214,11 @@ public class CaseListService {
 		}
 
 		public Long getCaseManagementSystemId() {
-			return _system.getCaseManagementSystemId();
+			return _system.getInternalId();
 		}
 
 		public Long getCaseTypeId() {
-			return _type.getCaseTypeId();
+			return _type.getInternalId();
 		}
 
 		public CaseManagementSystem getCaseManagementSystem() {

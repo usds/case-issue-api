@@ -9,5 +9,5 @@ import gov.usds.case_issues.db.model.TroubleCase;
 
 public interface NoteAssociationRepository extends CrudRepository<NoteAssociation, Long> {
 
-	public List<NoteAssociation> findAllBySnoozeSnoozeCaseOrderByAssociationTimestampAsc(TroubleCase rootCase);
+	public List<NoteAssociation> findAllBySnoozeSnoozeCaseOrderByUpdatedAtAsc(TroubleCase rootCase);
 }

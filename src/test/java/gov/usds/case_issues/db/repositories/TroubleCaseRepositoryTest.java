@@ -41,16 +41,16 @@ public class TroubleCaseRepositoryTest extends CaseIssueApiTestBase {
 		CaseType t1 = _dataService.ensureCaseTypeInitialized("T1", "Ahnold", "Terminated");
 		ZonedDateTime now = ZonedDateTime.now();
 		Set<Long> expectedIds = new HashSet<>();
-		expectedIds.add(_dataService.initCase(m1, "F123", t1, now).getInternalCaseId());
-		expectedIds.add(_dataService.initCase(m1, "F456", t1, now).getInternalCaseId());
+		expectedIds.add(_dataService.initCase(m1, "F123", t1, now).getInternalId());
+		expectedIds.add(_dataService.initCase(m1, "F456", t1, now).getInternalId());
 		_dataService.initCase(m1, "F789", t1, now);
 		_dataService.initCase(m2, "F123", t1, now);
 
 		Collection<TroubleCase> found = _repo.getAllByCaseManagementSystemAndReceiptNumberIn(
 				m1, Arrays.asList("F123", "F456", "F999"));
 		assertEquals(2, found.size());
-		found.forEach(c -> assertEquals(m1.getCaseManagementSystemId(), c.getCaseManagementSystem().getCaseManagementSystemId()));
-		Set<Long> foundIds = found.stream().map(TroubleCase::getInternalCaseId).collect(Collectors.toSet());
+		found.forEach(c -> assertEquals(m1.getInternalId(), c.getCaseManagementSystem().getInternalId()));
+		Set<Long> foundIds = found.stream().map(TroubleCase::getInternalId).collect(Collectors.toSet());
 		assertEquals(expectedIds, foundIds);
 	}
 

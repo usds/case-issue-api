@@ -45,7 +45,7 @@ public class CaseAttachmentService {
 		Optional<CaseNote> noteSearch = _noteRepository.findByNoteTypeAndNoteSubtypeAndContent(request.getNoteType(), subType, request.getContent());
 		if (noteSearch.isPresent()) {
 			note = noteSearch.get();
-			LOG.debug("Found existing note {}", note.getCaseNoteId());
+			LOG.debug("Found existing note {}", note.getInternalId());
 		} else {
 			note = _noteRepository.save(new CaseNote(request.getNoteType(), subType, request.getContent()));
 		}
@@ -54,6 +54,6 @@ public class CaseAttachmentService {
 	}
 
 	public List<NoteAssociation> findNotesForCase(TroubleCase rootCase) {
-		return _associationRepository.findAllBySnoozeSnoozeCaseOrderByAssociationTimestampAsc(rootCase);
+		return _associationRepository.findAllBySnoozeSnoozeCaseOrderByUpdatedAtAsc(rootCase);
 	}
 }

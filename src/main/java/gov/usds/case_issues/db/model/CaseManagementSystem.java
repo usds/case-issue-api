@@ -1,14 +1,13 @@
 package gov.usds.case_issues.db.model;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.EntityListeners;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.NaturalId;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -17,11 +16,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * different testing instances of a single case management system. 
  */
 @Entity
-public class CaseManagementSystem {
+@EntityListeners(AuditingEntityListener.class)
+public class CaseManagementSystem extends UpdatableEntity {
 
-	@Id
-	@GeneratedValue
-	private Long caseManagementSystemId;
 	@NaturalId
 	@JsonProperty("tag")
 	@NotNull
@@ -49,14 +46,10 @@ public class CaseManagementSystem {
 		this.caseDetailsUrlTemplate = caseDetailsUrlTemplate;
 	}
 
-	@JsonIgnore
-	public Long getCaseManagementSystemId() {
-		return caseManagementSystemId;
-	}
-
 	public String getCaseManagementSystemTag() {
 		return caseManagementSystemTag;
 	}
+
 	public String getName() {
 		return name;
 	}

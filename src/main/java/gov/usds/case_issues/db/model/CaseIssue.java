@@ -3,8 +3,6 @@ package gov.usds.case_issues.db.model;
 import java.time.ZonedDateTime;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
@@ -18,11 +16,8 @@ import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
  * An issue associated with a case.
  */
 @Entity
-public class CaseIssue implements CaseIssueSummary {
+public class CaseIssue extends UpdatableEntity implements CaseIssueSummary {
 
-	@Id
-	@GeneratedValue
-	private Long caseIssueId;
 	@NaturalId
 	@ManyToOne(optional=false)
 	private TroubleCase issueCase;
@@ -41,10 +36,6 @@ public class CaseIssue implements CaseIssueSummary {
 		this.issueCase = issueCase;
 		this.issueType = issueType;
 		this.issueCreated = issueCreated;
-	}
-
-	public Long getCaseIssueId() {
-		return caseIssueId;
 	}
 
 	public TroubleCase getIssueCase() {

@@ -94,8 +94,8 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	@Test
 	public void translatePath_validPath_itemsFound() {
 		CaseGroupInfo translated = _service.translatePath(VALID_SYS_TAG, VALID_TYPE_TAG);
-		assertEquals("Case management system ID", _system.getCaseManagementSystemId(), translated.getCaseManagementSystemId());
-		assertEquals("Case type ID", _type.getCaseTypeId(), translated.getCaseTypeId());
+		assertEquals("Case management system ID", _system.getInternalId(), translated.getCaseManagementSystemId());
+		assertEquals("Case type ID", _type.getInternalId(), translated.getCaseTypeId());
 	}
 
 	@Test

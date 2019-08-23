@@ -5,8 +5,6 @@ import java.time.temporal.ChronoUnit;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
@@ -17,14 +15,10 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
 @Entity
 @DynamicUpdate
-public class CaseSnooze implements CaseSnoozeSummary {
+public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 
 	/** The hour of the day (in server local time) at which all snoozes expire, if they are not manually terminated first */
 	public static final int EXPIRES_TIME = 3;
-
-	@Id
-	@GeneratedValue
-	private Long caseSnoozeId;
 
 	@ManyToOne(optional=false)
 	@JoinColumn(updatable=false)
@@ -47,9 +41,6 @@ public class CaseSnooze implements CaseSnoozeSummary {
 		snoozeEnd = getEndTime(snoozeStart, days);
 	}
 
-	public Long getCaseSnoozeId() {
-		return caseSnoozeId;
-	}
 	public TroubleCase getSnoozeCase() {
 		return snoozeCase;
 	}
