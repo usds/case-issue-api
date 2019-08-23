@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,6 +111,7 @@ public class CaseListService {
 	 * @throws ApiModelNotFoundException if the {@link CaseManagementSystem} or {@link CaseType} could not be found.
 	 */
 	@Transactional(readOnly=false)
+	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
 	public void putIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
 			Iterable<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
 		CaseGroupInfo translated = translatePath(systemTag, caseTypeTag);
