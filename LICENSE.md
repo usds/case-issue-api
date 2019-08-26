@@ -20,4 +20,4 @@ Other InformationIn no way are the patent or trademark rights of any person affe
 
 **Contributions to this project**
 
-As stated in [CONTRIBUTING](https://github.com/usds/case-issue-api/CONTRIBUTING.md), all contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
+As stated in [CONTRIBUTING](https://github.com/usds/blob/hank-gov-patch-1/case-issue-api/CONTRIBUTING.md), all contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
