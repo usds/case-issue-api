@@ -11,8 +11,9 @@ We're so glad you're thinking about contributing to the Search Party open source
   - If you prefer email to issues, you can reach us at search-party-group@usds.dhs.gov with your questions and comments. We're always open to suggestions.
 
 - To implement new functionality or fix a bug, you can open a [GitHub pull request](https://github.com/usds/case-issue-api/blob/master/.github/pull_request_template.md). However, please make sure you have discussed these changes and have an agreed upon plan of action before embarking on any significant pull request (e.g. implementing features, refactoring code, porting to a different language), otherwise you risk spending time working on something that may not get merged into the project. You can do so by starting by opening issues to track discussion regarding any changes you would like to implement.
-- Help improve our documentation for Search Party. If you propose changes that require updates to the documentation, kindly help us update that accordingly in your pull request.Help us improve our unit and integration tests.
-- Triage tickets and review patches triaging-tickets created by other users
+- Help improve our documentation for Search Party. If you propose changes that require updates to the documentation, kindly help us update that accordingly in your pull request.
+- Help us improve our unit and integration tests.
+- Triage tickets and review patches triaging-tickets created by other users.
 
 ### Public domain
 
