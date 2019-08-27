@@ -8,7 +8,7 @@ Search Party case tracker is an open source, API-enabled web table for aggregati
 
 Based on the experience and interviews with pilot users, we're considering scaling the design incorporating feedback with additional (but similar) use cases. 
 
-If you're interested in helping us design and build Search Party’s future iterations please [open an issue](https://github.com/usds/us-forms-system/issues)!
+If you're interested in helping us design and build Search Party’s future iterations please [open an issue](https://github.com/usds/case-issue-api/issues)!
 
 
 
