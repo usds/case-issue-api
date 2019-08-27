@@ -2,7 +2,7 @@
 
 ### Welcome!
 
-We're so glad you're thinking about contributing to the Search Party open source project! If you're unsure about anything, just ask by submitting an issue or sending us an email.We encourage you to read this CONTRIBUTING policy, as well as the project's [LICENSE](https://github.com/usds/blob/hank-gov-patch-1/case-issue-api/LICENSE.md) and [README](https://github.com/usds/case-issue-api/blob/master/README.md).
+We're so glad you're thinking about contributing to the Search Party open source project! If you're unsure about anything, just ask by submitting an issue or sending us an email.We encourage you to read this CONTRIBUTING policy, as well as the project's [LICENSE](https://github.com/usds/case-issue-api/blob/master/LICENSE.md) and [README](https://github.com/usds/case-issue-api/blob/master/README.md).
 
 ### How to contribute to Search Party
 
@@ -17,6 +17,6 @@ We're so glad you're thinking about contributing to the Search Party open source
 
 ### Public domain
 
-As noted in [LICENSE](https://github.com/usds/blob/master/hank-gov-patch-1/LICENSE.md), this project is in the worldwide public domain (in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/)).
+As noted in [LICENSE](https://github.com/usds/case-issue-api/blob/master/LICENSE.md), this project is in the worldwide public domain (in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/)).
 
 All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
