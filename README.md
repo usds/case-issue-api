@@ -20,7 +20,7 @@ In addition to providing visibility to these stuck cases, Search Party collects 
 
 
 
-### Geting Started
+### Getting Started
 
 For information about setting up and using Search Party, see the *Search Party*[ *Documentation*](https://github.com/usds/case-issue-api/blob/master/docs/README.md).
 
