@@ -52,18 +52,14 @@ public class OAuthMappingConfig {
 				createDelegatingUserService(new DefaultOAuth2UserService(), mappedConfig.getNamePath());
 		return http -> {
 			LOG.info("Configuring OAuth user info service");
-			try {
-				OAuth2LoginConfigurer<HttpSecurity> oauth2Login = http.oauth2Login();
-				if (userService != null) {
-					oauth2Login.userInfoEndpoint().userService(userService);
-				} else {
-					LOG.info("No custom username mapping provided: using fallback service");
-				}
-				if (mapper != null) {
-					oauth2Login.userInfoEndpoint().userAuthoritiesMapper(mapper);
-				}
-			} catch (Exception e) {
-				throw new RuntimeException(e);
+			OAuth2LoginConfigurer<HttpSecurity> oauth2Login = http.oauth2Login();
+			if (userService != null) {
+				oauth2Login.userInfoEndpoint().userService(userService);
+			} else {
+				LOG.info("No custom username mapping provided: using fallback service");
+			}
+			if (mapper != null) {
+				oauth2Login.userInfoEndpoint().userAuthoritiesMapper(mapper);
 			}
 		};
 	}
