@@ -47,27 +47,20 @@ public class CaseIssueApi {
 			throws IOException {
 		return args -> {
 			for (CaseManagementSystemDefinition spec : loaderConfig.getCaseManagementSystems()) {
-				LOG.debug("Creating Case Management System {} ({}/{}): URLS are {} and {}", spec.getTag(),
-						spec.getName(), spec.getDescription(), spec.getApplicationUrl(), spec.getCaseDetailsUrlTemplate());
 				CaseManagementSystem entity = new CaseManagementSystem(
 					spec.getTag(), spec.getName(), spec.getDescription(), spec.getApplicationUrl(), spec.getCaseDetailsUrlTemplate());
 				systemRepo.save(entity);
 			}
 			for (TaggedResource spec : loaderConfig.getCaseTypes()) {
-				LOG.debug("Creating Case Type {} ({}/{})", spec.getTag(), spec.getName(), spec.getDescription());
 				typeRepo.save(new CaseType(spec.getTag(), spec.getName(), spec.getDescription()));
 			}
 			for (NoteSubtypeDefinition spec : loaderConfig.getNoteSubtypes()) {
 				subtypeRepo.save(new NoteSubtype(spec.getTag(), spec.getNoteType(), spec.getName(), spec.getDescription(), spec.getUrlTemplate()));
 			}
 			for (SampleDataFileSpec fileConfig : loaderConfig.getFiles()) {
-				LOG.info("Loading data file {}", fileConfig.getFilename());
 				CsvSchema schema = CsvSchema.emptySchema().withHeader();
 				File dataFile = new File(fileConfig.getFilename());
-				MappingIterator<Map<String,String>> values = new CsvMapper()
-						.readerFor(Map.class)
-						.with(schema)
-						.readValues(dataFile);
+				MappingIterator<Map<String,String>> values = new CsvMapper().readerFor(Map.class).with(schema).readValues(dataFile);
 				loader.loadAll(values, fileConfig);
 			}
 		};
