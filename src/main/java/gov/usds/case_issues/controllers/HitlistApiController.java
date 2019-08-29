@@ -78,9 +78,7 @@ public class HitlistApiController {
 			.with(schema)
 			.readValues(csvStream);
 		List<CaseRequest> newIssueCases = new ArrayList<>();
-		valueIterator.forEachRemaining(m -> {
-			newIssueCases.add(new MapBasedCaseRequest(m));
-		});
+		valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(m)));
 		_listService.putIssueList(caseManagementSystemTag, caseTypeTag, issueTag, newIssueCases, ZonedDateTime.now());
 		return ResponseEntity.accepted().build();
 	}
@@ -91,9 +89,7 @@ public class HitlistApiController {
 			@RequestBody List<Map<String,Object>> jsonData) throws IOException {
 		Iterator<Map<String,Object>> valueIterator = jsonData.listIterator();
 		List<CaseRequest> newIssueCases = new ArrayList<>();
-		valueIterator.forEachRemaining(m -> {
-			newIssueCases.add(new MapBasedCaseRequest(m));
-		});
+		valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(m)));
 		_listService.putIssueList(caseManagementSystemTag, caseTypeTag, issueTag, newIssueCases, ZonedDateTime.now());
 		return ResponseEntity.accepted().build();
 	}
