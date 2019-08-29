@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.validation.constraints.NotNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,26 +47,9 @@ public class OAuthMappingConfig {
 		if (clientConfig == null || clientConfig.getRegistration().isEmpty()) {
 			return null; // see above "sneaky" remark
 		}
-		final GrantedAuthoritiesMapper mapper = oauthAuthorityMapper();
-		final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
-		final List<String> namePath = Collections.unmodifiableList(
-				new ArrayList<>(mappedConfig.getNamePath()));
-
-		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService = namePath.isEmpty()
-				? null
-				: r -> {
-					OAuth2User wrapped = delegate.loadUser(r);
-					Optional<String> nameAttr = descend(wrapped.getAttributes(), namePath)
-							.filter(v -> v instanceof String)
-							.map(String.class::cast)
-							;
-					if (nameAttr.isPresent()) {
-						return new NamedOAuth2User(nameAttr.get(), wrapped);
-					} else {
-						return null;
-					}
-				}
-		;
+		final GrantedAuthoritiesMapper mapper = oauthAuthorityMapper(mappedConfig.getAuthorityPaths());
+		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService =
+				createDelegatingUserService(new DefaultOAuth2UserService(), mappedConfig.getNamePath());
 		return http -> {
 			LOG.info("Configuring OAuth user info service");
 			try {
@@ -83,14 +68,36 @@ public class OAuthMappingConfig {
 		};
 	}
 
-	private GrantedAuthoritiesMapper oauthAuthorityMapper() {
-		LOG.info("Building authority mapper from {}", mappedConfig.authorityPaths);
-		// this is a shallow copy, so it's not as isolated as it should be
-		final List<AuthorityPath> authorityPaths = new ArrayList<>(mappedConfig.authorityPaths);
-		if (authorityPaths.isEmpty()) {
+	protected static OAuth2UserService<OAuth2UserRequest, OAuth2User> createDelegatingUserService(
+			final OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate, List<String> inputPath) {
+		if (inputPath == null || inputPath.isEmpty()) {
+			return null;
+		}
+		final List<String> safePath = Collections.unmodifiableList(new ArrayList<>(inputPath));
+		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService = r -> {
+			OAuth2User wrapped = delegate.loadUser(r);
+			Optional<String> nameAttr = descend(wrapped.getAttributes(), safePath)
+					.filter(v -> v instanceof String)
+					.map(String.class::cast)
+					;
+			if (nameAttr.isPresent()) {
+				return new NamedOAuth2User(nameAttr.get(), wrapped);
+			} else {
+				return null;
+			}
+		}
+		;
+		return userService;
+	}
+
+	protected static GrantedAuthoritiesMapper oauthAuthorityMapper(@NotNull List<AuthorityPath> unsafeList) {
+		LOG.info("Building authority mapper from {}", unsafeList);
+		if (unsafeList == null || unsafeList.isEmpty()) {
 			LOG.error("No authority mapping configuration found");
 			return null;
 		}
+		// this is a shallow copy, so it's not as unmodifiable as it should be
+		final List<AuthorityPath> authorityPaths = Collections.unmodifiableList(new ArrayList<>(unsafeList));
 		return authorities -> {
 			List<GrantedAuthority> translated = new ArrayList<>();
 			LOG.debug("Mapping authorities from {}", authorities);
@@ -115,8 +122,8 @@ public class OAuthMappingConfig {
 	@Component
 	@ConfigurationProperties(prefix="oauth-user-config", ignoreUnknownFields=false)
 	public static class OAuth2CustomizationProperties {
-		public List<String> namePath = new ArrayList<>();
-		public List<AuthorityPath> authorityPaths = new ArrayList<>();
+		private List<String> namePath = new ArrayList<>();
+		private List<AuthorityPath> authorityPaths = new ArrayList<>();
 
 		public List<String> getNamePath() {
 			return namePath;
@@ -139,6 +146,15 @@ public class OAuthMappingConfig {
 	public static class AuthorityPath {
 		private CaseIssuePermission authority;
 		private List<String> path;
+
+		public AuthorityPath() {
+			super();
+		}
+
+		public AuthorityPath(CaseIssuePermission auth, List<String> inputPath) {
+			authority = auth;
+			path = Collections.unmodifiableList(inputPath);
+		}
 
 		public CaseIssuePermission getAuthority() {
 			return authority;
@@ -173,7 +189,7 @@ public class OAuthMappingConfig {
 		LOG.debug("Finished path traversal with {}", curr);
 		if (curr instanceof Collection && ((Collection) curr).size() == 1) {
 			Iterator<String> it = ((Iterable) curr).iterator();
-			return it.hasNext() ? Optional.of(it.next()) : Optional.empty();
+			return Optional.ofNullable(it.next());
 		} else {
 			return Optional.ofNullable(curr);
 		}
