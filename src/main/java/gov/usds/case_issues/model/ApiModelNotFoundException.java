@@ -4,8 +4,8 @@ public class ApiModelNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private String _entityType;
-	private String _entityId;
+	private final String _entityType;
+	private final String _entityId;
 
 	public ApiModelNotFoundException(String entityType, String entityId) {
 		super();
