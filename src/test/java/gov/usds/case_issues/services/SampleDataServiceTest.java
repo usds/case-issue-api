@@ -100,5 +100,6 @@ public class SampleDataServiceTest extends CaseIssueApiTestBase {
 		loaderConfig.setFiles(Arrays.asList(fileSpec));
 		CsvLoader loader = new CsvLoader(_troubleCaseRespository, _caseIssueRespository, _caseSnoozeRespository, _caseListService);
 		_service.loadSampleDataFromFile(loaderConfig, loader);
+		assertEquals(_caseIssueRespository.count(), 1);
 	}
 }
