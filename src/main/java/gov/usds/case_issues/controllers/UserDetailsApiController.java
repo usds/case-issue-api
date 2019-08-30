@@ -14,7 +14,7 @@ import springfox.documentation.annotations.ApiIgnore;
  */
 @RestController
 @RequestMapping("/user")
-@Profile("dev")
+@Profile("auth-testing")
 @ApiIgnore
 public class UserDetailsApiController {
 
