@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -61,8 +63,13 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Bean
 	public FilterRegistrationBean<ForwardedHeaderFilter> getForwardFilter() {
-		// do we need to use setRelativeRedirects?
-		return new FilterRegistrationBean<ForwardedHeaderFilter>(new ForwardedHeaderFilter());
+		ForwardedHeaderFilter filter = new ForwardedHeaderFilter();
+		// some reverse-proxy setups allegedly have problems with this, but until somebody complains, going with
+		// the IETF recommendation over the servlet spec: https://tools.ietf.org/html/rfc7231#section-7.1.2
+		filter.setRelativeRedirects(true);
+		FilterRegistrationBean<ForwardedHeaderFilter> reg = new FilterRegistrationBean<ForwardedHeaderFilter>(filter);
+		reg.setOrder(OrderedFilter.HIGHEST_PRECEDENCE);
+		return reg;
 	}
 	/**
 	 * Trivial {@link HttpMessageConverter} implementation to allow handler methods to accept
