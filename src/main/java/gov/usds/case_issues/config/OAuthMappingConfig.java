@@ -79,7 +79,10 @@ public class OAuthMappingConfig {
 			if (nameAttr.isPresent()) {
 				return new NamedOAuth2User(nameAttr.get(), wrapped);
 			} else {
-				return null;
+				// AuthenticationException or AccessDeniedException might be better, but probably still
+				// produce an infinite redirect loop
+				throw new IllegalArgumentException("User " + wrapped.getName() +
+					" did not have the expected name attributes");
 			}
 		}
 		;
