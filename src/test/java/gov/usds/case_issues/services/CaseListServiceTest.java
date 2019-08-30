@@ -25,6 +25,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
@@ -64,7 +66,6 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_now = ZonedDateTime.now();
 		_system = _dataService.ensureCaseManagementSystemInitialized(VALID_SYS_TAG, "Fred", null);
 		_type = _dataService.ensureCaseTypeInitialized(VALID_TYPE_TAG, "An IRS form", "Look it up");
-
 	}
 
 	@Test
@@ -98,11 +99,13 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
+	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_noIssuesNoInput_nothingTerribleHappens() {
 		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "SUPER-OLD", Collections.emptyList(), _now);
 	}
 
 	@Test
+	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_blankSlateNewCases_casesCreated() {
 		List<CaseRequest> newIssueCases = new ArrayList<>();
 		newIssueCases.add(new CaseRequestImpl("A123"));
@@ -122,6 +125,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
+	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_existingCasesNewIssues_issuesCreated() {
 		String issueType = "ANCIENT";
 		_dataService.initCase(_system, "A1", _type, _now);
@@ -144,6 +148,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
+	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_existingIssuesEmptyInput_issuesClosed() {
 		ZonedDateTime then = _now.minusMonths(1);
 		String myIssueType = "BADNESS";
@@ -156,6 +161,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
+	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_existingIssuesNewCaseData_casesUpdated() {
 		ZonedDateTime then = _now.minusMonths(1);
 		String myIssueType = "SQUIRREL";
@@ -184,6 +190,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
+	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_existingCasesNewCaseData_casesUpdated() {
 		ZonedDateTime then = _now.minusMonths(1);
 		String myIssueType = "INIMITABLE";
@@ -210,9 +217,22 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals(2, foundData.size());
 	}
 
+	@Test(expected=AccessDeniedException.class)
+	@WithMockUser
+	public void putIssueList_unauthorizedUser_exception() {
+		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
+	}
+
+	@Test(expected=AccessDeniedException.class)
+	@WithMockUser(authorities="UPDATE_CASES")
+	public void putIssueList_insufficientlyAuthorizedUser_exception() {
+		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
+	}
+
 	@Test
 	// just ... exercise a bunch of things and make sure things come out right, to determine
 	@SuppressWarnings("checkstyle:MagicNumber")
+	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void omnibusListOperationsTest() {
 		String checkKey = "requestedAs";
 		CaseRequest a = new CaseRequestImpl("C1", Collections.singletonMap(checkKey, "C1"));

@@ -6,7 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 
+@WithMockUser
 public class SystemNavigationControllerTest extends ControllerTestBase {
 
 	@Before
