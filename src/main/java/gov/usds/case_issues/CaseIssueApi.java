@@ -11,9 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
 import gov.usds.case_issues.config.SampleDataConfig;
-import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
-import gov.usds.case_issues.db.repositories.CaseTypeRepository;
-import gov.usds.case_issues.db.repositories.NoteSubtypeRepository;
 import gov.usds.case_issues.services.CsvLoader;
 import gov.usds.case_issues.services.SampleDataService;
 
@@ -30,13 +27,11 @@ public class CaseIssueApi {
 
 	@Bean
 	@Profile({"dev"})
-	public CommandLineRunner loadSampleData(CsvLoader loader, SampleDataConfig loaderConfig,
-				CaseManagementSystemRepository systemRepo, CaseTypeRepository typeRepo, NoteSubtypeRepository subtypeRepo)
-			throws IOException {
+	public CommandLineRunner loadSampleData(CsvLoader loader, SampleDataConfig loaderConfig) throws IOException {
 		return args -> {
-			_sampleDataService.saveCaseManagementSystems(loaderConfig, systemRepo);
-			_sampleDataService.saveCaseTypes(loaderConfig, typeRepo);
-			_sampleDataService.saveNoteTypes(loaderConfig, subtypeRepo);
+			_sampleDataService.saveCaseManagementSystems(loaderConfig);
+			_sampleDataService.saveCaseTypes(loaderConfig);
+			_sampleDataService.saveNoteTypes(loaderConfig);
 			_sampleDataService.loadSampleDataFromFile(loaderConfig, loader);
 		};
 	}

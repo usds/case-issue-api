@@ -59,7 +59,7 @@ public class SampleDataServiceTest extends CaseIssueApiTestBase {
 		systemDefinition.setName("name");
 		systemDefinition.setDescription("description");
 		loaderConfig.setCaseManagementSystems(Arrays.asList(systemDefinition));
-		_service.saveCaseManagementSystems(loaderConfig, _systemRepo);
+		_service.saveCaseManagementSystems(loaderConfig);
 		assertEquals(_systemRepo.count(), 1);
 	}
 
@@ -71,7 +71,7 @@ public class SampleDataServiceTest extends CaseIssueApiTestBase {
 		taggedResource.setName("name");
 		taggedResource.setDescription("description");
 		loaderConfig.setCaseTypes(Arrays.asList(taggedResource));
-		_service.saveCaseTypes(loaderConfig, _caseTypeRepo);
+		_service.saveCaseTypes(loaderConfig);
 		assertEquals(_caseTypeRepo.count(), 1);
 	}
 
@@ -83,7 +83,7 @@ public class SampleDataServiceTest extends CaseIssueApiTestBase {
 		noteDefiniton.setName("name");
 		noteDefiniton.setDescription("description");
 		loaderConfig.setNoteSubtypes(Arrays.asList(noteDefiniton));
-		_service.saveNoteTypes(loaderConfig, _subtypeRepository);
+		_service.saveNoteTypes(loaderConfig);
 		assertEquals(_subtypeRepository.count(), 1);
 	}
 
