@@ -158,22 +158,19 @@ public class OAuthMappingConfigTest {
 		assertEquals(Collections.singleton(new SimpleGrantedAuthority("respect")), user.getAuthorities());
 	}
 
-	@Test
-	public void createDelegatingUserService_pathToNull_noUser() {
-		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "nopenopenope");
-		assertNull(service.loadUser(null));
+	@Test(expected=IllegalArgumentException.class)
+	public void createDelegatingUserService_pathToNull_error() {
+		setupService("my_attr", "nopenopenope").loadUser(null);
 	}
 
-	@Test
-	public void createDelegatingUserService_pathToMap_noUser() {
-		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr");
-		assertNull(service.loadUser(null));
+	@Test(expected=IllegalArgumentException.class)
+	public void createDelegatingUserService_pathToMap_error() {
+		setupService("my_attr").loadUser(null);
 	}
 
-	@Test
-	public void createDelegatingUserService_pathToEmptyList_noUser() {
-		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "empty_list");
-		assertNull(service.loadUser(null));
+	@Test(expected=IllegalArgumentException.class)
+	public void createDelegatingUserService_pathToEmptyList_error() {
+		setupService("my_attr", "empty_list").loadUser(null);
 	}
 
 	private OAuth2UserService<OAuth2UserRequest, OAuth2User> setupService(String... namePath) {
