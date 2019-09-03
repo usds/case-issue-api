@@ -43,6 +43,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http
 			.cors()
 				.and()
+			.headers()
+				.httpStrictTransportSecurity().and()
+				.and()
 			.authorizeRequests()
 				.antMatchers("/actuator/health", "/health")
 					.permitAll()
