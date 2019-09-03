@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HsqlDbTruncator {
+public class HsqlDbTruncator implements DbTruncator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HsqlDbTruncator.class);
 

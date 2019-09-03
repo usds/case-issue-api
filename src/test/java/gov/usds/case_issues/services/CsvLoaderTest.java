@@ -29,8 +29,8 @@ import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
+import gov.usds.case_issues.test_util.DbTruncator;
 import gov.usds.case_issues.test_util.FixtureDataInitializationService;
-import gov.usds.case_issues.test_util.HsqlDbTruncator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -38,7 +38,7 @@ import gov.usds.case_issues.test_util.HsqlDbTruncator;
 public class CsvLoaderTest {
 
 	@Autowired
-	private HsqlDbTruncator truncator;
+	private DbTruncator truncator;
 	@Autowired
 	private FixtureDataInitializationService dataService;
 	@Autowired

@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost/case_issues
+  jpa:
+    database: POSTGRESQL

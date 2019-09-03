@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
-import gov.usds.case_issues.test_util.HsqlDbTruncator;
+import gov.usds.case_issues.test_util.DbTruncator;
 
 public class CaseManagementSystemRepositoryTest extends CaseIssueApiTestBase {
 
@@ -27,7 +27,7 @@ public class CaseManagementSystemRepositoryTest extends CaseIssueApiTestBase {
 	@Autowired
 	private CaseManagementSystemRepository repo;
 	@Autowired
-	private HsqlDbTruncator truncator;
+	private DbTruncator truncator;
 
 	@Before
 	public void emptyDb() {

@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public abstract class CaseIssueApiTestBase {
 
 	@Autowired
-	private HsqlDbTruncator _truncator;
+	private DbTruncator _truncator;
 	@Autowired
 	protected FixtureDataInitializationService _dataService;
 
