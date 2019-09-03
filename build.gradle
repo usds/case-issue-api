@@ -67,5 +67,11 @@ jacocoTestCoverageVerification {
 	}
 }
 
+configurations {
+	compileClasspath {
+		resolutionStrategy.activateDependencyLocking()
+	}
+}
+
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
