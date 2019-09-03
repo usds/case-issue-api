@@ -31,6 +31,23 @@ import org.springframework.stereotype.Component;
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.authorization.NamedOAuth2User;
 
+/**
+ * Configuration to customize our integration with an external OAuth2/OIDC identity provider.
+ * If no OAuth2 client is registered with Spring Security, this configuration will do nothing;
+ * if a client is registered, it will configure OAuth2 login, and check for configuration
+ * properties (see {@link OAuth2CustomizationProperties} to see if it should do either of two
+ * other things:
+ * <ol>
+ * <li>If <code>oauth-user-config.name-path</code> is set, it will do a recursive descent through
+ * the user attributes in the OAuth user object to find a new value for the username attribute to
+ * be returned by {@link OAuth2User#getName()} (for cases when the default value is not actually
+ * the durable ID for the user).
+ * <li>If <code>oauth-user-config.authority-paths</code> is set (which it almost certainly should
+ * be), it configure a {@link GrantedAuthoritiesMapper} that will do a similar recursive descent
+ * for each path provided, and if the expected value is found, add the associated
+ * {@link CaseIssuePermission} to the user's authorities.
+ * </ol>
+ */
 @Configuration
 public class OAuthMappingConfig {
 
