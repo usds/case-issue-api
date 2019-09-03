@@ -165,6 +165,7 @@ public class TroubleCase {
 		return caseCreation;
 	}
 
+	@JsonIgnore
 	public List<CaseIssue> getOpenIssues() {
 		return openIssues;
 	}
