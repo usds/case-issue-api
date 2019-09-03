@@ -36,8 +36,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// these could be plugins, but they work already
 		configureResourceUrls(http);
 		configureSwaggerUi(http);
-		_configPlugins.forEach(p->p.accept(http));
-
+		for (WebSecurityPlugin p : _configPlugins) {
+			p.apply(http);
+		}
 		http
 			.cors()
 				.and()

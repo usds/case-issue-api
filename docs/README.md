@@ -50,6 +50,22 @@ The main files to be aware of are:
   (logging configuration, sample data file locations, and so forth) that are local to your development
   setup, rather than being common characteristics of everybody's local development environments.
 
+### Customizable Configuration Elements
+
+Several custom sections can be added to the application properties:
+
+* `sample-data` contains configuration for loading fake data into your development environment
+* `web-customization` customizes the server configuration
+    * `cors-origins` is a list of allowed origins for cross-origin resource sharing
+    * `users` is a list of test users (for use in development environments), for testing with various
+    authorization levels
+* `oauth-user-config` customizes the way that OAuth2/OIDC user ID tokens are translated into local
+  users (with local permissions).
+    * `name-path` (optionally) provides a path to the value in the user's `attributes` map where we can find
+    the actual durable user ID (if the IDP's notion of durable user ID does not map to the application's).
+    * `authority-paths` (optionally in some sense, but likely necessarily) configures how to translate the
+    user's `attributes` to internal authorities for this application.
+
 ## Loading Sample Data
 Unless you want to create all the data by hand using the `resources` API (not recommended),
 you will want to configure the application to load some sample data. This is most easily done
