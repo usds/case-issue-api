@@ -70,7 +70,11 @@ public class CaseDetailsApiController {
 	@PostMapping("activeSnooze/notes")
 	public ResponseEntity<?> addNote(@PathVariable String caseManagementSystemTag,
 			@PathVariable String receiptNumber, @RequestBody NoteRequest newNote) {
-		_caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, newNote);
+		try {
+			_caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, newNote);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().build();
+		}
 		return ResponseEntity.accepted().build();
 	}
 }

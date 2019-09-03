@@ -2,6 +2,7 @@ package gov.usds.case_issues.controllers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.NoteType;
+import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.NoteRequest;
 
 @WithMockUser(authorities = {"READ_CASES", "UPDATE_CASES"})
@@ -89,7 +91,6 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isNoContent());
 	}
 
-
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
 	public void snoozeWithNotes_validCase_notesStored() throws Exception {
@@ -103,6 +104,23 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isOk())
 			.andExpect(content().json("{\"notes\": [{\"content\": \"Hello World\"}]}"))
 			;
+	}
+
+	@Test
+	public void addNoteToSnooze_validCase_notesStored() throws Exception {
+		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
+		TroubleCase troubleCase = _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
+		_dataService.snoozeCase(troubleCase);
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new NoteRequest(NoteType.COMMENT, "Hello World", null)))
+			.andExpect(status().isAccepted());
+	}
+
+	@Test
+	public void addNoteToActive_validCase_notesStored() throws Exception {
+		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
+		_dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new NoteRequest(NoteType.COMMENT, "Hello World", null)))
+			.andExpect(status().isBadRequest());
 	}
 
 	private MockHttpServletRequestBuilder detailsRequest(String systemTag, String receipt) {
@@ -140,4 +158,17 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.content(body.toString())
 			;
 	}
+
+	private MockHttpServletRequestBuilder addNote(String systemTag, String receipt, NoteRequest note)
+			throws JSONException {
+		JSONObject body = new JSONObject();
+		body.put("type", note.getNoteType().name());
+		body.put("content", note.getContent());
+		body.put("subtype", note.getSubtype());
+		return post("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/activeSnooze/notes", systemTag, receipt)
+			.contentType("application/json")
+			.content(body.toString())
+			;
+	}
+
 }
