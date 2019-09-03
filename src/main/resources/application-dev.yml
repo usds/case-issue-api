@@ -28,6 +28,7 @@ web-customization:
     - name: service
       grants:
         - UPDATE_ISSUES
+access-log-format: combined
 sample-data:
   case-management-systems:
     -
