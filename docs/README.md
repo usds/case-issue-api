@@ -61,9 +61,9 @@ $ cp src/main/resources/_application-local.yml src/main/resources/application-lo
 
 See see (SampleDataConfig)[src/main/java/gov/usds/case_issues/config/SampleDataConfig.java] for more insight.
 
-## Updateing a dependency
+## Updating a dependency
 
-1. Update dependency in (build.grade)[build.grade]
+1. Update dependency in (build.grade)[build.gradle]
 2. Update the lock file with `./gradlew dependencies --write-locks`
 3. Rebuild the project with `./gradlew build`
 
