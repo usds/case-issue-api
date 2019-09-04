@@ -16,8 +16,6 @@ public class JpaAuditConfig {
 
 	static final String AUDITOR = "auditorSourceBean";
 
-	public static final String FAKE_ID = "HEYYYY";
-
 	@Bean(AUDITOR)
 	public AuditorAware<String> getCurrentIdProvider() {
 		return () -> {
