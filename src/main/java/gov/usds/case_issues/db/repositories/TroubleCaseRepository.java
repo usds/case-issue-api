@@ -1,6 +1,7 @@
 package gov.usds.case_issues.db.repositories;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.LockModeType;
@@ -29,6 +30,8 @@ public interface TroubleCaseRepository extends PagingAndSortingRepository<Troubl
 	public static final String ACTIVE_CASE_CLAUSE = "c.caseManagementSystem = :caseManagementSystem and c.caseType = :caseType and c.openIssues is not empty";
 	public static final String ACTIVE_CASE_QUERY = "select c from #{#entityName} c where " + ACTIVE_CASE_CLAUSE;
 	public static final String ACTIVE_SNOOZE_CLAUSE = "exists (select snoozeEnd from CaseSnooze where snoozeCase = c and snoozeEnd > CURRENT_TIMESTAMP)";
+
+	public List<TroubleCase> getFirst5ByCaseManagementSystemAndCaseTypeAndReceiptNumberContains(CaseManagementSystem caseManager, CaseType caseType, String receiptNumber);
 
 	public Page<TroubleCase> getAllByCaseManagementSystemAndCaseType(CaseManagementSystem caseManager, CaseType caseType, Pageable pageable);
 

@@ -60,6 +60,21 @@ public class CaseListService {
 	@Autowired
 	private CaseAttachmentService _attachmentService;
 
+	public List<TroubleCase> getCases(String caseManagementSystemTag, String caseTypeTag, String query) {
+		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
+		LOG.debug("Request for query cases by: {}", query);
+
+		if (query == null) {
+			return new ArrayList<>();
+		}
+
+		return _caseRepo.getFirst5ByCaseManagementSystemAndCaseTypeAndReceiptNumberContains(
+			translated.getCaseManagementSystem(),
+			translated.getCaseType(),
+			query
+		);
+	}
+
 	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for active cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());

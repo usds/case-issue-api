@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <springProfile name="!prod">
+            <encoder>
+                <pattern>%d{dd-MM-yyyy hh:mm:ss.SSS a} %highlight([%-5level]) [%thread]  %logger{50} - %msg%n</pattern>
+            </encoder>
+        </springProfile>
+        <springProfile name="prod">
+            <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                <layout class="gov.usds.case_issues.config.JSONLayout"/>
+            </encoder>
+        </springProfile>
+    </appender>
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

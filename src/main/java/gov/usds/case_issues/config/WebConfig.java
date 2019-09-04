@@ -8,6 +8,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.filter.OrderedFilter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -17,6 +20,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -56,6 +60,16 @@ public class WebConfig implements WebMvcConfigurer {
 		converters.add(new InputStreamMessageConverter());
 	}
 
+	@Bean
+	public FilterRegistrationBean<ForwardedHeaderFilter> getForwardFilter() {
+		ForwardedHeaderFilter filter = new ForwardedHeaderFilter();
+		// some reverse-proxy setups allegedly have problems with this, but until somebody complains, going with
+		// the IETF recommendation over the servlet spec: https://tools.ietf.org/html/rfc7231#section-7.1.2
+		filter.setRelativeRedirects(true);
+		FilterRegistrationBean<ForwardedHeaderFilter> reg = new FilterRegistrationBean<ForwardedHeaderFilter>(filter);
+		reg.setOrder(OrderedFilter.HIGHEST_PRECEDENCE);
+		return reg;
+	}
 	/**
 	 * Trivial {@link HttpMessageConverter} implementation to allow handler methods to accept
 	 * "text/csv" input as a raw input stream.

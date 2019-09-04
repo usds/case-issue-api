@@ -99,6 +99,36 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
+	public void getCases_noQuery_noCasesReturned() {
+		List<TroubleCase> cases = _service.getCases(VALID_SYS_TAG, VALID_TYPE_TAG, "");
+		assertEquals(0, cases.size());
+	}
+
+	@Test
+	public void getCases_exactReceipetNumber_returnsCaseWithQueriedReceipetNumber() {
+		String receiptNumber = "ABC1234567";
+
+		CaseGroupInfo translated = _service.translatePath(VALID_SYS_TAG, VALID_TYPE_TAG);
+		_dataService.initCase(
+			translated.getCaseManagementSystem(),
+			receiptNumber,
+			translated.getCaseType(),
+			_now
+		);
+		_dataService.initCase(
+			translated.getCaseManagementSystem(),
+			"XYZ8901234",
+			translated.getCaseType(),
+			_now
+		);
+
+		List<TroubleCase> cases = _service.getCases(VALID_SYS_TAG, VALID_TYPE_TAG, receiptNumber);
+
+		assertEquals(1, cases.size());
+		assertEquals(receiptNumber, cases.get(0).getReceiptNumber());
+	}
+
+	@Test
 	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_noIssuesNoInput_nothingTerribleHappens() {
 		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "SUPER-OLD", Collections.emptyList(), _now);
@@ -251,7 +281,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_service.putIssueList(otherSystem, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a,b,c), _now.minusHours(1));
 		assertEquals("No active cases for " + VALID_SYS_TAG, 0, fetchCasesForSystem(VALID_SYS_TAG).size());
 		assertEquals("3 active cases for " + otherSystem, 3, fetchCasesForSystem(otherSystem).size());
-		
+
 		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a, b), _now.minusDays(3));
 		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeB, Arrays.asList(b, c), _now.minusDays(2));
 		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeC, Arrays.asList(b, c), _now.minusDays(1));
@@ -287,10 +317,10 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	private List<CaseSummary> fetchCasesForSystem(String systemTag) {
 		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, PageRequest.of(0, 100));
 	}
-	
+
 	private class CaseRequestImpl implements CaseRequest {
 
-		private String _receiptNumber; 
+		private String _receiptNumber;
 		private Map<String, Object> _extraData;
 
 		public CaseRequestImpl(String receipt) {
@@ -317,6 +347,6 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		public Map<String, Object> getExtraData() {
 			return _extraData;
 		}
-		
+
 	}
 }

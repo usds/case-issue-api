@@ -25,6 +25,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 /**
@@ -154,6 +155,7 @@ public class TroubleCase extends UpdatableEntity {
 		return caseCreation;
 	}
 
+	@JsonIgnore
 	public List<CaseIssue> getOpenIssues() {
 		return openIssues;
 	}

@@ -10,3 +10,6 @@ spring:
       hibernate:
         format_sql: false
         generate_statistics: true # possibly too verbose, but useful to have around
+logback:
+  access:
+    enabled: true

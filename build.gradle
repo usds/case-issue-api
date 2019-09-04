@@ -1,8 +1,9 @@
 plugins {
-	id 'org.springframework.boot' version '2.1.6.RELEASE'
+	id 'org.springframework.boot' version '2.1.7.RELEASE'
 	id 'java'
 	id 'checkstyle'
 	id 'jacoco'
+	id 'org.sonarqube'  version '2.7.1'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -17,6 +18,7 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.json:json:20180130'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
@@ -25,18 +27,23 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
 
+	// access logging:
+	implementation 'net.rakugakibox.spring.boot:logback-access-spring-boot-starter:2.7.1'
+
 	implementation "io.springfox:springfox-swagger2:${springFoxVersion}"
 	implementation "io.springfox:springfox-swagger-ui:${springFoxVersion}"
 	implementation "io.springfox:springfox-bean-validators:${springFoxVersion}"
-// try this again when springfox 3.0 comes out:
+//	try this again if and when springfox 3.0 comes out:
 //	implementation "io.springfox:springfox-data-rest:${springFoxVersion}"
 
+	implementation "com.fasterxml.jackson.core:jackson-databind:2.9.9.3"
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
 
 	implementation "com.vladmihalcea:hibernate-types-52:2.5.0"
 
 	runtimeOnly 'org.hsqldb:hsqldb'
 	runtimeOnly 'org.postgresql:postgresql'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
@@ -45,7 +52,7 @@ jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = 0.7
+				minimum = 0.84
 			}
 		}
 
@@ -58,6 +65,12 @@ jacocoTestCoverageVerification {
 				minimum = 0.85
 			}
 		}
+	}
+}
+
+configurations {
+	compileClasspath {
+		resolutionStrategy.activateDependencyLocking()
 	}
 }
 

@@ -30,23 +30,18 @@ public class DemoUserLoginConfig {
 
 	@Bean
 	@Order(-1)
-	@SuppressWarnings("checkstyle:IllegalCatch")
 	public WebSecurityPlugin addDemoLogins() {
 		final String apiTitle = _apiInfo.getTitle();
 
 		return http -> {
 			LOG.info("Configuring form login and basic auth on {} with realm {}.", http, apiTitle);
-			try {
-				http
-					.formLogin()
-						.defaultSuccessUrl("/user")
-						.and()
-					.httpBasic()
-						.realmName(apiTitle)
-				;
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+			http
+				.formLogin()
+					.defaultSuccessUrl("/user")
+					.and()
+				.httpBasic()
+					.realmName(apiTitle)
+			;
 		};
 	}
 
