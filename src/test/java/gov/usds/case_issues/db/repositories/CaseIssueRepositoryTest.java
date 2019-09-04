@@ -2,14 +2,18 @@ package gov.usds.case_issues.db.repositories;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
@@ -23,6 +27,7 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 	private static final String VALID_ISSUE = "RELEVANT";
 	private static final String VALID_TYPE = "CT1";
 	private static final String VALID_MGT_SYS = "CS1";
+	private static final String DUMMY_USERNAME = "IamNotSam";
 
 	@Autowired
 	private CaseIssueRepository _repo;
@@ -142,5 +147,42 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 		assertEquals(then.plusDays(1), issues.get(0).getIssueCreated());
 		assertEquals(r1.getReceiptNumber(), issues.get(1).getIssueCase().getReceiptNumber());
 		assertEquals(then.plusDays(2), issues.get(1).getIssueCreated());
+	}
+
+	@Test
+	public void saveCase_noUser_auditInfoCorrect() {
+		Instant startTime = new Date().toInstant();
+		TroubleCase c = _dataService.initCase(_system, "ABC1234", _type, _now.minusDays(1));
+		CaseIssue saved = _repo.save(new CaseIssue(c, "FAKE", _now.minusHours(1)));
+		Instant end = new Date().toInstant();
+		assertNull(saved.getCreatedBy());
+		assertNull(saved.getUpdatedBy());
+		Date createdAt = saved.getCreatedAt();
+		assertTrue(startTime.isBefore(createdAt.toInstant()));
+		assertTrue(end.isAfter(createdAt.toInstant()));
+		assertEquals(createdAt, saved.getUpdatedAt());
+	}
+
+	@Test
+	@WithMockUser(DUMMY_USERNAME)
+	public void saveCaseAndUpdate_withUser_auditInfoCorrect() {
+		Instant startTime = new Date().toInstant();
+		TroubleCase c = _dataService.initCase(_system, "ABC1234", _type, _now.minusDays(1));
+		CaseIssue saved = _repo.save(new CaseIssue(c, "FAKE", _now.minusHours(1)));
+		Instant middle = new Date().toInstant();
+		assertEquals(DUMMY_USERNAME, saved.getCreatedBy());
+		assertEquals(DUMMY_USERNAME, saved.getUpdatedBy());
+		Date createdAt = saved.getCreatedAt();
+		assertTrue(startTime.isBefore(createdAt.toInstant()));
+		assertTrue(middle.isAfter(createdAt.toInstant()));
+		assertTrue(startTime.isBefore(saved.getUpdatedAt().toInstant()));
+		assertTrue(middle.isAfter(saved.getUpdatedAt().toInstant()));
+		saved.setIssueClosed(ZonedDateTime.now());
+		CaseIssue resaved = _repo.save(saved);
+		Instant end = new Date().toInstant();
+		assertEquals(createdAt, resaved.getCreatedAt());
+		assertTrue(middle.isBefore(resaved.getUpdatedAt().toInstant()));
+		assertTrue(end.isAfter(resaved.getUpdatedAt().toInstant()));
+		assertEquals(DUMMY_USERNAME, resaved.getUpdatedBy());
 	}
 }
