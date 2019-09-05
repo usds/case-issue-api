@@ -8,11 +8,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,6 +41,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).READ_CASES.name())")
 @RequestMapping("/api/cases/{caseManagementSystemTag}/{caseTypeTag}")
+@Validated
 public class HitlistApiController {
 
 	@Autowired
@@ -47,7 +51,7 @@ public class HitlistApiController {
 	public List<TroubleCase> getCases(
 		@PathVariable String caseManagementSystemTag,
 		@PathVariable String caseTypeTag,
-		@RequestParam("query") String query) {
+		@RequestParam("query") @Pattern(regexp="\\w+") String query) {
 		return _listService.getCases(caseManagementSystemTag, caseTypeTag, query);
 	}
 

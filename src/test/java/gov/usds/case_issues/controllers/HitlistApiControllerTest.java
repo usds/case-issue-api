@@ -116,6 +116,22 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		perform(jsonPut).andExpect(status().isAccepted());
 	}
 
+	@Test
+	public void search_noCases_emptyResult() throws Exception {
+		perform(doSearch(VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "abcde"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true));
+	}
+
+	@Test
+	public void search_invalidInput_badRequest() throws Exception {
+		perform(doSearch(VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "ab cde"))
+			.andExpect(status().isBadRequest())
+		;
+		perform(doSearch(VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "ab\ncde"))
+			.andExpect(status().isBadRequest())
+		;
+	}
 	/**
 	 * Create some data on our default case type!
 	 * 
@@ -131,6 +147,9 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		_dataService.snoozeCase(case2);
 	}
 
+	private static MockHttpServletRequestBuilder doSearch(String cmsTag, String ctTag, String queryString) {
+		return get(API_PATH + "search", cmsTag, ctTag).param("query", queryString);
+	}
 	private static MockHttpServletRequestBuilder getActive(String cmsTag, String ctTag) {
 		return get(API_PATH + "active", cmsTag, ctTag);
 	}
