@@ -40,7 +40,6 @@ public class LoginRedirectController {
 				// prevent "http://good.origin:shenanigans/
 				String allowedPrefix = allowedOrigin.endsWith("/") ? allowedOrigin : allowedOrigin + "/";
 				if (redirect.equals(allowedOrigin) || redirect.startsWith(allowedPrefix)) {
-				//if (redirect.startsWith(allowedOrigin)) {
 					validatedRedirect = redirect;
 					LOG.debug("Match found!");
 					break;
