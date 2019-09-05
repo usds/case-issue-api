@@ -99,9 +99,9 @@ public class CaseListService {
 	}
 	
 	public CaseGroupInfo translatePath(String caseManagementSystemTag, String caseTypeTag) {
-		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
+		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByExternalId(caseManagementSystemTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
-		CaseType caseType = _caseTypeRepo.findByCaseTypeTag(caseTypeTag)
+		CaseType caseType = _caseTypeRepo.findByExternalId(caseTypeTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Type", caseTypeTag));
 		return new CaseGroupInfo(caseManagementSystem, caseType);
 	}
@@ -116,8 +116,8 @@ public class CaseListService {
  	 * <li>Cases that are in the list and already exist will have their additional data updated,
  	 * 		and an issue created if no open issue of the correct type exists;</li>
  	 * </ul>  
-	 * @param systemTag the {@link CaseManagementSystem#getCaseManagementSystemTag()} for the system we are updating.
-	 * @param caseTypeTag {@link CaseType#getCaseTypeTag()} for the case type we are updating.
+	 * @param systemTag the {@link CaseManagementSystem#getExternalId()} for the system we are updating.
+	 * @param caseTypeTag {@link CaseType#getExternalId()} for the case type we are updating.
 	 * @param issueTypeTag the type of issue we are updating.
 	 * @param newIssueCases case information for each case that has this issue as of the date for which we are uploading data.
 	 * @param eventDate the date (usually but not always {@link ZonedDateTime#now()}) to attach to this update

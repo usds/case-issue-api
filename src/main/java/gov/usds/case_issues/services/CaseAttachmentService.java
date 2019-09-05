@@ -39,7 +39,7 @@ public class CaseAttachmentService {
 
 		LOG.debug("Attempting to attach note {} {} {}", request.getNoteType(), request.getSubtype(), request.getContent());
 		if (null != request.getSubtype()) {
-			subType = _subtypeRepository.findByNoteSubtypeTag(request.getSubtype())
+			subType = _subtypeRepository.findByExternalId(request.getSubtype())
 				.orElseThrow(IllegalArgumentException::new);
 		}
 		Optional<CaseNote> noteSearch = _noteRepository.findByNoteTypeAndNoteSubtypeAndContent(request.getNoteType(), subType, request.getContent());

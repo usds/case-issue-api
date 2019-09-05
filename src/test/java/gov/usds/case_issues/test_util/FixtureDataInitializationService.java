@@ -48,7 +48,7 @@ public class FixtureDataInitializationService {
 
 	public CaseManagementSystem ensureCaseManagementSystemInitialized(String tag, String name, String description) {
 		LOG.debug("(Re)initializing case management system '{}'", tag);
-		Optional<CaseManagementSystem> found = _caseManagementSystemRepo.findByCaseManagementSystemTag(tag);
+		Optional<CaseManagementSystem> found = _caseManagementSystemRepo.findByExternalId(tag);
 		if (found.isPresent()) {
 			return found.get();
 		}
@@ -57,7 +57,7 @@ public class FixtureDataInitializationService {
 
 	public CaseType ensureCaseTypeInitialized(String tag, String name, String description) {
 		LOG.debug("(Re)initializing case type '{}'", tag);
-		Optional<CaseType> found = _caseTypeRepository.findByCaseTypeTag(tag);
+		Optional<CaseType> found = _caseTypeRepository.findByExternalId(tag);
 		if (found.isPresent()) {
 			return found.get();
 		}

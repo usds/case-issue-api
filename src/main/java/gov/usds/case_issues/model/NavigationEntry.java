@@ -21,7 +21,7 @@ public class NavigationEntry {
 
 	@JsonProperty("tag")
 	public String getCaseManagementSystemTag() {
-		return _caseManagementSystem.getCaseManagementSystemTag();
+		return _caseManagementSystem.getExternalId();
 	}
 
 	public String getName() {

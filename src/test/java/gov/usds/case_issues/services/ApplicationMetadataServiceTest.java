@@ -63,12 +63,12 @@ public class ApplicationMetadataServiceTest extends CaseIssueApiTestBase {
 		assertEquals("Silly system", nav.get(0).getName());
 		assertEquals("You and me system", nav.get(1).getName());
 		Set<String> typeTags = new HashSet<>();
-		nav.get(0).getCaseTypes().forEach(t -> typeTags.add(t.getCaseTypeTag()));
+		nav.get(0).getCaseTypes().forEach(t -> typeTags.add(t.getExternalId()));
 		assertEquals("two types found", 2, typeTags.size());
 		assertTrue("FOO found", typeTags.contains("FOO"));
 		assertTrue("BAR found", typeTags.contains("FOO"));
 		typeTags.clear();
-		nav.get(1).getCaseTypes().forEach(t -> typeTags.add(t.getCaseTypeTag()));
+		nav.get(1).getCaseTypes().forEach(t -> typeTags.add(t.getExternalId()));
 		assertEquals("two types found", 2, typeTags.size());
 		assertTrue("FOO found", typeTags.contains("FOO"));
 		assertTrue("BAR found", typeTags.contains("FOO"));

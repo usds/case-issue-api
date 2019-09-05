@@ -45,7 +45,7 @@ public class CaseManagementSystemRepositoryTest extends CaseIssueApiTestBase {
 		Instant startTime = new Date().toInstant();
 		repo.save(new CaseManagementSystem(DUMMY_TAG, DUMMY_NAME, DUMMY_DESC));
 		CaseManagementSystem found = repo.findAll().iterator().next();
-		assertEquals(DUMMY_TAG, found.getCaseManagementSystemTag());
+		assertEquals(DUMMY_TAG, found.getExternalId());
 		assertEquals(DUMMY_NAME, found.getName());
 		assertEquals(DUMMY_DESC, found.getDescription());
 		assertNotNull(found.getInternalId());
