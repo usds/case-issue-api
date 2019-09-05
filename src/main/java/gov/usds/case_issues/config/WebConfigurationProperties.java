@@ -1,5 +1,6 @@
 package gov.usds.case_issues.config;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class WebConfigurationProperties {
 
 	public static class UserDefinition {
 		private String _name;
-		private List<CaseIssuePermission> _grants;
+		private List<CaseIssuePermission> _grants = new ArrayList<>();
 
 		public String getName() {
 			return _name;

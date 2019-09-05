@@ -11,3 +11,31 @@ spring:
       hibernate:
         format_sql: true
         generate_statistics: false # way too noisy to be worth it
+bind-testing:
+  web-conf-a:
+    cors-origins:
+      - http://origin
+      - https://other-origin
+  web-conf-b:
+    users:
+      - name: user1
+        grants:
+          - READ_CASES
+          - UPDATE_CASES
+          - UPDATE_STRUCTURE
+          - UPDATE_ISSUES
+      - name: user2
+  web-conf-c:
+    users:
+      - name: user1
+        grants:
+          - FAKE
+          - UPDATE_CASES
+  oauth-conf-a:
+    name-path:
+      - yabba
+      - dabba
+      - doo
+    authority-paths:
+      - authority: UPDATE_ISSUES
+        path: custom, attribute, path
