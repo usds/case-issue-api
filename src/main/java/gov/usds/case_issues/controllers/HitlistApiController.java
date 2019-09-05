@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.Pattern;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -51,7 +49,7 @@ public class HitlistApiController {
 	public List<TroubleCase> getCases(
 		@PathVariable String caseManagementSystemTag,
 		@PathVariable String caseTypeTag,
-		@RequestParam("query") @Pattern(regexp="\\w+") String query) {
+		@RequestParam("query") @TagFragment String query) {
 		return _listService.getCases(caseManagementSystemTag, caseTypeTag, query);
 	}
 
