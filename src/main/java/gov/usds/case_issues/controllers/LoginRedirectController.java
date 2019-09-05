@@ -25,7 +25,7 @@ public class LoginRedirectController {
 	private WebConfigurationProperties config;
 
 	@GetMapping("/clientLogin")
-	public ResponseEntity<String> shenanigans(@RequestParam(required=false) @URL String redirect) {
+	public ResponseEntity<String> redirectToClient(@RequestParam(required=false) @URL String redirect) {
 		String[] corsOrigins = config.getCorsOrigins();
 		if (corsOrigins == null || corsOrigins.length == 0) {
 			return ResponseEntity.ok("Login successful, but client redirection is not currently configured.");
