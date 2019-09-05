@@ -12,18 +12,13 @@ import javax.validation.constraints.Pattern;
 @Entity
 public class CaseManagementSystem extends TaggedEntity {
 
-	@NotNull
-	private String name;
-	private String description;
 	private String applicationUrl;
 	private String caseDetailsUrlTemplate;
 
 	protected CaseManagementSystem() { /* for hibernate */ }
 
 	public CaseManagementSystem(@NotNull @Pattern(regexp = "[-\\w]+") String tag, @NotNull String name, String description) {
-		super(tag);
-		this.name = name;
-		this.description = description;
+		super(tag, name, description);
 	}
 
 	public CaseManagementSystem(@NotNull @Pattern(regexp = "[-\\w]+") String tag,
@@ -31,14 +26,6 @@ public class CaseManagementSystem extends TaggedEntity {
 		this(tag, name, description);
 		this.applicationUrl = applicationUrl;
 		this.caseDetailsUrlTemplate = caseDetailsUrlTemplate;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
 	}
 
 	public String getApplicationUrl() {

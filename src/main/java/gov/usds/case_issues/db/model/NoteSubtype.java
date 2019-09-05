@@ -6,8 +6,6 @@ import javax.persistence.Entity;
 public class NoteSubtype extends TaggedEntity {
 
 	private NoteType forNoteType;
-	private String name;
-	private String description;
 	private String urlTemplate;
 
 	@SuppressWarnings("unused")
@@ -15,21 +13,13 @@ public class NoteSubtype extends TaggedEntity {
 
 	public NoteSubtype(String noteSubtypeTag, NoteType forNoteType, String name, String description,
 			String urlTemplate) {
-		super(noteSubtypeTag);
+		super(noteSubtypeTag, name, description);
 		this.forNoteType = forNoteType;
-		this.name = name;
-		this.description = description;
 		this.urlTemplate = urlTemplate;
 	}
 
 	public NoteType getForNoteType() {
 		return forNoteType;
-	}
-	public String getName() {
-		return name;
-	}
-	public String getDescription() {
-		return description;
 	}
 	public String getUrlTemplate() {
 		return urlTemplate;

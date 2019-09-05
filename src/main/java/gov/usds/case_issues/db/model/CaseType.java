@@ -9,22 +9,9 @@ import javax.persistence.Entity;
 @Entity
 public class CaseType extends TaggedEntity {
 
-	private String name;
-	private String description;
-
 	protected CaseType() { /* for hibernate/JPA */ }
 
 	public CaseType(String tag, String name, String desc) {
-		super(tag);
-		this.name = name;
-		this.description = desc;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
+		super(tag, name, desc);
 	}
 }

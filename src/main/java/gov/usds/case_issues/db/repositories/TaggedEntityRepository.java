@@ -12,5 +12,7 @@ public interface TaggedEntityRepository<T extends TaggedEntity> extends CrudRepo
 
 	/** Find the system based on the URL-safe tag (e.g. "CM1K") */
 	public Optional<T> findByExternalId(String tag);
+	/** Find the system based on its proper name (e.g. "Case Manager 1000") */
+	public Optional<T> findByName(String name);
 
 }
