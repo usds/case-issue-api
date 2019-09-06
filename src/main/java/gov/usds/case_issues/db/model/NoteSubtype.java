@@ -2,21 +2,14 @@ package gov.usds.case_issues.db.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 import org.hibernate.annotations.NaturalId;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
-public class NoteSubtype {
+public class NoteSubtype extends UpdatableEntity {
 
-	@Id
-	@GeneratedValue
-	@JsonIgnore
-	private Long noteSubtypeId;
 
 	@NaturalId(mutable=false)
 	@Column(nullable=false)
@@ -38,9 +31,7 @@ public class NoteSubtype {
 		this.description = description;
 		this.urlTemplate = urlTemplate;
 	}
-	public Long getNoteSubtypeId() {
-		return noteSubtypeId;
-	}
+
 	public String getNoteSubtypeTag() {
 		return noteSubtypeTag;
 	}

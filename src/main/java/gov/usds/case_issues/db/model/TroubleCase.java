@@ -9,8 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.EntityResult;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQueries;
@@ -43,14 +41,14 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		name = "snoozed",
 		query = "SELECT * from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
 			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
-			  + "ORDER BY last_snooze_end ASC, case_creation ASC, internal_case_id ASC",
+			  + "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC",
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
 		name = "unSnoozed",
 		query = "SELECT * from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
 			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP "
-			  + "ORDER BY case_creation ASC, internal_case_id ASC",
+			  + "ORDER BY case_creation ASC, internal_id ASC",
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
@@ -83,7 +81,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		columns=@ColumnResult(name="entity_count", type=Long.class)
 	),
 })
-public class TroubleCase {
+public class TroubleCase extends UpdatableEntity {
 
 	public static final String CASE_SNOOZE_DECODE =
 		"case when last_snooze_end is null then 'NEVER_SNOOZED' "
@@ -91,21 +89,16 @@ public class TroubleCase {
 		+ "else 'CURRENTLY_SNOOZED' end";
 	public static final String CASE_DTO_QUERY =
 		"SELECT c.*, "
-		+ "(SELECT MAX(snooze_end) FROM case_snooze s where s.snooze_case_internal_case_id = c.internal_case_id) last_snooze_end "
+		+ "(SELECT MAX(snooze_end) FROM case_snooze s where s.snooze_case_internal_id = c.internal_id) last_snooze_end "
 		+ "FROM trouble_case c "
-		+ "WHERE case_management_system_case_management_system_id = :caseManagementSystemId "
-		+ "AND case_type_case_type_id = :caseTypeId "
+		+ "WHERE case_management_system_internal_id = :caseManagementSystemId "
+		+ "AND case_type_internal_id = :caseTypeId "
 		+ "AND exists ("
-			+ "select openissues1_.case_issue_id "
+			+ "select openissues1_.internal_id "
 			+ "from case_issue openissues1_ "
-			+ "where c.internal_case_id=openissues1_.issue_case_internal_case_id "
+			+ "where c.internal_id=openissues1_.issue_case_internal_id "
 			+ "and ( openissues1_.issue_closed is null)"
 		+ ")";
-
-	@Id
-	@GeneratedValue
-	@JsonIgnore
-	private Long internalCaseId;
 
 	@NaturalId
 	@ManyToOne(optional=false)
@@ -145,9 +138,6 @@ public class TroubleCase {
 		this.extraData = new HashMap<String, Object>(extraData); // shallow copy for reasonable safety
 	}
 
-	public Long getInternalCaseId() {
-		return internalCaseId;
-	}
 
 	public CaseManagementSystem getCaseManagementSystem() {
 		return caseManagementSystem;

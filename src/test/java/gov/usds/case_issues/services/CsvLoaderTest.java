@@ -34,7 +34,7 @@ import gov.usds.case_issues.test_util.HsqlDbTruncator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("servicetest")
+@ActiveProfiles({"autotest", "servicetest"})
 public class CsvLoaderTest {
 
 	@Autowired

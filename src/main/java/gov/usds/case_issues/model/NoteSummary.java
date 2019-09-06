@@ -1,6 +1,6 @@
 package gov.usds.case_issues.model;
 
-import java.time.ZonedDateTime;
+import java.util.Date;
 
 import gov.usds.case_issues.db.model.CaseNote;
 import gov.usds.case_issues.db.model.NoteAssociation;
@@ -12,7 +12,8 @@ public class NoteSummary {
 	private NoteType type;
 	private String subType;
 	private String href;
-	private ZonedDateTime timestamp;
+	private String userId;
+	private Date timestamp;
 
 	public NoteSummary(NoteAssociation backEnd) {
 		CaseNote note = backEnd.getNote();
@@ -29,7 +30,8 @@ public class NoteSummary {
 				href = urlTemplate + content;
 			}
 		}
-		timestamp = backEnd.getAssociationTimestamp();
+		userId = backEnd.getCreatedBy();
+		timestamp = backEnd.getCreatedAt();
 	}
 
 	public String getContent() {
@@ -45,7 +47,11 @@ public class NoteSummary {
 		return href;
 	}
 
-	public ZonedDateTime getTimestamp() {
+	public String getUserId() {
+		return userId;
+	}
+
+	public Date getTimestamp() {
 		return timestamp;
 	}
 }
