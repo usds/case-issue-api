@@ -79,7 +79,7 @@ See see (SampleDataConfig)[src/main/java/gov/usds/case_issues/config/SampleDataC
 
 ## Updating a dependency
 
-1. Update dependency in (build.grade)[build.gradle]
+1. Update the dependency in [build.gradle](../build.gradle#L21)
 2. Update the lock file with `./gradlew dependencies --write-locks`
 3. Rebuild the project with `./gradlew build`
 
