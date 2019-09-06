@@ -107,7 +107,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
-	public void addNoteToSnooze_validCase_notesStored() throws Exception {
+	public void addNoteToSnooze_snoozedCase_notesStored() throws Exception {
 		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
 		TroubleCase troubleCase = _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
 		_dataService.snoozeCase(troubleCase);
@@ -116,7 +116,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
-	public void addNoteToActive_validCase_notesStored() throws Exception {
+	public void addNoteToSnooze_activeCase_badRequest() throws Exception {
 		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
 		_dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new NoteRequest(NoteType.COMMENT, "Hello World", null)))
