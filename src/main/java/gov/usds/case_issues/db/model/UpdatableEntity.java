@@ -11,7 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
  * A normal, editable entity, which can be updated one or more times after being created.
  */
 @MappedSuperclass
-public class UpdatableEntity extends WriteOnceEntity {
+public abstract class UpdatableEntity extends WriteOnceEntity {
 
 	@LastModifiedBy
 	private String updatedBy;
