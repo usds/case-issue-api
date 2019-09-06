@@ -51,8 +51,13 @@ public class CaseManagementSystemRepositoryTest extends CaseIssueApiTestBase {
 		assertNotNull(found.getInternalId());
 		assertTrue(found.getInternalId().longValue() > 0);
 		assertNull(found.getCreatedBy());
-		assertTrue(startTime.isBefore(found.getCreatedAt().toInstant()));
-		Instant end = new Date().toInstant();
-		assertTrue(end.isAfter(found.getCreatedAt().toInstant()));
+		Instant createdAtInstant = found.getCreatedAt().toInstant();
+		assertInstantOrder(startTime, createdAtInstant);
+		assertInstantOrder(createdAtInstant, new Date().toInstant());
+	}
+
+	private static void assertInstantOrder(Instant before, Instant after) {
+		String message = String.format("Validating that %s is before %s", before.toString(), after.toString());
+		assertTrue(message, after.isAfter(before));
 	}
 }
