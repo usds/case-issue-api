@@ -18,6 +18,13 @@ public class ApiControllerAdvice {
 	private static final Logger LOG = LoggerFactory.getLogger(ApiControllerAdvice.class);
 
 	@ExceptionHandler
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public SpringRestError handleIllegalArgumentException(IllegalArgumentException e, HttpServletRequest req) {
+		LOG.debug("Illegal argument of: {}", e);
+		return new SpringRestError(e, HttpStatus.BAD_REQUEST, req);
+	}
+
+	@ExceptionHandler
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public SpringRestError handleInvalidApiRequest(ApiModelNotFoundException e, HttpServletRequest req) {
 		LOG.debug("Not found error for {}/{}", e.getEntityType(), e.getEntityId());
