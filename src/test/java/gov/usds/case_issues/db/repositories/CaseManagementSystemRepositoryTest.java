@@ -1,5 +1,6 @@
 package gov.usds.case_issues.db.repositories;
 
+import static gov.usds.case_issues.test_util.Assert.assertInstantOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -52,12 +53,7 @@ public class CaseManagementSystemRepositoryTest extends CaseIssueApiTestBase {
 		assertTrue(found.getInternalId().longValue() > 0);
 		assertNull(found.getCreatedBy());
 		Instant createdAtInstant = found.getCreatedAt().toInstant();
-		assertInstantOrder(startTime, createdAtInstant);
-		assertInstantOrder(createdAtInstant, new Date().toInstant());
-	}
-
-	private static void assertInstantOrder(Instant before, Instant after) {
-		String message = String.format("Validating that %s is before %s", before.toString(), after.toString());
-		assertTrue(message, after.isAfter(before));
+		assertInstantOrder(startTime, createdAtInstant, true);
+		assertInstantOrder(createdAtInstant, new Date().toInstant(), true);
 	}
 }

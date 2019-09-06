@@ -1,8 +1,8 @@
 package gov.usds.case_issues.db.repositories;
 
+import static gov.usds.case_issues.test_util.Assert.assertInstantOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -158,8 +158,8 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 		assertNull(saved.getCreatedBy());
 		assertNull(saved.getUpdatedBy());
 		Date createdAt = saved.getCreatedAt();
-		assertTrue(startTime.isBefore(createdAt.toInstant()));
-		assertTrue(end.isAfter(createdAt.toInstant()));
+		assertInstantOrder(startTime, createdAt.toInstant(), true);
+		assertInstantOrder(createdAt.toInstant(), end, true);
 		assertEquals(createdAt, saved.getUpdatedAt());
 	}
 
@@ -172,17 +172,19 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 		Instant middle = new Date().toInstant();
 		assertEquals(DUMMY_USERNAME, saved.getCreatedBy());
 		assertEquals(DUMMY_USERNAME, saved.getUpdatedBy());
-		Date createdAt = saved.getCreatedAt();
-		assertTrue(startTime.isBefore(createdAt.toInstant()));
-		assertTrue(middle.isAfter(createdAt.toInstant()));
-		assertTrue(startTime.isBefore(saved.getUpdatedAt().toInstant()));
-		assertTrue(middle.isAfter(saved.getUpdatedAt().toInstant()));
+		Instant createdAt = saved.getCreatedAt().toInstant();
+		Instant updatedAt = saved.getUpdatedAt().toInstant();
+		assertInstantOrder(startTime, createdAt, true);
+		assertInstantOrder(startTime, createdAt, true);
+		assertInstantOrder(createdAt, middle, false);
+		assertInstantOrder(startTime, updatedAt, true);
+		assertInstantOrder(updatedAt, middle, false);
 		saved.setIssueClosed(ZonedDateTime.now());
 		CaseIssue resaved = _repo.save(saved);
 		Instant end = new Date().toInstant();
-		assertEquals(createdAt, resaved.getCreatedAt());
-		assertTrue(middle.isBefore(resaved.getUpdatedAt().toInstant()));
-		assertTrue(end.isAfter(resaved.getUpdatedAt().toInstant()));
+		assertEquals(createdAt, resaved.getCreatedAt().toInstant());
+		assertInstantOrder(middle, resaved.getUpdatedAt().toInstant(), false);
+		assertInstantOrder(resaved.getUpdatedAt().toInstant(), end, true);
 		assertEquals(DUMMY_USERNAME, resaved.getUpdatedBy());
 	}
 }
