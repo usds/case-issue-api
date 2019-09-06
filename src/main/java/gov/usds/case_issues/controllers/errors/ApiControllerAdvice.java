@@ -1,6 +1,7 @@
 package gov.usds.case_issues.controllers.errors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,5 +22,12 @@ public class ApiControllerAdvice {
 	public SpringRestError handleInvalidApiRequest(ApiModelNotFoundException e, HttpServletRequest req) {
 		LOG.debug("Not found error for {}/{}", e.getEntityType(), e.getEntityId());
 		return new SpringRestError(e, HttpStatus.NOT_FOUND, req);
+	}
+
+	@ExceptionHandler
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public SpringRestError handleConstraintViolation(ConstraintViolationException e, HttpServletRequest req) {
+		LOG.warn("Got constraint violation", e);
+		return new SpringRestError(e, HttpStatus.BAD_REQUEST, req);
 	}
 }
