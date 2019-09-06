@@ -52,7 +52,7 @@ public class CaseDetailsService {
 	private CaseAttachmentService _attachmentService;
 
 	public TroubleCase findCaseByTags(String caseManagementSystemTag, String receiptNumber) {
-		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByCaseManagementSystemTag(caseManagementSystemTag)
+		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByExternalId(caseManagementSystemTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
 		TroubleCase mainCase = _caseRepo.findByCaseManagementSystemAndReceiptNumber(caseManagementSystem, receiptNumber)
 				.orElseThrow(()->new ApiModelNotFoundException("Case", receiptNumber));

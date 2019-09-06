@@ -20,7 +20,7 @@ public class NoteSummary {
 		type = note.getNoteType();
 		content = note.getContent();
 		if (null != note.getNoteSubtype()) {
-			subType = note.getNoteSubtype().getNoteSubtypeTag();
+			subType = note.getNoteSubtype().getExternalId();
 		}
 		if (note.getNoteType() == NoteType.LINK) {
 			String urlTemplate = note.getNoteSubtype().getUrlTemplate();
