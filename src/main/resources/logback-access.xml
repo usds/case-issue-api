@@ -7,7 +7,7 @@
         </springProfile>
 
         <springProfile name="prod">
-          <pattern>{"clientHost": "%h", "RemoteUser": "%u", "date": "%t", "RequestURL": "%m", "StatusCode": "%s", "ContentLength": "%b"}</pattern>
+          <pattern>{"clientHost": "%h", "RemoteUser": "%u", "date": "%t", "RequestURL": "%r", "SessionId": "%S", "StatusCode": "%s", "ContentLength": "%b"}</pattern>
         </springProfile>
       </encoder>
     </appender>
