@@ -4,8 +4,10 @@ import java.util.Date;
 
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.SequenceGenerator;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,8 +23,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class WriteOnceEntity {
 
+	public static final String DEFAULT_SEQUENCE_GENERATOR = "caseIssueDefaultSequence";
+
 	@Id
-	@GeneratedValue
+	@GeneratedValue(
+		strategy=GenerationType.SEQUENCE,
+		generator=DEFAULT_SEQUENCE_GENERATOR
+	)
+	@SequenceGenerator(
+		name=DEFAULT_SEQUENCE_GENERATOR,
+		sequenceName="case_issue_entity_id_sequence"
+	)
 	@JsonIgnore
 	private Long internalId;
 
