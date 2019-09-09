@@ -1,10 +1,13 @@
 package gov.usds.case_issues.db.model;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 @Entity
 public class NoteSubtype extends TaggedEntity {
 
+	@Enumerated(EnumType.STRING)
 	private NoteType forNoteType;
 	private String urlTemplate;
 

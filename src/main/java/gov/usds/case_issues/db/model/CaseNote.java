@@ -2,12 +2,15 @@ package gov.usds.case_issues.db.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 
 @Entity
 public class CaseNote extends WriteOnceEntity {
 
 	@Column(nullable=false)
+	@Enumerated(EnumType.STRING)
 	private NoteType noteType;
 	@ManyToOne(optional=true)
 	private NoteSubtype noteSubtype;
