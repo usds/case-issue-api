@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class TaggedEntity extends UpdatableEntity {
 
 	@NaturalId
+	@NotNull
 	@Column(nullable=false)
 	@JsonProperty("tag")
 	@Pattern(regexp="[-\\w]+")

@@ -1,6 +1,7 @@
 package gov.usds.case_issues.db.model;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.NaturalId;
@@ -10,9 +11,11 @@ public class NoteAssociation extends UpdatableEntity {
 
 	@NaturalId
 	@ManyToOne(optional=false)
+	@JoinColumn(nullable=false)
 	private CaseSnooze snooze;
 	@NaturalId
 	@ManyToOne(optional=false)
+	@JoinColumn(nullable=false)
 	private CaseNote note;
 
 	private NoteAssociation() { /* for hibernate */}
