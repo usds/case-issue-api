@@ -1,0 +1,294 @@
+x-ref-data:
+   type-defs:
+      - &idtype bigint
+      - &string varchar(255)
+      - &user_date datetime # a date that may come from outside, which may include time zone information that we may want to preserve
+   column-defs:
+      - column: &pk_column
+          name: internal_id
+          type: *idtype
+          remarks: The internal database identifier for this entity.
+          constraints:
+            primaryKey: true
+            nullable: false
+      - column: &created_at_column
+          name: created_at
+          type: DATETIME
+          remarks: The creation timestamp for this entity.
+          constraints:
+            nullable: false
+      - column: &created_by_column
+          name: created_by
+          type: *string
+          remarks: The ID of the user who created this entity.
+          constraints:
+            nullable: true
+      - column: &updated_at_column
+          name: updated_at
+          type: DATETIME
+          remarks: The timestamp for the most recent update of this entity.
+          constraints:
+            nullable: false
+      - column: &updated_by_column
+          name: updated_by
+          type: *string
+          remarks: The ID of the user who most recently updated this entity.
+          constraints:
+            nullable: true
+      - column: &tag_column
+          name: external_id
+          type: *string
+          remarks: The external ID (or "tag") used by the API to identify this entity (URL-safe string).
+          constraints:
+            unique: true
+            nullable: false
+      - column: &name_column
+          name: name
+          type: *string
+          remarks: The human-readable name of this entity (may contain spaces and punctuation).
+          constraints:
+            nullable: false
+      - column: &description_column
+          name: description
+          type: *string
+          remarks: A longer (optional) plain-language description of this entity, for use in wider list views.
+
+databaseChangeLog:
+  - changeSet:
+      id: initial-schema
+      author: ben.warfield@usds.dhs.gov
+      comment: The database schema required for the initial pilot deployment of the Case Issue API.
+      changes:
+        - createSequence:
+            sequenceName: case_issue_entity_id_sequence
+            startValue: 1
+        - createTable:
+            tableName: case_management_system
+            remarks: Case Management Systems that are known to this application (each case belongs to exactly one case management system).
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column: *tag_column
+              - column: *name_column
+              - column: *description_column
+              - column:
+                  name: application_url
+                  type: *string
+                  remarks: The root URL for the best available web view of this case management system.
+              - column:
+                  name: case_details_url_template
+                  type: *string
+                  remarks: A URL template for generating direct hyperlinks to cases in this case management system.
+        - createTable:
+            tableName: case_type
+            remarks: Types of case that this application distinguishes between (each case can have only one type).
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column: *tag_column
+              - column: *name_column
+              - column: *description_column
+        - createTable:
+            tableName: trouble_case
+            remarks: A case that has been entered into this application as having some issue that needs to be tracked (therefore by definition a trouble case of some kind).
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: case_management_system_internal_id
+                  remarks: The case management system where this case is being tracked outside of this application.
+                  type: *idtype
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__trouble_case__case_management_system
+                    references: case_management_system
+              - column:
+                  name: receipt_number
+                  type: *string
+                  remarks: The unique identifier for a case, as understood by the case management system that owns it.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: case_creation
+                  type: *user_date
+                  remarks: The date and time when this case was originally created (e.g. the form or letter was received). Immutable.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: case_type_internal_id
+                  remarks: What type of case this is (e.g. what form or what category of letter or inquiry). Immutable.
+                  type: *idtype
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__trouble_case__case_type
+                    references: case_type
+              - column:
+                  name: extra_data
+                  type: varchar(32000)
+                  remarks: Additional data about this case, as of the time it was most recently updated in this application. Mutable.
+        - addUniqueConstraint:
+            tableName: trouble_case
+            constraint_name: uk__trouble_case
+            columnNames: case_management_system_internal_id, receipt_number
+        - createTable:
+            tableName: case_issue
+            remarks: An issue (e.g. "assigned to an invalid queue") that exists for some period of time with a specific case.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: issue_case_internal_id
+                  type: *idtype
+                  remarks: The case that this issue is about.
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__case_issue__trouble_case
+                    references: trouble_case
+              - column:
+                  name: issue_type
+                  type: *string
+                  remarks: The type of this issue, as a URL-safe string (e.g. "AGING").
+              - column:
+                  name: issue_created
+                  type: *user_date
+                  remarks: The date this issue was first seen (likely but not necessarily the same as created_at).
+                  constraints:
+                    nullable: false
+              - column:
+                  name: issue_closed
+                  type: *user_date
+                  remarks: The date this issue was closed out.
+                  constraints:
+                    nullable: true
+        - addUniqueConstraint:
+            tableName: case_issue
+            constraint_name: uk__case_issue
+            columnNames: issue_case_internal_id, issue_type, issue_created
+        - createTable:
+            tableName: case_snooze
+            remarks: An instance of a particular case being "snoozed" for a period of time.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: snooze_case_internal_id
+                  type: *idtype
+                  remarks: The case that was snoozed.
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__case_snooze__trouble_case
+                    references: trouble_case
+              - column:
+                  name: snooze_reason
+                  type: *string
+                  remarks: The reason (as a URL-safe string) for snoozing this case (e.g. "TICKET_OPENED"). Immutable.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: snooze_start
+                  type: *user_date
+                  remarks: The date and time when the case was snoozed. Immutable.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: snooze_end
+                  type: *user_date
+                  remarks: The date and time when the snooze ended or will end.
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: note_subtype
+            remarks: A category of note (applying to one specific note type)
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column: *tag_column
+              - column: *name_column
+              - column: *description_column
+              - column:
+                  name: for_note_type
+                  type: *string
+                  remarks: Which type of note this subtype is applicable for.
+                  constraints:
+                    nullable: false
+                    # check constraint would be appropriate but cannot be added inline,
+                    # and postgresql has an Enum type anyway
+              - column:
+                  name: url_template
+                  type: *string
+                  remarks: The URL template for generating a link to notes with this subtype (for notes that are actually external tickets or the like).
+        - createTable:
+            tableName: case_note
+            remarks: A note, annotation, or other attachment to a case (generally by way of a case_snooze). Immutable so as to be reusable.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column:
+                  name: note_type
+                  type: *string
+                  remarks: The type of note or annotation.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: note_subtype_internal_id
+                  type: *idtype
+                  remarks: The subtype (if applicable) for this annotation.
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk__case_note__note_subtype
+                    references: note_subtype
+              - column:
+                  name: content
+                  remarks: The content of this note or annotation.
+                  type: *string
+                  constraints:
+                    nullable: false
+                    unique: true
+        - createTable:
+            tableName: note_association
+            remarks: The association between a note and snoozed case (by way of the snooze object).
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: snooze_internal_id
+                  type: *idtype
+                  remarks: The active case snooze for the annotated case when this association was created.
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__note_association__case_snooze
+                    references: case_snooze
+              - column:
+                  name: note_internal_id
+                  type: *idtype
+                  remarks: The annotation content to associate to a case.
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__note_association__case_note
+                    references: case_note
+        - addUniqueConstraint:
+            tableName: note_association
+            constraint_name: uk__note_association
+            columnNames: snooze_internal_id, note_internal_id

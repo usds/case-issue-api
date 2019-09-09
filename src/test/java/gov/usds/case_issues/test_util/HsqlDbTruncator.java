@@ -1,5 +1,8 @@
 package gov.usds.case_issues.test_util;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -13,12 +16,25 @@ public class HsqlDbTruncator implements DbTruncator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HsqlDbTruncator.class);
 
+	private final List<String> allTables = Arrays.asList(
+		"case_management_system",
+		"case_type",
+		"trouble_case",
+		"case_issue",
+		"case_snooze",
+		"note_subtype",
+		"case_note",
+		"note_association"
+	);
+
 	@Autowired
 	private JdbcTemplate jdbc;
 
 	@Transactional
 	public void truncateAll() {
 		LOG.warn("Attempting to truncate all tables.");
-		jdbc.execute("TRUNCATE SCHEMA PUBLIC AND COMMIT NO CHECK");
+		for (String tableName : allTables) {
+			jdbc.execute("TRUNCATE TABLE " + tableName + " AND COMMIT NO CHECK");
+		}
 	}
 }

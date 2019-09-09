@@ -11,6 +11,9 @@ spring:
       hibernate:
         format_sql: true
         generate_statistics: false # way too noisy to be worth it
+    hibernate.ddl-auto: none
+  liquibase:
+    enabled: true
 bind-testing:
   web-conf-a:
     cors-origins:
