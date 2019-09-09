@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 public class TroubleCaseRepositoryTest extends CaseIssueApiTestBase {
 
 	private static final int GIANT_LIST_SIZE = 100_000;
+	private static final int LARGE_LIST_SIZE = 29_999;
+
 
 	@Autowired
 	private TroubleCaseRepository _repo;
@@ -56,6 +60,16 @@ public class TroubleCaseRepositoryTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getAllByCaseManagementSystemAndReceiptNumberIn_longRequestList_dbOK() {
+		CaseManagementSystem m1 = _dataService.ensureCaseManagementSystemInitialized("M1", "System 1", null);
+		List<String> receipts = new ArrayList<>(LARGE_LIST_SIZE);
+		for (int i = 0; i < LARGE_LIST_SIZE; i++) {
+			receipts.add(String.format("FFFF%07d", i));
+		}
+		_repo.getAllByCaseManagementSystemAndReceiptNumberIn(m1, receipts);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getAllByCaseManagementSystemAndReceiptNumberIn_excessiveRequestList_validationError() {
 		CaseManagementSystem m1 = _dataService.ensureCaseManagementSystemInitialized("M1", "System 1", null);
 		List<String> receipts = new ArrayList<>(GIANT_LIST_SIZE);
 		for (int i = 0; i < GIANT_LIST_SIZE; i++) {
