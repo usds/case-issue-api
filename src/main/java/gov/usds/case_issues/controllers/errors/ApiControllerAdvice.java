@@ -20,7 +20,7 @@ public class ApiControllerAdvice {
 	@ExceptionHandler
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public SpringRestError handleIllegalArgumentException(IllegalArgumentException e, HttpServletRequest req) {
-		LOG.debug("Illegal argument of: {}", e);
+		LOG.debug("Illegal argument exception raised: {}", e.getMessage());
 		return new SpringRestError(e, HttpStatus.BAD_REQUEST, req);
 	}
 
