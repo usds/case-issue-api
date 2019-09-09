@@ -17,6 +17,7 @@ import gov.usds.case_issues.config.SampleDataConfig.NoteSubtypeDefinition;
 import gov.usds.case_issues.config.SampleDataConfig.TaggedResource;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
+import gov.usds.case_issues.db.model.NoteType;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
@@ -82,6 +83,7 @@ public class SampleDataServiceTest extends CaseIssueApiTestBase {
 		noteDefiniton.setTag("tag");
 		noteDefiniton.setName("name");
 		noteDefiniton.setDescription("description");
+		noteDefiniton.setNoteType(NoteType.TAG);
 		loaderConfig.setNoteSubtypes(Arrays.asList(noteDefiniton));
 		_service.saveNoteTypes(loaderConfig);
 		assertEquals(_subtypeRepository.count(), 1);
