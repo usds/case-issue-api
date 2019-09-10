@@ -23,6 +23,7 @@ public class PgDbTruncator implements DbTruncator {
 			"   (SELECT 'TRUNCATE TABLE ' || string_agg(oid::regclass::text, ', ') || ' CASCADE' " +
 			"    FROM   pg_class " +
 			"    WHERE  relkind = 'r' " + // only tables
+			"    AND oid::regclass::text not like 'databasechangelog%' " + // no liquibase tables!
 			"    AND    relnamespace = 'public'::regnamespace " + // probably should be property-driven
 			"   ); " +
 			"END " +
