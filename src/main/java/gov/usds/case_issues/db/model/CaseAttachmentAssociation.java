@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-public class NoteAssociation extends UpdatableEntity {
+public class CaseAttachmentAssociation extends UpdatableEntity {
 
 	@NaturalId
 	@ManyToOne(optional=false)
@@ -16,21 +16,21 @@ public class NoteAssociation extends UpdatableEntity {
 	@NaturalId
 	@ManyToOne(optional=false)
 	@JoinColumn(nullable=false)
-	private CaseNote note;
+	private CaseAttachment attachment;
 
-	private NoteAssociation() { /* for hibernate */}
+	private CaseAttachmentAssociation() { /* for hibernate */}
 
-	public NoteAssociation(CaseSnooze snooze, CaseNote note) {
+	public CaseAttachmentAssociation(CaseSnooze snooze, CaseAttachment note) {
 		this();
 		this.snooze = snooze;
-		this.note = note;
+		this.attachment = note;
 	}
 
 	public CaseSnooze getSnooze() {
 		return snooze;
 	}
 
-	public CaseNote getNote() {
-		return note;
+	public CaseAttachment getAttachment() {
+		return attachment;
 	}
 }

@@ -21,10 +21,10 @@ import gov.usds.case_issues.config.SampleDataConfig.NoteSubtypeDefinition;
 import gov.usds.case_issues.config.SampleDataConfig.TaggedResource;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
-import gov.usds.case_issues.db.model.NoteSubtype;
+import gov.usds.case_issues.db.model.AttachmentSubtype;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
-import gov.usds.case_issues.db.repositories.NoteSubtypeRepository;
+import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
 
 /**
  * Service object for loading sample data primarily for use in a dev environment
@@ -38,7 +38,7 @@ public class SampleDataService {
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
 	@Autowired
-	private NoteSubtypeRepository _noteSubTypeRepo;
+	private AttachmentSubtypeRepository _noteSubTypeRepo;
 
 	private static final Logger LOG = LoggerFactory.getLogger(SampleDataService.class);
 
@@ -65,7 +65,7 @@ public class SampleDataService {
 				"Creating Cade Type {} ({}/{}) with noteType {}: URL is {}",
 				spec.getTag(), spec.getName(), spec.getDescription(), spec.getNoteType(), spec.getUrlTemplate()
 			);
-			_noteSubTypeRepo.save(new NoteSubtype(spec.getTag(), spec.getNoteType(), spec.getName(), spec.getDescription(), spec.getUrlTemplate()));
+			_noteSubTypeRepo.save(new AttachmentSubtype(spec.getTag(), spec.getNoteType(), spec.getName(), spec.getDescription(), spec.getUrlTemplate()));
 		}
 	}
 

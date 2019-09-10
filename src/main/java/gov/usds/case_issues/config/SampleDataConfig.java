@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import gov.usds.case_issues.db.model.NoteType;
+import gov.usds.case_issues.db.model.AttachmentType;
 
 @ConfigurationProperties(prefix="sample-data", ignoreUnknownFields=false)
 @Component
@@ -160,18 +160,18 @@ public class SampleDataConfig {
 
 	public static class NoteSubtypeDefinition extends TaggedResource {
 		private String urlTemplate;
-		private NoteType noteType;
+		private AttachmentType noteType;
 
 		public String getUrlTemplate() {
 			return urlTemplate;
 		}
-		public NoteType getNoteType() {
+		public AttachmentType getNoteType() {
 			return noteType;
 		}
 		public void setUrlTemplate(String urlTemplate) {
 			this.urlTemplate = urlTemplate;
 		}
-		public void setNoteType(NoteType noteType) {
+		public void setNoteType(AttachmentType noteType) {
 			this.noteType = noteType;
 		}
 	}

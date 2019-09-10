@@ -3,7 +3,7 @@ package gov.usds.case_issues.db.model;
 /**
  * A type of note/attachment that can be associated with a case/snooze.
  */
-public enum NoteType {
+public enum AttachmentType {
 	/** A simple text comment. */
 	COMMENT,
 	/**

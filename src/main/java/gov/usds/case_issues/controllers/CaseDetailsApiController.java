@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.model.CaseDetails;
-import gov.usds.case_issues.model.NoteRequest;
+import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.SnoozeRequest;
 import gov.usds.case_issues.services.CaseDetailsService;
 
@@ -69,7 +69,7 @@ public class CaseDetailsApiController {
 
 	@PostMapping("activeSnooze/notes")
 	public ResponseEntity<?> addNote(@PathVariable String caseManagementSystemTag,
-			@PathVariable String receiptNumber, @RequestBody NoteRequest newNote) {
+			@PathVariable String receiptNumber, @RequestBody AttachmentRequest newNote) {
 		_caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, newNote);
 		return ResponseEntity.accepted().build();
 	}

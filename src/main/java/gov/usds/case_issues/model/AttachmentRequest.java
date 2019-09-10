@@ -3,35 +3,35 @@ package gov.usds.case_issues.model;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import gov.usds.case_issues.db.model.NoteType;
+import gov.usds.case_issues.db.model.AttachmentType;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Thin wrapper to request the creation of a Note through the API.
  */
-public class NoteRequest {
+public class AttachmentRequest {
 
-	private NoteType noteTypeCode;
+	private AttachmentType noteTypeCode;
 	private String content;
 	private String subType;
 
-	protected NoteRequest() {
+	protected AttachmentRequest() {
 		super();
 	}
 
-	public NoteRequest(NoteType typeCode, String content) {
+	public AttachmentRequest(AttachmentType typeCode, String content) {
 		this();
 		this.content = content;
 		this.noteTypeCode = typeCode;
 	}
 
-	public NoteRequest(NoteType noteTypeCode, String noteContent, String subType) {
+	public AttachmentRequest(AttachmentType noteTypeCode, String noteContent, String subType) {
 		this(noteTypeCode, noteContent);
 		this.subType = subType;
 	}
 
 	@JsonProperty(value="type", defaultValue="COMMENT")
-	public NoteType getNoteType() {
+	public AttachmentType getNoteType() {
 		return noteTypeCode;
 	}
 
@@ -47,7 +47,7 @@ public class NoteRequest {
 		return subType;
 	}
 
-	public void setNoteType(NoteType noteTypeCode) {
+	public void setNoteType(AttachmentType noteTypeCode) {
 		this.noteTypeCode = noteTypeCode;
 	}
 

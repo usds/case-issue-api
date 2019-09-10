@@ -7,26 +7,26 @@ import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 
 @Entity
-public class NoteSubtype extends TaggedEntity {
+public class AttachmentSubtype extends TaggedEntity {
 
 	@NotNull
 	@Column(nullable=false)
 	@Enumerated(EnumType.STRING)
-	private NoteType forNoteType;
+	private AttachmentType forAttachmentType;
 	private String urlTemplate;
 
 	@SuppressWarnings("unused")
-	private NoteSubtype() { /* for hibernate */}
+	private AttachmentSubtype() { /* for hibernate */}
 
-	public NoteSubtype(String noteSubtypeTag, NoteType forNoteType, String name, String description,
+	public AttachmentSubtype(String noteSubtypeTag, AttachmentType forNoteType, String name, String description,
 			String urlTemplate) {
 		super(noteSubtypeTag, name, description);
-		this.forNoteType = forNoteType;
+		this.forAttachmentType = forNoteType;
 		this.urlTemplate = urlTemplate;
 	}
 
-	public NoteType getForNoteType() {
-		return forNoteType;
+	public AttachmentType getForAttachmentType() {
+		return forAttachmentType;
 	}
 	public String getUrlTemplate() {
 		return urlTemplate;

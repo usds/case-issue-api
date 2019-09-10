@@ -17,7 +17,7 @@ public class SnoozeRequest {
 
 	private String snoozeReason;
 	private int duration;
-	private List<NoteRequest> notes = new ArrayList<>();
+	private List<AttachmentRequest> notes = new ArrayList<>();
 
 	public SnoozeRequest(String snoozeType, int duration) {
 		super();
@@ -37,7 +37,7 @@ public class SnoozeRequest {
 		return duration;
 	}
 
-	public List<NoteRequest> getNotes() {
+	public List<AttachmentRequest> getNotes() {
 		return notes;
 	}
 }

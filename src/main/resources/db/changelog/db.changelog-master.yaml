@@ -213,8 +213,8 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - createTable:
-            tableName: note_subtype
-            remarks: A category of note (applying to one specific note type)
+            tableName: attachment_subtype
+            remarks: A category of attachment (applying to one specific attachment type)
             columns:
               - column: *pk_column
               - column: *created_at_column
@@ -225,9 +225,9 @@ databaseChangeLog:
               - column: *name_column
               - column: *description_column
               - column:
-                  name: for_note_type
+                  name: for_attachment_type
                   type: *string
-                  remarks: Which type of note this subtype is applicable for.
+                  remarks: Which type of attachment this subtype is applicable for.
                   constraints:
                     nullable: false
                     # check constraint would be appropriate but cannot be added inline,
@@ -235,38 +235,38 @@ databaseChangeLog:
               - column:
                   name: url_template
                   type: *string
-                  remarks: The URL template for generating a link to notes with this subtype (for notes that are actually external tickets or the like).
+                  remarks: The URL template for generating a link to attachments with this subtype (for attachments that are actually external tickets or the like).
         - createTable:
-            tableName: case_note
+            tableName: case_attachment
             remarks: A note, annotation, or other attachment to a case (generally by way of a case_snooze). Immutable so as to be reusable.
             columns:
               - column: *pk_column
               - column: *created_at_column
               - column: *created_by_column
               - column:
-                  name: note_type
+                  name: attachment_type
                   type: *string
-                  remarks: The type of note or annotation.
+                  remarks: The type of this attachment, note or annotation (an enumerated type in Java, if not necessarily in the database).
                   constraints:
                     nullable: false
               - column:
-                  name: note_subtype_internal_id
+                  name: attachment_subtype_internal_id
                   type: *idtype
-                  remarks: The subtype (if applicable) for this annotation.
+                  remarks: The subtype (if applicable) for this attachment.
                   constraints:
                     nullable: true
-                    foreignKeyName: fk__case_note__note_subtype
-                    references: note_subtype
+                    foreignKeyName: fk__case_attachment__attachment_subtype
+                    references: attachment_subtype
               - column:
                   name: content
-                  remarks: The content of this note or annotation.
+                  remarks: The content of this attachment, note or annotation.
                   type: *string
                   constraints:
                     nullable: false
                     unique: true
         - createTable:
-            tableName: note_association
-            remarks: The association between a note and snoozed case (by way of the snooze object).
+            tableName: case_attachment_association
+            remarks: The association between an immutable attachment and snoozed case (by way of the snooze object).
             columns:
               - column: *pk_column
               - column: *created_at_column
@@ -279,17 +279,17 @@ databaseChangeLog:
                   remarks: The active case snooze for the annotated case when this association was created.
                   constraints:
                     nullable: false
-                    foreignKeyName: fk__note_association__case_snooze
+                    foreignKeyName: fk__case_attachment_association__case_snooze
                     references: case_snooze
               - column:
-                  name: note_internal_id
+                  name: attachment_internal_id
                   type: *idtype
-                  remarks: The annotation content to associate to a case.
+                  remarks: The attached content to associate with a case.
                   constraints:
                     nullable: false
-                    foreignKeyName: fk__note_association__case_note
-                    references: case_note
+                    foreignKeyName: fk__case_attachment_association__case_attachment
+                    references: case_attachment
         - addUniqueConstraint:
-            tableName: note_association
-            constraint_name: uk__note_association
-            columnNames: snooze_internal_id, note_internal_id
+            tableName: case_attachment_association
+            constraint_name: uk__case_attachment_association
+            columnNames: snooze_internal_id, attachment_internal_id
