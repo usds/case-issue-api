@@ -3,3 +3,4 @@ spring:
     url: jdbc:postgresql://localhost/case_issues
   jpa:
     database: POSTGRESQL
+    hibernate.ddl-auto: validate
