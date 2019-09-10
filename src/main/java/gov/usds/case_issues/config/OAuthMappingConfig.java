@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -49,6 +50,7 @@ import gov.usds.case_issues.authorization.NamedOAuth2User;
  * </ol>
  */
 @Configuration
+@ConditionalOnWebApplication
 public class OAuthMappingConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(OAuthMappingConfig.class);

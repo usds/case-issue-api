@@ -2,7 +2,7 @@ x-ref-data:
    type-defs:
       - &idtype bigint
       - &string varchar(255)
-      - &user_date datetime # a date that may come from outside, which may include time zone information that we may want to preserve
+      - &user_date timestamp with time zone # a date that may come from outside, which may include time zone information that we may want to preserve
    column-defs:
       - column: &pk_column
           name: internal_id
@@ -62,6 +62,7 @@ databaseChangeLog:
         - createSequence:
             sequenceName: case_issue_entity_id_sequence
             startValue: 1
+            incrementBy: 50
         - createTable:
             tableName: case_management_system
             remarks: Case Management Systems that are known to this application (each case belongs to exactly one case management system).

@@ -5,11 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 
 @Component
+@Lazy
 @ConfigurationProperties(prefix="web-customization", ignoreUnknownFields=false)
 public class WebConfigurationProperties {
 
