@@ -13,9 +13,7 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 
-import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
-
-public class CustomAccessDeniedHandlerTest extends CaseIssueApiTestBase {
+public class CustomAccessDeniedHandlerTest {
 
 	@Test
 	public void handle_called_ResopnseForbiden() throws IOException, ServletException {
