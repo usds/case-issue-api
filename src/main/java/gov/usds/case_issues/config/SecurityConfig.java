@@ -56,8 +56,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			.csrf()
 				.ignoringRequestMatchers(AnyRequestMatcher.INSTANCE)
+				.and()
+			.exceptionHandling()
+				.accessDeniedHandler(new CustomAccessDeniedHandler())
 		;
-		http.exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler());
 	}
 
 	private void configureResourceUrls(HttpSecurity http) throws Exception {
