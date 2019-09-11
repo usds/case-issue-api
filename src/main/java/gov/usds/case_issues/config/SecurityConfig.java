@@ -18,6 +18,7 @@ import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.authorization.CustomAccessDeniedHandler;
+import gov.usds.case_issues.authorization.CustomAuthenticationEntryPoint;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled=false, prePostEnabled=true)
@@ -59,6 +60,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			.exceptionHandling()
 				.accessDeniedHandler(new CustomAccessDeniedHandler())
+				.and()
+			.exceptionHandling()
+				.authenticationEntryPoint(new CustomAuthenticationEntryPoint())
 		;
 	}
 
