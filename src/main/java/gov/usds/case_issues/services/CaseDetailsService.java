@@ -26,7 +26,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
-import gov.usds.case_issues.model.NoteRequest;
+import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.NoteSummary;
 import gov.usds.case_issues.model.SnoozeRequest;
 
@@ -128,7 +128,7 @@ public class CaseDetailsService {
 	}
 
 	@Transactional(readOnly=false)
-	public void annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, NoteRequest newNote) {
+	public void annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
 		if (snoozeIsActive(foundSnooze)) {

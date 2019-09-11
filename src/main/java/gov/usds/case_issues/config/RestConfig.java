@@ -10,7 +10,7 @@ import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TaggedEntity;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
-import gov.usds.case_issues.db.repositories.NoteSubtypeRepository;
+import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
 import gov.usds.case_issues.db.repositories.TaggedEntityRepository;
 
 @Configuration
@@ -26,7 +26,7 @@ public class RestConfig implements RepositoryRestConfigurer {
 			.forRepository(CaseTypeRepository.class)
 				.withIdMapping(CaseType::getExternalId)
 				.withLookup(CaseTypeRepository::findByExternalId)
-			.forRepository(NoteSubtypeRepository.class)
+			.forRepository(AttachmentSubtypeRepository.class)
 				.withIdMapping(TaggedEntity::getExternalId)
 				.withLookup(TaggedEntityRepository::findByExternalId)
 		;

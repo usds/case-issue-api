@@ -2,27 +2,27 @@ package gov.usds.case_issues.model;
 
 import java.util.Date;
 
-import gov.usds.case_issues.db.model.CaseNote;
-import gov.usds.case_issues.db.model.NoteAssociation;
-import gov.usds.case_issues.db.model.NoteType;
+import gov.usds.case_issues.db.model.CaseAttachment;
+import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
+import gov.usds.case_issues.db.model.AttachmentType;
 
 public class NoteSummary {
 
 	private String content;
-	private NoteType type;
+	private AttachmentType type;
 	private String subType;
 	private String href;
 	private String userId;
 	private Date timestamp;
 
-	public NoteSummary(NoteAssociation backEnd) {
-		CaseNote note = backEnd.getNote();
+	public NoteSummary(CaseAttachmentAssociation backEnd) {
+		CaseAttachment note = backEnd.getAttachment();
 		type = note.getNoteType();
 		content = note.getContent();
 		if (null != note.getNoteSubtype()) {
 			subType = note.getNoteSubtype().getExternalId();
 		}
-		if (note.getNoteType() == NoteType.LINK) {
+		if (note.getNoteType() == AttachmentType.LINK) {
 			String urlTemplate = note.getNoteSubtype().getUrlTemplate();
 			if (urlTemplate.contains("%s")) {
 				href= String.format(urlTemplate, content);
@@ -37,7 +37,7 @@ public class NoteSummary {
 	public String getContent() {
 		return content;
 	}
-	public NoteType getType() {
+	public AttachmentType getType() {
 		return type;
 	}
 	public String getSubType() {

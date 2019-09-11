@@ -23,9 +23,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
-import gov.usds.case_issues.db.model.NoteType;
+import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
-import gov.usds.case_issues.model.NoteRequest;
+import gov.usds.case_issues.model.AttachmentRequest;
 
 @WithMockUser(authorities = {"READ_CASES", "UPDATE_CASES"})
 public class CaseDetailsApiControllerTest extends ControllerTestBase {
@@ -99,7 +99,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isNoContent());
 		_mvc.perform(updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null,
-				new NoteRequest(NoteType.COMMENT, "Hello World", null)));
+				new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)));
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("{\"notes\": [{\"content\": \"Hello World\"}]}"))
@@ -111,7 +111,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
 		TroubleCase troubleCase = _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
 		_dataService.snoozeCase(troubleCase);
-		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new NoteRequest(NoteType.COMMENT, "Hello World", null)))
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
 			.andExpect(status().isAccepted());
 	}
 
@@ -119,7 +119,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	public void addNoteToSnooze_activeCase_badRequest() throws Exception {
 		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
 		_dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
-		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new NoteRequest(NoteType.COMMENT, "Hello World", null)))
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
 			.andExpect(status().isBadRequest());
 	}
 
@@ -136,7 +136,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	private MockHttpServletRequestBuilder updateSnooze(String systemTag, String receipt, String reason, int duration, String details,
-			NoteRequest... notes)
+			AttachmentRequest... notes)
 			throws JSONException {
 		JSONObject body = new JSONObject()
 			.put("reason", reason)
@@ -144,7 +144,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.put("duration", duration);
 		if (notes != null && notes.length > 0) {
 			JSONArray notesArray = new JSONArray();
-			for (NoteRequest req : notes) {
+			for (AttachmentRequest req : notes) {
 				JSONObject noteJson = new JSONObject();
 				noteJson.put("type", req.getNoteType().name());
 				noteJson.put("content", req.getContent());
@@ -159,7 +159,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			;
 	}
 
-	private MockHttpServletRequestBuilder addNote(String systemTag, String receipt, NoteRequest note)
+	private MockHttpServletRequestBuilder addNote(String systemTag, String receipt, AttachmentRequest note)
 			throws JSONException {
 		JSONObject body = new JSONObject();
 		body.put("type", note.getNoteType().name());
