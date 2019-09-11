@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.LockModeType;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.Description;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.validation.annotation.Validated;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
@@ -25,11 +27,14 @@ import gov.usds.case_issues.db.model.TroubleCase;
 	collectionResourceRel="cases",
 	collectionResourceDescription=@Description("All cases that have had at least one issue reported.")
 )
+@Validated
 public interface TroubleCaseRepository extends PagingAndSortingRepository<TroubleCase, Long>, BulkCaseRepository {
 
 	public static final String ACTIVE_CASE_CLAUSE = "c.caseManagementSystem = :caseManagementSystem and c.caseType = :caseType and c.openIssues is not empty";
 	public static final String ACTIVE_CASE_QUERY = "select c from #{#entityName} c where " + ACTIVE_CASE_CLAUSE;
 	public static final String ACTIVE_SNOOZE_CLAUSE = "exists (select snoozeEnd from CaseSnooze where snoozeCase = c and snoozeEnd > CURRENT_TIMESTAMP)";
+	public static final int MAX_INLIST_SIZE = 32000;
+	public static final String INLIST_SIZE_MESSAGE = "Too many items in this IN-list: not all databases can handle this many placeholders.";
 
 	public List<TroubleCase> getFirst5ByCaseManagementSystemAndCaseTypeAndReceiptNumberContains(CaseManagementSystem caseManager, CaseType caseType, String receiptNumber);
 
@@ -38,7 +43,8 @@ public interface TroubleCaseRepository extends PagingAndSortingRepository<Troubl
 	public Optional<TroubleCase> findByCaseManagementSystemAndReceiptNumber(CaseManagementSystem caseManager, String receiptNumber);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE) // might need to be more aggressive when postgresql table-level LOCK is available
-	public Collection<TroubleCase> getAllByCaseManagementSystemAndReceiptNumberIn(CaseManagementSystem caseManager, Collection<String> receiptNumbers);
+	public Collection<TroubleCase> getAllByCaseManagementSystemAndReceiptNumberIn(CaseManagementSystem caseManager,
+			@Size(max=MAX_INLIST_SIZE, message=INLIST_SIZE_MESSAGE) Collection<String> receiptNumbers);
 
 	@Query(ACTIVE_CASE_QUERY)
 	public Page<TroubleCase> getWithOpenIssues(CaseManagementSystem caseManagementSystem, CaseType caseType, Pageable pageable);

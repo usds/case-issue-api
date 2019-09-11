@@ -5,14 +5,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import gov.usds.case_issues.db.model.NoteType;
 
 @ConfigurationProperties(prefix="sample-data", ignoreUnknownFields=false)
-@Configuration
-@Profile({"dev","test"})
+@Component
+@Lazy
+@Profile({"dev"})
 public class SampleDataConfig {
 
 	private List<SampleDataFileSpec> files = new ArrayList<>();

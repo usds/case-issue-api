@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * Configuration that customizes Spring MVC for our specific needs.
  */
 @Configuration
+@ConditionalOnWebApplication
 public class WebConfig implements WebMvcConfigurer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class);

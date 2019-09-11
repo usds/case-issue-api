@@ -39,34 +39,34 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @NamedNativeQueries({
 	@NamedNativeQuery(
 		name = "snoozed",
-		query = "SELECT * from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+		query = "SELECT * from " + TroubleCase.CASE_DTO_CTE
 			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
 			  + "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC",
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
 		name = "unSnoozed",
-		query = "SELECT * from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+		query = "SELECT * from " + TroubleCase.CASE_DTO_CTE
 			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP "
 			  + "ORDER BY case_creation ASC, internal_id ASC",
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
 		name = "snoozed.count",
-		query = "SELECT count(1) as entity_count from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+		query = "SELECT count(1) as entity_count from " + TroubleCase.CASE_DTO_CTE
 			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP ",
 		resultSetMapping = "rowCount"
 	),
 	@NamedNativeQuery(
 		name = "unSnoozed.count",
-		query = "SELECT count(1) as entity_count from ( "+ TroubleCase.CASE_DTO_QUERY + ") "
+		query = "SELECT count(1) as entity_count from " + TroubleCase.CASE_DTO_CTE
 			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP ",
 		resultSetMapping = "rowCount"
 	),
 	@NamedNativeQuery(
 		name = "summary",
 		query = "SELECT " + TroubleCase.CASE_SNOOZE_DECODE + " as snooze_state, count(1) "
-				+ "FROM ( " + TroubleCase.CASE_DTO_QUERY + ") "
+				+ "FROM " + TroubleCase.CASE_DTO_CTE
 				+ "GROUP BY " + TroubleCase.CASE_SNOOZE_DECODE
 	),
 })
@@ -99,6 +99,7 @@ public class TroubleCase extends UpdatableEntity {
 			+ "where c.internal_id=openissues1_.issue_case_internal_id "
 			+ "and ( openissues1_.issue_closed is null)"
 		+ ")";
+	public static final String CASE_DTO_CTE = "(" + CASE_DTO_QUERY + ") as trouble_case_dto ";
 
 	@NaturalId
 	@ManyToOne(optional=false)

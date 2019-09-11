@@ -3,13 +3,17 @@ spring:
     rest:
       basePath: /resources
   jpa:
+    database: HSQL
     # we do not want Hibernate to start making DB calls during Jackson rendering: much better to have that
     # throw an exception so we know we have to update the persistence configuration.
     open-in-view: false
+    hibernate.ddl-auto: create
     properties:
       hibernate:
         format_sql: false
         generate_statistics: true # possibly too verbose, but useful to have around
+  liquibase:
+    enabled: false
 logback:
   access:
     enabled: true
