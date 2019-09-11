@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,8 @@ public class HsqlDbTruncator implements DbTruncator {
 	private static final Logger LOG = LoggerFactory.getLogger(HsqlDbTruncator.class);
 
 	private List<String> allTables;
+	@Value("${spring.jpa.properties.hibernate.default_schema:public}")
+	private String hibernateSchema;
 
 	@Autowired
 	private JdbcTemplate jdbc;
@@ -31,7 +34,7 @@ public class HsqlDbTruncator implements DbTruncator {
 		LOG.warn("Attempting to truncate all tables.");
 		String sql = TABLE_QUERY;
 		if (allTables == null) {
-			allTables = jdbc.queryForList(sql, "PUBLIC").stream()
+			allTables = jdbc.queryForList(sql, hibernateSchema.toUpperCase()).stream()
 					.map(m->(String) m.get("TABLE_NAME"))
 					.collect(Collectors.toList());
 			LOG.info("Initialized HSQLDB table list: {}", allTables);
