@@ -3,8 +3,6 @@ spring:
     web-application-type: NONE
   liquibase:
     enabled: true
-    default-schema: public
-    liquibase-schema: public
   jpa.hibernate.ddl-auto: validate
 logging:
   level:
