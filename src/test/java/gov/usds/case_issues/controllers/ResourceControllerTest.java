@@ -196,8 +196,7 @@ public class ResourceControllerTest extends ControllerTestBase {
 	@Test
 	@WithAnonymousUser
 	public void fetchCases_anonymous_forbidden() throws Exception {
-		// this should be "unauthorized" but coaxing the test harness to behave just right is not a high priority
-		perform(get(linkFor(TroubleCase.class))).andExpect(status().isForbidden());
+		perform(get(linkFor(TroubleCase.class))).andExpect(status().isUnauthorized());
 	}
 
 	@Test

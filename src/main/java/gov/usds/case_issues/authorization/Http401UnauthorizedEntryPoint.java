@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
-public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class Http401UnauthorizedEntryPoint implements AuthenticationEntryPoint {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CustomAccessDeniedHandler.class);
 

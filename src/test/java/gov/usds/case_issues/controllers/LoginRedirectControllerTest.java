@@ -29,9 +29,12 @@ public class LoginRedirectControllerTest extends ControllerTestBase {
 
 	@Test
 	@WithAnonymousUser
-	public void clientLogin_noUser_forbidden() throws Exception {
+	public void clientLogin_noUser_OK() throws Exception {
 		// in real life this would redirect to /login, but making the test that realistic is not worth it
-		perform(doClientLogin()).andExpect(status().isForbidden());
+		perform(doClientLogin())
+			.andExpect(status().isFound())
+			.andExpect(header().string("Location", "http://example.com"))
+		;
 	}
 
 	@Test
