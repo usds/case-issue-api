@@ -1,10 +1,6 @@
 package gov.usds.case_issues.config;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -18,9 +14,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
-import org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter;
-import org.springframework.security.web.csrf.CsrfToken;
 
 import springfox.documentation.service.ApiInfo;
 
@@ -53,26 +46,6 @@ public class DemoUserLoginConfig {
 				.authorizeRequests()
 					.antMatchers("/login*")
 					.permitAll();
-
-			Function<HttpServletRequest, Map<String, String>> hiddenInputs = request -> {
-				CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-				if (token == null) {
-					return Collections.emptyMap();
-				}
-				return Collections.singletonMap(token.getParameterName(), token.getToken());
-			};
-			DefaultLoginPageGeneratingFilter loginPageGeneratingFilter = new DefaultLoginPageGeneratingFilter();
-			DefaultLogoutPageGeneratingFilter logoutPageGeneratingFilter = new DefaultLogoutPageGeneratingFilter();
-			loginPageGeneratingFilter.setResolveHiddenInputs(hiddenInputs);
-			logoutPageGeneratingFilter.setResolveHiddenInputs(hiddenInputs);
-			http.setSharedObject(DefaultLoginPageGeneratingFilter.class, loginPageGeneratingFilter);
-			// loginPageGeneratingFilter = postProcess(loginPageGeneratingFilter);
-
-			http
-				.addFilter(loginPageGeneratingFilter)
-				.addFilter(logoutPageGeneratingFilter);
-
-			;
 		};
 	}
 

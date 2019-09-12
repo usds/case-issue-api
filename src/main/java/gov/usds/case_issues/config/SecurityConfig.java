@@ -17,7 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -77,7 +77,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		entryPoints.put(new AntPathRequestMatcher("/resources/**"), new CustomAuthenticationEntryPoint());
 		entryPoints.put(new AntPathRequestMatcher("/api/**"), new CustomAuthenticationEntryPoint());
 		final DelegatingAuthenticationEntryPoint authenticationEntryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
-		// authenticationEntryPoint.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
+		authenticationEntryPoint.setDefaultEntryPoint(new BasicAuthenticationEntryPoint());
 		return authenticationEntryPoint;
 	}
 
