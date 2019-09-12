@@ -3,6 +3,7 @@ package gov.usds.case_issues.authorization;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,12 +21,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
-		AuthenticationException authException) throws IOException {
+		AuthenticationException authException) throws IOException, ServletException {
 			String loginURL = "/login";
-			if (request.getRequestURI().equals(loginURL)) {
-				return;
-			}
-
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");

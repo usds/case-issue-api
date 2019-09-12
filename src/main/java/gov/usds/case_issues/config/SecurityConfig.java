@@ -1,6 +1,7 @@
 package gov.usds.case_issues.config;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,7 +15,12 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.authorization.CustomAccessDeniedHandler;
@@ -62,8 +68,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.accessDeniedHandler(new CustomAccessDeniedHandler())
 				.and()
 			.exceptionHandling()
-				.authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+				.authenticationEntryPoint(authenticationEntryPoint())
 		;
+	}
+
+	private DelegatingAuthenticationEntryPoint authenticationEntryPoint() {
+		final LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> entryPoints = new LinkedHashMap<>();
+		entryPoints.put(new AntPathRequestMatcher("/resources/**"), new CustomAuthenticationEntryPoint());
+		entryPoints.put(new AntPathRequestMatcher("/api/**"), new CustomAuthenticationEntryPoint());
+		final DelegatingAuthenticationEntryPoint authenticationEntryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
+		// authenticationEntryPoint.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
+		return authenticationEntryPoint;
 	}
 
 	private void configureResourceUrls(HttpSecurity http) throws Exception {
