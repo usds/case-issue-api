@@ -22,7 +22,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException, ServletException {
-			String loginURL = "/clientLogin";
+			String loginURL = "/oauth2/authorization/uscis-icam";
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
