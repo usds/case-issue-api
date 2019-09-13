@@ -2,7 +2,9 @@ package gov.usds.case_issues.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Lazy;
@@ -17,6 +19,7 @@ public class WebConfigurationProperties {
 
 	private String[] _corsOrigins;
 	private List<UserDefinition> _users;
+	private Map<String, DataFormatSpec> _dataFormats = new HashMap<>();
 
 	public void setCorsOrigins(String[] origins) {
 		_corsOrigins = origins;
@@ -32,6 +35,14 @@ public class WebConfigurationProperties {
 
 	public void setUsers(List<UserDefinition> users) {
 		this._users = users;
+	}
+
+	public Map<String, DataFormatSpec> getDataFormats() {
+		return _dataFormats;
+	}
+
+	public void setDataFormats(Map<String, DataFormatSpec> dataFormats) {
+		this._dataFormats = dataFormats;
 	}
 
 	public static class UserDefinition {
