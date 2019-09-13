@@ -77,6 +77,28 @@ $ cp src/main/resources/_application-local.yml src/main/resources/application-lo
 
 See see (SampleDataConfig)[src/main/java/gov/usds/case_issues/config/SampleDataConfig.java] for more insight.
 
+### Loading Data into a running application
+
+If you have successfully started the application with the `dev` profile and don't want to mess
+with the profiles and restart just to see some data, this command should get you started:
+
+   curl -i -X PUT -u service:service -HContent-type:text/csv --data-binary '@sample_data/cases.csv' localhost:8080/api/cases/OTHER/WEIRD/SILLY
+
+If the data uses a non-default key for the receipt number or case creation date, or a non-standard
+format for the creation date, you can save upload configurations as a dictionary in the application
+properties under `web-customization.data-formats` like this:
+
+    web-customization:
+        data-formats:
+            my-format:
+                receipt-number-key: caseIdString
+                creation-date-key: case-was-created-at
+                creation-date-format: "EEE MMM dd yyyy"
+
+Then refer to that format in the upload using the `uploadSchema` request parameter:
+
+   curl -i -X PUT -u service:service -HContent-type:text/csv --data-binary '@sample_data/cases.csv' localhost:8080/api/cases/OTHER/WEIRD/SILLY?uploadScehma=my-format
+
 ## Updating a dependency
 
 1. Update the dependency in [build.gradle](../build.gradle#L21)
