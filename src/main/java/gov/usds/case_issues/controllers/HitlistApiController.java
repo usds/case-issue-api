@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
-import gov.usds.case_issues.config.SampleDataFileSpec;
+import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
@@ -83,14 +83,13 @@ public class HitlistApiController {
 	@PutMapping(value="/{issueTag}",consumes= {"text/csv"})
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
 	public ResponseEntity<?> updateIssueListCsv(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
-			@RequestBody InputStream csvStream) throws IOException {
+			@RequestBody InputStream csvStream, @RequestParam(required=false) String uploadSchema) throws IOException {
 		CsvSchema schema = CsvSchema.emptySchema().withHeader();
 		MappingIterator<Map<String, Object>> valueIterator = new CsvMapper()
 			.readerFor(Map.class)
 			.with(schema)
 			.readValues(csvStream);
-		List<CaseRequest> newIssueCases = new ArrayList<>();
-		valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(m)));
+		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
 		_listService.putIssueList(caseManagementSystemTag, caseTypeTag, issueTag, newIssueCases, ZonedDateTime.now());
 		return ResponseEntity.accepted().build();
 	}
@@ -98,12 +97,18 @@ public class HitlistApiController {
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
 	@PutMapping(value="/{issueTag}",consumes= {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<?> updateIssueListJson(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
-			@RequestBody List<Map<String,Object>> jsonData) throws IOException {
+			@RequestBody List<Map<String,Object>> jsonData, @RequestParam(required=false) String uploadSchema) throws IOException {
 		Iterator<Map<String,Object>> valueIterator = jsonData.listIterator();
-		List<CaseRequest> newIssueCases = new ArrayList<>();
-		valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(m)));
+		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
 		_listService.putIssueList(caseManagementSystemTag, caseTypeTag, issueTag, newIssueCases, ZonedDateTime.now());
 		return ResponseEntity.accepted().build();
+	}
+
+	private List<CaseRequest> processCaseUploads(Iterator<Map<String, Object>> valueIterator, String schemaName) {
+		List<CaseRequest> newIssueCases = new ArrayList<>();
+		DataFormatSpec spec = new DataFormatSpec();
+		valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(spec, m)));
+		return newIssueCases;
 	}
 
 	private static class MapBasedCaseRequest implements CaseRequest {
@@ -112,11 +117,11 @@ public class HitlistApiController {
 		private ZonedDateTime _caseCreation;
 		private Map<String, Object> _rest;
 
-		public MapBasedCaseRequest(Map<String, Object> input) {
-			_receipt = input.remove(SampleDataFileSpec.DEFAULT_RECEIPT_NUMBER_KEY).toString();
+		public MapBasedCaseRequest(DataFormatSpec spec, Map<String, Object> input) {
+			_receipt = input.remove(spec.getReceiptNumberKey()).toString();
 			_caseCreation = ZonedDateTime.parse(
-				input.remove(SampleDataFileSpec.DEFAULT_CREATION_DATE_KEY).toString(),
-				SampleDataFileSpec.DEFAULT_DATETIME_FORMAT
+				input.remove(spec.getCreationDateKey()).toString(),
+				spec.getCreationDateParser()
 			);
 			_rest = input;
 		}
