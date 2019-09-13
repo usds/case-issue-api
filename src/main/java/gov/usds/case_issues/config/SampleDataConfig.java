@@ -20,7 +20,7 @@ public class SampleDataConfig {
 	private List<SampleDataFileSpec> files = new ArrayList<>();
 	private List<CaseManagementSystemDefinition> caseManagementSystems = new ArrayList<>();;
 	private List<TaggedResource> caseTypes = new ArrayList<>();
-	private List<NoteSubtypeDefinition> noteSubtypes = new ArrayList<>();
+	private List<AttachmentSubtypeDefinition> noteSubtypes = new ArrayList<>();
 
 	public SampleDataConfig() {
 		super();
@@ -50,11 +50,11 @@ public class SampleDataConfig {
 		this.caseTypes = caseTypes;
 	}
 
-	public List<NoteSubtypeDefinition> getNoteSubtypes() {
+	public List<AttachmentSubtypeDefinition> getAttachmentSubtypes() {
 		return noteSubtypes;
 	}
 
-	public void setNoteSubtypes(List<NoteSubtypeDefinition> noteSubtypes) {
+	public void setNoteSubtypes(List<AttachmentSubtypeDefinition> noteSubtypes) {
 		this.noteSubtypes = noteSubtypes;
 	}
 
@@ -158,14 +158,14 @@ public class SampleDataConfig {
 		}
 	}
 
-	public static class NoteSubtypeDefinition extends TaggedResource {
+	public static class AttachmentSubtypeDefinition extends TaggedResource {
 		private String urlTemplate;
 		private AttachmentType noteType;
 
 		public String getUrlTemplate() {
 			return urlTemplate;
 		}
-		public AttachmentType getNoteType() {
+		public AttachmentType getAttachmentType() {
 			return noteType;
 		}
 		public void setUrlTemplate(String urlTemplate) {

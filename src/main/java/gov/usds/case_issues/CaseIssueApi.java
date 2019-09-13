@@ -31,7 +31,7 @@ public class CaseIssueApi {
 		return args -> {
 			_sampleDataService.saveCaseManagementSystems(loaderConfig);
 			_sampleDataService.saveCaseTypes(loaderConfig);
-			_sampleDataService.saveNoteTypes(loaderConfig);
+			_sampleDataService.saveSubTypes(loaderConfig);
 			_sampleDataService.loadSampleDataFromFile(loaderConfig, loader);
 		};
 	}

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import gov.usds.case_issues.config.SampleDataConfig;
 import gov.usds.case_issues.config.SampleDataFileSpec;
 import gov.usds.case_issues.config.SampleDataConfig.CaseManagementSystemDefinition;
-import gov.usds.case_issues.config.SampleDataConfig.NoteSubtypeDefinition;
+import gov.usds.case_issues.config.SampleDataConfig.AttachmentSubtypeDefinition;
 import gov.usds.case_issues.config.SampleDataConfig.TaggedResource;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
@@ -79,13 +79,13 @@ public class SampleDataServiceTest extends CaseIssueApiTestBase {
 	@Test
 	public void saveSingleNoteSubType() {
 		SampleDataConfig loaderConfig = new SampleDataConfig();
-		NoteSubtypeDefinition noteDefiniton = new NoteSubtypeDefinition();
+		AttachmentSubtypeDefinition noteDefiniton = new AttachmentSubtypeDefinition();
 		noteDefiniton.setTag("tag");
 		noteDefiniton.setName("name");
 		noteDefiniton.setDescription("description");
 		noteDefiniton.setNoteType(AttachmentType.TAG);
 		loaderConfig.setNoteSubtypes(Arrays.asList(noteDefiniton));
-		_service.saveNoteTypes(loaderConfig);
+		_service.saveSubTypes(loaderConfig);
 		assertEquals(_subtypeRepository.count(), 1);
 	}
 
