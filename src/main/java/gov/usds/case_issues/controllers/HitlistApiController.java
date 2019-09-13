@@ -3,6 +3,7 @@ package gov.usds.case_issues.controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -106,8 +107,12 @@ public class HitlistApiController {
 
 	private List<CaseRequest> processCaseUploads(Iterator<Map<String, Object>> valueIterator, String schemaName) {
 		List<CaseRequest> newIssueCases = new ArrayList<>();
-		DataFormatSpec spec = new DataFormatSpec();
-		valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(spec, m)));
+		DataFormatSpec spec = _listService.getUploadFormat(schemaName);
+		try {
+			valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(spec, m)));
+		} catch (DateTimeParseException badDate) {
+			throw new IllegalArgumentException("Incorrectly formatted case creation date in input"); // ... somewhere
+		}
 		return newIssueCases;
 	}
 

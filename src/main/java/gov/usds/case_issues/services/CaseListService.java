@@ -18,6 +18,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.usds.case_issues.config.DataFormatSpec;
+import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
@@ -59,6 +61,8 @@ public class CaseListService {
 	private TroubleCaseRepository _caseRepo;
 	@Autowired
 	private CaseAttachmentService _attachmentService;
+	@Autowired
+	private WebConfigurationProperties _webProperties;
 
 	public List<TroubleCase> getCases(String caseManagementSystemTag, String caseTypeTag, String query) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
@@ -201,6 +205,17 @@ public class CaseListService {
 				newIssues.stream()
 			).collect(Collectors.toSet())
 		);
+	}
+
+	public DataFormatSpec getUploadFormat(String uploadFormatId) {
+		if (null == uploadFormatId) {
+			return new DataFormatSpec();
+		}
+		DataFormatSpec spec = _webProperties.getDataFormats().get(uploadFormatId);
+		if (spec == null) {
+			throw new IllegalArgumentException("Not a recognized data format");
+		}
+		return spec;
 	}
 
 	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {
