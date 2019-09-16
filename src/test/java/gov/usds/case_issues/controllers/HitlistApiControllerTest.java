@@ -117,6 +117,30 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
+	@WithMockUser(authorities = "UPDATE_ISSUES")
+	public void putCsv_singleCase_accepted() throws Exception {
+		MockHttpServletRequestBuilder jsonPut = put("/api/cases/{caseManagementSystemTag}/{caseTypeTag}/{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
+			.contentType("text/csv")
+			.content(
+				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
+				"FKE5250608,2014-08-29T00:00:00-04:00,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing\n"
+			);
+		perform(jsonPut).andExpect(status().isAccepted());
+	}
+
+	@Test
+	@WithMockUser(authorities = "UPDATE_ISSUES")
+	public void putCsv_invalidCreationDate_badRequest() throws Exception {
+		MockHttpServletRequestBuilder jsonPut = put("/api/cases/{caseManagementSystemTag}/{caseTypeTag}/{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
+			.contentType("text/csv")
+			.content(
+				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
+				"FKE5250608,NOT A DATE,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing\n"
+			);
+		perform(jsonPut).andExpect(status().isBadRequest());
+	}
+
+	@Test
 	public void search_noCases_emptyResult() throws Exception {
 		perform(doSearch(VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "abcde"))
 			.andExpect(status().isOk())
@@ -134,7 +158,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 	/**
 	 * Create some data on our default case type!
-	 * 
+	 *
 	 * 1 case that has 1 issue and is currently active
 	 * 1 case that has 1 issue and is currently snoozed
 	 */
