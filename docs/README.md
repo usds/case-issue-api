@@ -27,7 +27,7 @@ To configure your IDE to report style violations, use the checkstyle configurati
 ## Running the Application
 
 1. Using the command line
-   
+
      SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
 
 1. Using Spring Tool Suite (Eclipse)
