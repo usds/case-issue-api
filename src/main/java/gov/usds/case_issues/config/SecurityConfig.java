@@ -62,7 +62,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.httpStrictTransportSecurity().and()
 				.and()
 			.authorizeRequests()
-				.antMatchers("/actuator/health", "/health", "/clientLogin")
+				.antMatchers("/actuator/health", "/health")
 					.permitAll()
 				.anyRequest()
 					.authenticated()
@@ -79,13 +79,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	@Profile("!dev")
+	@Profile("dev")
 	public AuthenticationEntryPoint prodDefaultAuthenticationEntryPoint() {
 		return new Http401UnauthorizedEntryPoint();
 	}
 
 	@Bean
-	@Profile("dev")
+	@Profile("!dev")
 	public AuthenticationEntryPoint devDefaultAuthenticationEntryPoint() {
 		BasicAuthenticationEntryPoint authEntryPoint = new BasicAuthenticationEntryPoint();
 		authEntryPoint.setRealmName("auth");
@@ -93,7 +93,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	@Autowired
 	public DelegatingAuthenticationEntryPoint authenticationEntryPoint(AuthenticationEntryPoint defaultEntryPoint) {
 		final LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> entryPoints = new LinkedHashMap<>();
 		entryPoints.put(new AntPathRequestMatcher("/login*"), new LoginUrlAuthenticationEntryPoint("/clientLogin"));

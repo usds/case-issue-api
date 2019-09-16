@@ -22,7 +22,7 @@ public class Http401UnauthorizedEntryPoint implements AuthenticationEntryPoint {
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException, ServletException {
-			String loginURL = "/oauth2/authorization/uscis-icam";
+			String loginURL = "/clientLogin";
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
