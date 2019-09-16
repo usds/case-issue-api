@@ -208,7 +208,7 @@ public class CaseListService {
 	}
 
 	public DataFormatSpec getUploadFormat(String uploadFormatId) {
-		if (null == uploadFormatId) {
+		if (uploadFormatId == null) {
 			return new DataFormatSpec();
 		}
 		DataFormatSpec spec = _webProperties.getDataFormats().get(uploadFormatId);

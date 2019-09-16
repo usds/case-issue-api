@@ -25,8 +25,8 @@ public class DataFormatSpec {
 
 	// fancy getter
 	public DateTimeFormatter getCreationDateParser() {
-		if (null == creationDateParser) {
-			if (null != creationDateFormat) {
+		if (creationDateParser == null) {
+			if (creationDateFormat != null) {
 				creationDateParser = DateTimeFormatter.ofPattern(creationDateFormat);
 			} else {
 				creationDateParser = DEFAULT_DATETIME_FORMAT;
