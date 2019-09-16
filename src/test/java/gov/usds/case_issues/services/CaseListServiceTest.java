@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
@@ -311,6 +312,32 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals("C2", activeCases.get(0).getReceiptNumber());
 		assertEquals("Checking extra data", "C2", activeCases.get(0).getExtraData().get(checkKey));
 		assertEquals("Other list remains intact", 3, fetchCasesForSystem(otherSystem).size());
+	}
+
+	@Test()
+	public void getUploadFormat_formatIdNull_DefaultFormat() {
+		DataFormatSpec uploadFormat = _service.getUploadFormat(null);
+
+		assertEquals(
+			"Default creation date was set",
+			DataFormatSpec.DEFAULT_CREATION_DATE_KEY,
+			uploadFormat.getCreationDateKey()
+		);
+		assertEquals(
+			"Default receipt number was set",
+			DataFormatSpec.DEFAULT_RECEIPT_NUMBER_KEY,
+			uploadFormat.getReceiptNumberKey()
+		);
+		assertEquals(
+			"Default datetime format was set",
+			DataFormatSpec.DEFAULT_DATETIME_FORMAT,
+			uploadFormat.getCreationDateParser()
+		);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void getUploadFormat_formatIdInvalid_exception() {
+		_service.getUploadFormat("INVALID DATE FORMAT");
 	}
 
 	@SuppressWarnings("checkstyle:MagicNumber")
