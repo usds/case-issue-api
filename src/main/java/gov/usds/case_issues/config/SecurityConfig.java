@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
+import gov.usds.case_issues.authorization.CustomAccessDeniedHandler;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled=false, prePostEnabled=true)
@@ -55,6 +56,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			.csrf()
 				.ignoringRequestMatchers(AnyRequestMatcher.INSTANCE)
+				.and()
+			.exceptionHandling()
+				.accessDeniedHandler(new CustomAccessDeniedHandler())
 		;
 	}
 
