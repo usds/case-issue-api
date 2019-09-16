@@ -35,6 +35,9 @@ public class WebConfig implements WebMvcConfigurer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class);
 
+	/** A filter order that allows us to get in before the Spring Security filter chain. */
+	private static final int BEFORE_SECURITY = -100;
+
 	@Autowired
 	private WebConfigurationProperties _customProperties;
 
@@ -72,6 +75,14 @@ public class WebConfig implements WebMvcConfigurer {
 		reg.setOrder(OrderedFilter.HIGHEST_PRECEDENCE);
 		return reg;
 	}
+
+	@Bean
+	public FilterRegistrationBean<JsonRedirectPreventingFilter> getRedirectPreventingFilter() {
+		FilterRegistrationBean<JsonRedirectPreventingFilter> registration = new FilterRegistrationBean<>(new JsonRedirectPreventingFilter());
+		registration.setOrder(BEFORE_SECURITY);
+		return registration;
+	}
+
 	/**
 	 * Trivial {@link HttpMessageConverter} implementation to allow handler methods to accept
 	 * "text/csv" input as a raw input stream.
