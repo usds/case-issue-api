@@ -1,5 +1,6 @@
 package gov.usds.case_issues.controllers;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -92,6 +93,19 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
+	public void snoozeOperations_validCaseNoCsrf_forbidden() throws Exception {
+		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
+		TroubleCase tc = _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
+		_dataService.snoozeCase(tc);
+		perform(updateSnoozeNoCsrf(VALID_SYS, SAMPLE_CASE, "EVIL", 1, null))
+			.andExpect(status().isForbidden());
+		perform(endSnoozeNoCsrf(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isForbidden());
+		perform(addNoteNoCsrf(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "What up?")))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
 	public void snoozeWithNotes_validCase_notesStored() throws Exception {
 		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
@@ -132,10 +146,20 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	private MockHttpServletRequestBuilder endSnooze(String systemTag, String receipt) {
+		return endSnoozeNoCsrf(systemTag, receipt).with(csrf());
+	}
+
+	private MockHttpServletRequestBuilder endSnoozeNoCsrf(String systemTag, String receipt) {
 		return delete("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/activeSnooze", systemTag, receipt);
 	}
 
+
 	private MockHttpServletRequestBuilder updateSnooze(String systemTag, String receipt, String reason, int duration, String details,
+			AttachmentRequest... notes) throws JSONException {
+		return updateSnoozeNoCsrf(systemTag, receipt, reason, duration, details, notes).with(csrf());
+	}
+
+	private MockHttpServletRequestBuilder updateSnoozeNoCsrf(String systemTag, String receipt, String reason, int duration, String details,
 			AttachmentRequest... notes)
 			throws JSONException {
 		JSONObject body = new JSONObject()
@@ -160,6 +184,11 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	private MockHttpServletRequestBuilder addNote(String systemTag, String receipt, AttachmentRequest note)
+			throws JSONException {
+		return addNoteNoCsrf(systemTag, receipt, note).with(csrf());
+	}
+
+	private MockHttpServletRequestBuilder addNoteNoCsrf(String systemTag, String receipt, AttachmentRequest note)
 			throws JSONException {
 		JSONObject body = new JSONObject();
 		body.put("type", note.getNoteType().name());

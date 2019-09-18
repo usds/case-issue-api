@@ -2,9 +2,12 @@ package gov.usds.case_issues.controllers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -91,7 +94,7 @@ public class ResourceControllerTest extends ControllerTestBase {
 			.andExpect(jsonPath("issueClosed").isEmpty());
 		reqBody = new JSONObject();
 		reqBody.put("issueClosed", "2019-07-10T18:11:00-04:00");
-		_mvc.perform(patch(issueUrl).content(reqBody.toString()))
+		_mvc.perform(patch(issueUrl).content(reqBody.toString()).with(csrf()))
 			.andExpect(status().is(HttpStatus.NO_CONTENT.value()))
 		;
 
@@ -121,6 +124,24 @@ public class ResourceControllerTest extends ControllerTestBase {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("snoozeReason").value("In the Mail"))
 		;
+	}
+
+	// not doing every possible entity, but doing all the unsafe operations on at least one resource
+	@Test
+	public void unsafeOperations_noCsrf_forbidden() throws Exception {
+		createFixtureEntities();
+		doCreate(CaseManagementSystem.class, taggedResourceBody("MINE3", "MyCaseManager 3.1", "The manager that manages."),
+				HttpStatus.FORBIDDEN, false);
+		perform(delete(getFixtureCaseManagerUrl()))
+			.andExpect(status().isForbidden());
+		perform(patch(getFixtureCaseManagerUrl()).content("{\"name\": \"Other Name\"}"))
+			.andExpect(status().isForbidden());
+		perform(put(getFixtureCaseManagerUrl()).content("{\"name\": \"Other Name\"}"))
+			.andExpect(status().isForbidden());
+		doCreate(CaseType.class, taggedResourceBody("STD", "Standard Case", "Nothing interesting"),
+				HttpStatus.FORBIDDEN, false);
+		perform(delete(getFixtureCaseTypeUrl()))
+			.andExpect(status().isForbidden());
 	}
 
 	@Test
@@ -218,13 +239,28 @@ public class ResourceControllerTest extends ControllerTestBase {
 		doCreate(TroubleCase.class, new JSONObject(), HttpStatus.FORBIDDEN);
 	}
 
+	private static JSONObject taggedResourceBody(String tag, String name, String description) {
+		JSONObject reqBody = new JSONObject();
+		reqBody.put("tag", tag);
+		reqBody.put("description", description);
+		reqBody.put("name", name);
+		return reqBody;
+	}
+
 	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body) throws Exception {
 		return doCreate(entityType, body, HttpStatus.CREATED);
 	}
 
-	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus expectedStatus) throws Exception {
+	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus created) throws Exception {
+		return doCreate(entityType, body, created, true);
+	}
+
+	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus expectedStatus, boolean withCsrf) throws Exception {
 		MockHttpServletRequestBuilder postRequest = post(linkFor(entityType))
 			.content(body.toString());
+		if (withCsrf) {
+			postRequest.with(csrf());
+		}
 		return _mvc.perform(postRequest)
 			.andExpect(status().is(expectedStatus.value()))
 			.andReturn()
