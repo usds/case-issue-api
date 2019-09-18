@@ -25,14 +25,14 @@ public class DataFormatSpec {
 
 	// fancy getter
 	public DateTimeFormatter getCreationDateParser() {
-		if (creationDateParser != null) {
-			return creationDateParser;
+		if (creationDateParser == null) {
+			if (creationDateFormat != null) {
+				creationDateParser = DateTimeFormatter.ofPattern(creationDateFormat);
+			} else {
+				creationDateParser = DEFAULT_DATETIME_FORMAT;
+			}
 		}
-		if (creationDateFormat != null) {
-			return DateTimeFormatter.ofPattern(creationDateFormat);
-		} else {
-			return DEFAULT_DATETIME_FORMAT;
-		}
+		return creationDateParser;
 	}
 
 	// dumb getters
