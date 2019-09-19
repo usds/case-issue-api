@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 public class OneShotControllersTest extends ControllerTestBase {
 
 	private static MockHttpServletRequestBuilder getUser() {
-		return get("/user");
+		return get(UserDetailsApiController.USER_INFO_ENDPOINT);
 	}
 
 	private static MockHttpServletRequestBuilder getCsrf() {
