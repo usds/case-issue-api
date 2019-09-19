@@ -46,7 +46,7 @@ public class JsonRedirectPreventingFilter implements Filter {
 		}
 
 		@Override
-		public void sendRedirect(String location) throws IOException {
+		public void sendRedirect(String _location) throws IOException {
 			LOG.info("Intercepted a redirect on a JSON request: sending 401 instead");
 			sendError(SC_UNAUTHORIZED);
 		}
