@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller to see information about the current user.
  */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping(UserDetailsApiController.USER_INFO_ENDPOINT)
 @Profile("auth-testing")
 public class UserDetailsApiController {
+
+	public static final String USER_INFO_ENDPOINT = "/api/users";
 
 	@GetMapping
 	public Object getUser(Authentication u) {

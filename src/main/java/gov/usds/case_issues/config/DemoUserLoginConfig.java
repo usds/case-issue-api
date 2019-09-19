@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import gov.usds.case_issues.controllers.UserDetailsApiController;
 import springfox.documentation.service.ApiInfo;
 
 @Configuration
@@ -37,7 +38,7 @@ public class DemoUserLoginConfig {
 			LOG.info("Configuring form login and basic auth on {} with realm {}.", http, apiTitle);
 			http
 				.formLogin()
-					.defaultSuccessUrl("/user")
+					.defaultSuccessUrl(UserDetailsApiController.USER_INFO_ENDPOINT)
 					.and()
 				.httpBasic()
 					.realmName(apiTitle)
