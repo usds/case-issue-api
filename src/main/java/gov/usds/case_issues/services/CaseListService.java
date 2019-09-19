@@ -66,7 +66,6 @@ public class CaseListService {
 
 	public List<TroubleCase> getCases(String caseManagementSystemTag, String caseTypeTag, String query) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug("Request for query cases by: {}", query);
 
 		if (query == null) {
 			return new ArrayList<>();
@@ -155,8 +154,6 @@ public class CaseListService {
 			}
 		}
 
-		LOG.debug("For PUT of {}/{}/{}, opening {} and closing {} issues; updating cases of {} existing issues", systemTag, caseTypeTag, issueTypeTag,
-				requestedNewIssues.size(), currentMap.size(), updatedCaseCount);
 		// terminate all the remaining issues in the current collection
 		// this could also be done directly in the database, which might not be a bad idea?
 		currentMap.values().forEach(i -> i.setIssueClosed(eventDate));
@@ -167,9 +164,6 @@ public class CaseListService {
 		Map<String, TroubleCase> existingCases = _caseRepo.getAllByCaseManagementSystemAndReceiptNumberIn(
 				translated.getCaseManagementSystem(), newReceipts).stream().collect(Collectors.toMap(TroubleCase::getReceiptNumber, i->i));
 		newReceipts.removeAll(existingCases.keySet());
-
-		LOG.debug("For PUT of {}/{}/{}, found {} existing cases, creating {}", systemTag, caseTypeTag, issueTypeTag,
-				existingCases.size(), newReceipts.size());
 
 		List<TroubleCase> unsavedCases = new ArrayList<>();
 		// create or update cases
@@ -194,9 +188,6 @@ public class CaseListService {
 		Iterable<TroubleCase> newlySavedCases = _caseRepo.saveAll(unsavedCases);
 		List<CaseIssue> newIssues = new ArrayList<>();
 		newlySavedCases.forEach(tc -> newIssues.add(createIssue.apply(tc)));
-
-		LOG.debug("For PUT of {}/{}/{}, attempting to save {} new issues", systemTag, caseTypeTag, issueTypeTag,
-				newIssues.size() + existingCases.size());
 
 		// aaaand save everything!
 		_issueRepo.saveAll(
