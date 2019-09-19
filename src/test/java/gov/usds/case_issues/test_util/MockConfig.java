@@ -16,11 +16,11 @@ import org.springframework.context.annotation.Profile;
  * or otherwise be attached to the "autotest" profile as an autowired bean.
  */
 @Configuration
-@Profile("autotest")
 public class MockConfig {
 
 	@Bean
 	@Primary
+	@Profile("mock-properties")
 	public WebConfigurationProperties getMockProperties() {
 		return Mockito.mock(WebConfigurationProperties.class);
 	}

@@ -11,11 +11,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.util.NestedServletException;
 
 import gov.usds.case_issues.config.WebConfigurationProperties;
 
+@ActiveProfiles("mock-properties")
 public class LoginRedirectControllerTest extends ControllerTestBase {
 
 	private static final String[] ALLOWED_ORIGINS = {
