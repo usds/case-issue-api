@@ -139,13 +139,11 @@ public class CaseListService {
 
 		// build a list containing only CaseSummary objects with no existing CaseIssue
 		List<CaseRequest> requestedNewIssues = new ArrayList<>();
-		int updatedCaseCount = 0;
 		for (CaseRequest caseSummary : newIssueCases) {
 			CaseIssue existingIssue = currentMap.remove(caseSummary.getReceiptNumber());
 			if (null == existingIssue) {
 				requestedNewIssues.add(caseSummary);
 			} else {
-				updatedCaseCount++;
 				TroubleCase issueCase = existingIssue.getIssueCase();
 				issueCase.getExtraData().putAll(caseSummary.getExtraData());
 				if (issueCase.getCaseType() != translated.getCaseType()) {
