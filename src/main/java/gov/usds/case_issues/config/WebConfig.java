@@ -51,17 +51,13 @@ public class WebConfig implements WebMvcConfigurer {
 					.allowCredentials(true)
 					.allowedMethods("*")
 					.allowedOrigins(origins);
-			registry.addMapping("/user")
-					.allowCredentials(true)
-					.allowedMethods("GET")
-					.allowedOrigins(origins);
 			registry.addMapping("/csrf")
 					.allowCredentials(true)
 					.allowedMethods("GET")
 					.allowedOrigins(origins);
 		}
 	}
-	
+
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addStatusController("/health", HttpStatus.OK);
