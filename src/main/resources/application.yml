@@ -16,6 +16,11 @@ spring:
         generate_statistics: true # possibly too verbose, but useful to have around
   liquibase:
     enabled: false
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
+      table-name: user_session
 logback:
   access:
     enabled: true
