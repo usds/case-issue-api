@@ -38,7 +38,6 @@ public class RestConfig implements RepositoryRestConfigurer {
 
 		// this is very broad, but only applies when controllers managed by this configuration, so
 		// we can leave it broad instead of tailoring it to our actual URL configuration.
-		config.getCorsRegistry().addMapping("/**")
-			.allowedOrigins(new String[0]);
+		config.getCorsRegistry().addMapping("/**").allowedOrigins();
 	}
 }
