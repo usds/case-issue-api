@@ -44,6 +44,7 @@ dependencies {
 
 	runtimeOnly 'org.hsqldb:hsqldb'
 	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'org.springframework.session:spring-session-jdbc'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
@@ -72,6 +73,9 @@ jacocoTestCoverageVerification {
 configurations {
 	compileClasspath {
 		resolutionStrategy.activateDependencyLocking()
+	}
+	runtimeClasspath {
+                resolutionStrategy.activateDependencyLocking()
 	}
 }
 
