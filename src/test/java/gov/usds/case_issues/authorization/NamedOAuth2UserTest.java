@@ -18,10 +18,9 @@ public class NamedOAuth2UserTest {
 	public void user_toSrting_containsNameAndId() throws IOException, ServletException {
 		Map<String, Object> attributes = new HashMap<>();
 		attributes.put("name", "Emma Lazarus");
-		attributes.put("user_id", "fe1ec665-82de-48e7-9ef3-fc28bdcc9d20");
 
 		NamedOAuth2User user = new NamedOAuth2User(
-			"not the name",
+			"fe1ec665-82de-48e7-9ef3-fc28bdcc9d20",
 			Collections.singleton(new SimpleGrantedAuthority("respect")),
 			attributes
 		);
