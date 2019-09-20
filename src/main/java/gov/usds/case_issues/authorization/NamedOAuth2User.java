@@ -50,7 +50,7 @@ public class NamedOAuth2User implements OAuth2User {
 
 	public String toString() {
 		try {
-			return attributes.get("user_id").toString() + " " + attributes.get("name").toString();
+			return name + " " + attributes.get("name").toString();
 		} catch(NullPointerException _e) {
 			return name;
 		}
