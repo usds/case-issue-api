@@ -1,8 +1,6 @@
 package gov.usds.case_issues.controllers;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -21,15 +19,16 @@ public class UserDetailsApiController {
 	public static final String USER_INFO_ENDPOINT = "/api/users";
 
 	@GetMapping(UserDetailsApiController.USER_INFO_ENDPOINT)
-	@SuppressWarnings({"unchecked"})
 	public Object getUser(Authentication u) {
 		HashMap<String, String> user = new HashMap<String, String>();
-		user.put("ID", u.getName());
-		Map<String, Object> principal = (Map<String, Object>)u.getPrincipal();
-		Collection<Object> authorities = (Collection<Object>)principal.get("authorities");
-		Map<String, Object> authority = (Map<String, Object>)authorities.iterator().next();
-		Map<String, String> attributes = (Map<String, String>)authority.get("attributes");
-		user.put("name", attributes.get("name"));
+		String name = u.getName();
+		if (name.contains(";")) {
+			String[] userInfo = name.split(";");
+			user.put("ID", userInfo[0]);
+			user.put("name", userInfo[1]);
+		} else {
+			user.put("name", u.getName());
+		}
 		return user;
 	}
 

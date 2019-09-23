@@ -24,7 +24,7 @@ public class NamedOAuth2UserTest {
 			Collections.singleton(new SimpleGrantedAuthority("respect")),
 			attributes
 		);
-		assertEquals(user.toString(), "fe1ec665-82de-48e7-9ef3-fc28bdcc9d20 Emma Lazarus");
+		assertEquals("fe1ec665-82de-48e7-9ef3-fc28bdcc9d20;Emma Lazarus", user.toString());
 	}
 
 }
