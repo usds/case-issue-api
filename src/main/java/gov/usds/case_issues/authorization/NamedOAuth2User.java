@@ -35,7 +35,11 @@ public class NamedOAuth2User implements OAuth2User {
 
 	@Override
 	public String getName() {
-		return name;
+		try {
+			return name + ";" + attributes.get("name").toString();
+		} catch(NullPointerException _e) {
+			return name;
+		}
 	}
 
 	@Override
@@ -49,10 +53,6 @@ public class NamedOAuth2User implements OAuth2User {
 	}
 
 	public String toString() {
-		try {
-			return name + " " + attributes.get("name").toString();
-		} catch(NullPointerException _e) {
-			return name;
-		}
+		return getName();
 	}
 }

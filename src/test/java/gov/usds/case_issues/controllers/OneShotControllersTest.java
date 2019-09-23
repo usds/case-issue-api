@@ -35,7 +35,7 @@ public class OneShotControllersTest extends ControllerTestBase {
 	public void getUser_loggedInUser_expectedResult() throws Exception {
 		perform(getUser())
 			.andExpect(status().isOk())
-			.andExpect(content().json("{\"name\": \"Freddie Fixer\", \"authorities\":[{\"authority\": \"FIGURE\"},{\"authority\": \"RESPECT\"}]}"))
+			.andExpect(content().json("{\"name\": \"Freddie Fixer\"}"))
 			;
 	}
 
