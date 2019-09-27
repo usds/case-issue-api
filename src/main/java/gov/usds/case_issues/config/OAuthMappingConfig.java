@@ -1,9 +1,7 @@
 package gov.usds.case_issues.config;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.authorization.NamedOAuth2User;
+import gov.usds.case_issues.utils.HashUtils;
 
 /**
  * Configuration to customize our integration with an external OAuth2/OIDC identity provider.
@@ -91,7 +90,7 @@ public class OAuthMappingConfig {
 		final List<String> safePath = Collections.unmodifiableList(new ArrayList<>(inputPath));
 		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService = r -> {
 			OAuth2User wrapped = delegate.loadUser(r);
-			Optional<String> nameAttr = descend(wrapped.getAttributes(), safePath)
+			Optional<String> nameAttr = HashUtils.descend(wrapped.getAttributes(), safePath)
 					.filter(v -> v instanceof String)
 					.map(String.class::cast)
 					;
@@ -126,7 +125,7 @@ public class OAuthMappingConfig {
 					LOG.debug("Attributes to check: {}", attributes);
 					for (AuthorityPath p : authorityPaths) {
 						LOG.debug("Examining path {}", p.path);
-						Optional<?> pathResult = descend(attributes, p.path);
+						Optional<?> pathResult = HashUtils.descend(attributes, p.path);
 						if (pathResult.isPresent()) {
 							translated.add(p.getAuthority());
 						}
@@ -187,30 +186,4 @@ public class OAuthMappingConfig {
 			this.path = path;
 		}
 	}
-
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	private static Optional<?> descend(Object o, List<String> path) {
-		Object curr = o;
-		for (String pathElement : path) {
-			LOG.debug("Looking for {} in {}", pathElement, curr);
-			if (curr instanceof Map) {
-				Map<String, Object> cast = Map.class.cast(curr);
-				curr = cast.get(pathElement);
-			}
-			else if (curr instanceof Collection) {
-				return ((Collection<String>) curr).stream().filter(pathElement::equals).findFirst();
-			}
-			else if (curr instanceof String) {
-				return pathElement.equals(curr) ? Optional.of((String) curr) : Optional.empty();
-			}
-		}
-		LOG.debug("Finished path traversal with {}", curr);
-		if (curr instanceof Collection && ((Collection) curr).size() == 1) {
-			Iterator<String> it = ((Iterable) curr).iterator();
-			return Optional.ofNullable(it.next());
-		} else {
-			return Optional.ofNullable(curr);
-		}
-	}
-
 }
