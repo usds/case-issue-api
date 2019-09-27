@@ -35,9 +35,10 @@ public class NamedOAuth2User implements OAuth2User {
 
 	@Override
 	public String getName() {
-		try {
-			return name + ";" + attributes.get("name");
-		} catch(NullPointerException _e) {
+		Object attributeName = attributes.get("name");
+		if (attributeName != null) {
+			return name + ";" + attributeName;
+		} else {
 			return name;
 		}
 	}
