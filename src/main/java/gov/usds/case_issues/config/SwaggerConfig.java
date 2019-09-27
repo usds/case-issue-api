@@ -45,7 +45,9 @@ public class SwaggerConfig {
 			) {
 		Contact contact = new Contact(contactName, contactUrl, contactEmail);
 		if (!contactName.isEmpty() && contactUrl.isEmpty() && contactEmail.isEmpty()) {
-			throw new IllegalArgumentException("API contact name is useless if both API contact email and contact URL are null.");
+			throw new IllegalArgumentException(
+				"A contact email or url is required when providing an API contact name."
+			);
 		}
 		ApiInfo apiInfo = new ApiInfo(
 				apiTitle, apiDescription, apiVersion, null, contact,
