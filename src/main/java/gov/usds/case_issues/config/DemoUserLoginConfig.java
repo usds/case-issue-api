@@ -32,6 +32,7 @@ public class DemoUserLoginConfig {
 	@Bean
 	@Order(-1)
 	public WebSecurityPlugin addDemoLogins() {
+		LOG.info("Getting realm name from {}", _apiInfo);
 		final String apiTitle = _apiInfo.getTitle();
 
 		return http -> {
