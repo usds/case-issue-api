@@ -39,12 +39,12 @@ public class SwaggerConfig {
 			@Value("${api.title:API}") String apiTitle,
 			@Value("${api.description:#{null}}") String apiDescription,
 			@Value("${api.version:1.0.0}") String apiVersion,
-			@Value("${api.contact.name:#{null}}") String contactName,
-			@Value("${api.contact.url:#{null}}") String contactUrl,
-			@Value("${api.contact.email:#{null}}") String contactEmail
+			@Value("${api.contact.name:}") String contactName,
+			@Value("${api.contact.url:}") String contactUrl,
+			@Value("${api.contact.email:}") String contactEmail
 			) {
 		Contact contact = new Contact(contactName, contactUrl, contactEmail);
-		if (contactName != null && contactUrl == null && contactEmail == null) {
+		if (!contactName.isEmpty() && contactUrl.isEmpty() && contactEmail.isEmpty()) {
 			throw new IllegalArgumentException("API contact name is useless if both API contact email and contact URL are null.");
 		}
 		ApiInfo apiInfo = new ApiInfo(
