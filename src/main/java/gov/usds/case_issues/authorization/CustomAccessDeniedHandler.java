@@ -34,7 +34,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 					message.put("Details", auth.getDetails());
 					message.put("Date", ZonedDateTime.now());
 					message.put("StatusCode", HttpStatus.FORBIDDEN.value());
-					LOG.warn(message.toString());
+					LOG.warn("{}", message);
 				} catch(JSONException e) {
 					LOG.error("Unable to parse log event into JSON ", e);
 				}
