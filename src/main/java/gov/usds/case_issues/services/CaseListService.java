@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -81,17 +80,27 @@ public class CaseListService {
 	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for active cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
-		Page<Object[]> cases = _bulkRepo.getActiveCases(
-			translated.getCaseManagementSystemId(), translated.getCaseTypeId(), pageRequest);
-		return rewrap(cases.getContent(), false);
+		return rewrap(
+			_bulkRepo.getActiveCases(
+				translated.getCaseManagementSystemId(),
+				translated.getCaseTypeId(),
+				pageRequest
+			).getContent(),
+			false
+		);
 	}
 
 	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for snoozed cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
-		Page<Object[]> cases = _bulkRepo.getSnoozedCases(
-			translated.getCaseManagementSystemId(), translated.getCaseTypeId(), pageRequest);
-		return rewrap(cases.getContent(), true);
+		return rewrap(
+			_bulkRepo.getSnoozedCases(
+				translated.getCaseManagementSystemId(),
+				translated.getCaseTypeId(),
+				pageRequest
+			).getContent(),
+			false
+		);
 	}
 
 	public Map<String, Number> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
@@ -208,6 +217,8 @@ public class CaseListService {
 	}
 
 	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {
+		LOG.info("Finding snoozed case from {}.", _snoozeRepo);
+		LOG.info("Finding attachment from {}.", _attachmentService);
 		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
