@@ -342,7 +342,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 	@SuppressWarnings("checkstyle:MagicNumber")
 	private List<CaseSummary> fetchCasesForSystem(String systemTag) {
-		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, PageRequest.of(0, 100));
+		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, null, 20);
 	}
 
 	private class CaseRequestImpl implements CaseRequest {

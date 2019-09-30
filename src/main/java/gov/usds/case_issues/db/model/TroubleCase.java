@@ -39,16 +39,29 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @NamedNativeQueries({
 	@NamedNativeQuery(
 		name = "snoozed",
-		query = "SELECT * from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
-			  + "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC",
+		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
+				+ "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
+				+ "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
+				+ "LIMIT :size",
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "snoozedAfter",
+		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
+				+ "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
+				+ "AND last_snooze_end >= :lastSnoozeEnd "
+				+ "AND case_creation >= :caseCreation "
+				+ "AND internal_id >= :internalId "
+				+ "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
+				+ "LIMIT :size",
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
 		name = "unSnoozed",
-		query = "SELECT * from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP "
-			  + "ORDER BY case_creation ASC, internal_id ASC",
+		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
+				+ "WHERE last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP "
+				+ "ORDER BY case_creation ASC, internal_id ASC "
+				+ "LIMIT :size",
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
@@ -56,6 +69,16 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		query = "SELECT count(1) as entity_count from " + TroubleCase.CASE_DTO_CTE
 			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP ",
 		resultSetMapping = "rowCount"
+	),
+	@NamedNativeQuery(
+		name = "unSnoozedAfter",
+		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
+				+ "WHERE last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP "
+				+ "AND case_creation >= :caseCreation "
+				+ "AND internal_id >= :internalId "
+				+ "ORDER BY case_creation ASC, internal_id ASC "
+				+ "LIMIT :size",
+		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
 		name = "unSnoozed.count",
