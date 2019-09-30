@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,7 +14,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
+import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UploadStatus;
@@ -84,28 +86,91 @@ public class CaseListService {
 		);
 	}
 
-	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
+	public List<CaseSummary> getActiveCases(
+		String caseManagementSystemTag,
+		String caseTypeTag,
+		String receiptNumber,
+		Integer size
+	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug("Paged request for active cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
+		LOG.debug(
+			"Request for active cases after case with systemTag: {} and reciptNumber: {}",
+			caseManagementSystemTag,
+			receiptNumber
+		);
+		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
+			translated.getCaseManagementSystem(),
+			receiptNumber
+		);
+		if (lastCase.isEmpty()) {
+			return rewrap(
+				_bulkRepo.getActiveCases(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					size
+				),
+				false
+			);
+		}
+		TroubleCase troubleCase = lastCase.get();
+
 		return rewrap(
-			_bulkRepo.getActiveCases(
+			_bulkRepo.getActiveCasesAfter(
 				translated.getCaseManagementSystemId(),
 				translated.getCaseTypeId(),
-				pageRequest
-			).getContent()
+				troubleCase.getCaseCreation(),
+				troubleCase.getInternalId(),
+				size
+			)
 		);
 	}
 
-	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
+	public List<CaseSummary> getSnoozedCases(
+			String caseManagementSystemTag,
+			String caseTypeTag,
+			String receiptNumber,
+			Integer size
+	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug("Paged request for snoozed cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
-		return rewrap(
-			_bulkRepo.getSnoozedCases(
-				translated.getCaseManagementSystemId(),
-				translated.getCaseTypeId(),
-				pageRequest
-			).getContent()
+		LOG.debug(
+			"Request for snoozed cases after case with systemTag: {} and reciptNumber: {}",
+			caseManagementSystemTag,
+			receiptNumber
 		);
+		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
+			translated.getCaseManagementSystem(),
+			receiptNumber
+		);
+
+		if (lastCase.isEmpty()) {
+			return rewrap(
+				_bulkRepo.getSnoozedCases(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					size
+				)
+			);
+		}
+
+		TroubleCase troubleCase = lastCase.get();
+		try {
+			CaseSnooze lastSnoozeEnd = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase).get();
+			return rewrap(
+				_bulkRepo.getSnoozedCasesAfter(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					lastSnoozeEnd.getSnoozeEnd(),
+					troubleCase.getCaseCreation(),
+					troubleCase.getInternalId(),
+					size
+				)
+			);
+		} catch (NoSuchElementException _exception) {
+			throw new IllegalArgumentException(
+				"Receipt number given does not correspond to a snoozed case"
+			);
+		}
+
 	}
 
 	public Map<String, Object> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
