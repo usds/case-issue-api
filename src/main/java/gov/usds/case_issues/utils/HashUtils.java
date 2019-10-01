@@ -15,6 +15,10 @@ import org.slf4j.LoggerFactory;
 public class HashUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(HashUtils.class);
 
+	private HashUtils() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static Optional<?> descend(Object o, List<String> path) {
 		Object curr = o;
