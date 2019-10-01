@@ -102,7 +102,7 @@ public class CaseListService {
 			translated.getCaseManagementSystem(),
 			receiptNumber
 		);
-		if (lastCase.isEmpty()) {
+		if (!lastCase.isPresent()) {
 			return rewrap(
 				_bulkRepo.getActiveCases(
 					translated.getCaseManagementSystemId(),
@@ -142,7 +142,7 @@ public class CaseListService {
 			receiptNumber
 		);
 
-		if (lastCase.isEmpty()) {
+		if (!lastCase.isPresent()) {
 			return rewrap(
 				_bulkRepo.getSnoozedCases(
 					translated.getCaseManagementSystemId(),
