@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.model.CaseDetails;
+import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
 import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.SnoozeRequest;
 import gov.usds.case_issues.services.CaseDetailsService;
@@ -59,11 +60,11 @@ public class CaseDetailsApiController {
 
 	@PutMapping("activeSnooze")
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_CASES.name())")
-	public ResponseEntity<CaseSnoozeSummary> changeActiveSnooze(
+	public ResponseEntity<CaseSnoozeSummaryFacade> changeActiveSnooze(
 			@PathVariable String caseManagementSystemTag,
 			@PathVariable String receiptNumber,
 			@RequestBody @Valid SnoozeRequest requestedSnooze) {
-		CaseSnoozeSummary replacement = _caseDetailsService.updateSnooze(caseManagementSystemTag, receiptNumber, requestedSnooze);
+				CaseSnoozeSummaryFacade replacement = _caseDetailsService.updateSnooze(caseManagementSystemTag, receiptNumber, requestedSnooze);
 		return ResponseEntity.ok(replacement);
 	}
 
