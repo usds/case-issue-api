@@ -6,8 +6,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import gov.usds.case_issues.db.model.TroubleCase;
-
 /**
  * Repository interface for bulk operations (not independently autowired because
  * this turns out to break things horribly).
