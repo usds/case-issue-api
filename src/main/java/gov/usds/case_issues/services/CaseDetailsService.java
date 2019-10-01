@@ -95,7 +95,7 @@ public class CaseDetailsService {
 	}
 
 	@Transactional(readOnly=false)
-	public CaseSnoozeSummary updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
+	public CaseSnoozeSummaryFacade updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
 		if (snoozeIsActive(foundSnooze)) {
