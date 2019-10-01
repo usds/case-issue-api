@@ -18,7 +18,14 @@ import javax.validation.constraints.Pattern;
  * the same {@link Pattern} annotation in a million places.
  */
 @Constraint(validatedBy = { })
-@Pattern(regexp="\\w[-\\w]*")
+/**
+ * \\w matchs 0 or more word chars [A-Z, a-z, 0-9, _]
+ * [-\\w]* match 0 or more words seperated by [-]
+ * Examples:
+ *   Valid: "1c58a9ab-1f8c-4743-b067-f55c60c22080", "abc_XYZ_123"
+ *   Invalid: "\n\r", "\s", "?"
+ */
+@Pattern(regexp="\\w*[-\\w]*")
 @Documented
 @Retention(RUNTIME)
 @Target({ FIELD, PARAMETER, LOCAL_VARIABLE })

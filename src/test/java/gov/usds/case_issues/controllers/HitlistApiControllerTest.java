@@ -194,6 +194,13 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
+	public void search_withoutQueryParam_badRequest() throws Exception {
+		perform(doSearch(VALID_CASE_MGT_SYS, VALID_CASE_TYPE, null))
+			.andExpect(status().isBadRequest())
+			.andExpect(content().string(""));
+	}
+
+	@Test
 	public void search_noCases_emptyResult() throws Exception {
 		perform(doSearch(VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "abcde"))
 			.andExpect(status().isOk())
