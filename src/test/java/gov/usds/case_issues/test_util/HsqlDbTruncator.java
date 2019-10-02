@@ -37,7 +37,6 @@ public class HsqlDbTruncator implements DbTruncator {
 			allTables = jdbc.queryForList(sql, hibernateSchema.toUpperCase()).stream()
 					.map(m->(String) m.get("TABLE_NAME"))
 					.collect(Collectors.toList());
-			LOG.info("Initialized HSQLDB table list: {}", allTables);
 		}
 
 		for (String tableName : allTables) {

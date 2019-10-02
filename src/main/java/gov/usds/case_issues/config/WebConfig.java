@@ -45,7 +45,6 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addCorsMappings(CorsRegistry registry) {
 		String[] origins = _customProperties.getCorsOrigins();
 		// NOTE: Spring Data Rest (/resources) CORS configuration is in RestConfig, not here.
-		LOG.info("Configuring CORS allowed origins for API to {}", Arrays.toString(origins));
 		if (origins != null && 0 < origins.length) {
 			registry.addMapping("/api/**")
 					.allowCredentials(true)

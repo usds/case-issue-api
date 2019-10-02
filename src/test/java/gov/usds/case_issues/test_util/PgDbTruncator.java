@@ -44,7 +44,6 @@ public class PgDbTruncator implements DbTruncator {
 	@Override
 	@Transactional
 	public void truncateAll() {
-		LOG.warn("Attempting to truncate all tables in {}.", hibernateSchema);
 		jdbc.execute(String.format(TRUNCATE_FUNCTION_TEMPLATE, hibernateSchema));
 	}
 }

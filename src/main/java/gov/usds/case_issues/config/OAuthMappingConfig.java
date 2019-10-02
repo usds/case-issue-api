@@ -108,7 +108,6 @@ public class OAuthMappingConfig {
 	}
 
 	protected static GrantedAuthoritiesMapper oauthAuthorityMapper(@NotNull List<AuthorityPath> unsafeList) {
-		LOG.info("Building authority mapper from {}", unsafeList);
 		if (unsafeList == null || unsafeList.isEmpty()) {
 			LOG.error("No authority mapping configuration found");
 			return null;
