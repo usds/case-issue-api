@@ -33,6 +33,7 @@ import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.CaseListService;
+import gov.usds.case_issues.validators.TagFragment;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import springfox.documentation.annotations.ApiIgnore;
