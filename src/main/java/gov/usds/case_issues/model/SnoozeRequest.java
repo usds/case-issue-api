@@ -31,7 +31,7 @@ public class SnoozeRequest {
 
 	@InitBinder
 	protected void initBinder(WebDataBinder binder) {
-			binder.setAllowedFields("reason", "duration", "notes");
+		binder.setAllowedFields("reason", "duration", "notes");
 	}
 
 	@JsonProperty("reason")
