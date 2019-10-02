@@ -9,6 +9,9 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+
 import gov.usds.case_issues.db.model.CaseSnooze;
 
 /**
@@ -24,6 +27,11 @@ public class SnoozeRequest {
 		super();
 		this.snoozeReason = snoozeType;
 		this.duration = duration;
+	}
+
+	@InitBinder
+	protected void initBinder(WebDataBinder binder) {
+			binder.setAllowedFields("reason", "duration", "notes");
 	}
 
 	@JsonProperty("reason")
