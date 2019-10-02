@@ -36,7 +36,7 @@ public class AttachmentRequest {
 
 	@InitBinder
 	protected void initBinder(WebDataBinder binder) {
-			binder.setAllowedFields("noteTypeCode", "content", "subType");
+		binder.setAllowedFields("noteTypeCode", "content", "subType");
 	}
 
 	@JsonProperty(value="type", defaultValue="COMMENT")
