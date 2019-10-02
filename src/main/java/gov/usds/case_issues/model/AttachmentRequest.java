@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import gov.usds.case_issues.db.model.AttachmentType;
+import gov.usds.case_issues.validators.EscapeXSS;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -36,6 +37,7 @@ public class AttachmentRequest {
 	}
 
 	@JsonProperty("content")
+	@EscapeXSS
 	public String getContent() {
 		return content;
 	}
@@ -43,6 +45,7 @@ public class AttachmentRequest {
 	@ApiModelProperty(required=false,
 			value="The type code for a NoteSubType entity, which contains information about what kind of tag or link this is.")
 	@JsonAlias("subType")
+	@EscapeXSS
 	public String getSubtype() {
 		return subType;
 	}

@@ -3,6 +3,7 @@ package gov.usds.case_issues.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
@@ -37,6 +38,7 @@ public class SnoozeRequest {
 		return duration;
 	}
 
+	@Valid
 	public List<AttachmentRequest> getNotes() {
 		return notes;
 	}

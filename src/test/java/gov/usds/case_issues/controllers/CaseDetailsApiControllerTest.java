@@ -157,12 +157,68 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		initSampleCase();
 		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isNoContent());
-		_mvc.perform(updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null,
-				new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)));
+		_mvc.perform(
+				updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null))
+			)
+			.andExpect(status().isOk());
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("{\"notes\": [{\"content\": \"Hello World\"}]}"))
 			;
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snooze_reasonScriptTag_badRequest() throws Exception {
+		initSampleCase();
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE)).andExpect(status().isNoContent());
+		_mvc.perform(
+			updateSnooze(VALID_SYS, SAMPLE_CASE, "<script>", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null))
+		).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snooze_invalidAttachmentType_badRequest() throws Exception {
+		initSampleCase();
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE)).andExpect(status().isNoContent());
+		JSONObject body = new JSONObject()
+			.put("reason", "reason")
+			.put("duration", 1);
+		JSONArray notesArray = new JSONArray();
+		JSONObject noteJson = new JSONObject();
+		noteJson.put("type", "invalid atttachment type");
+		noteJson.put("content", "hello world");
+		notesArray.put(noteJson);
+		body.put("notes", notesArray);
+		_mvc.perform(
+			put("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/activeSnooze", VALID_SYS, SAMPLE_CASE)
+				.contentType("application/json")
+				.content(body.toString())
+				.with(csrf())
+			)
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snooze_attachmentContentScriptTag_badRequest() throws Exception {
+		initSampleCase();
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE)).andExpect(status().isNoContent());
+		_mvc.perform(
+			updateSnooze(VALID_SYS, SAMPLE_CASE, "reason", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "<script></script>", null))
+		).andExpect(status().isBadRequest());
+	}
+
+	// this might be me failing for something other than the script tag
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snooze_attachmentSubtypeScriptTag_badRequest() throws Exception {
+		initSampleCase();
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE)).andExpect(status().isNoContent());
+		_mvc.perform(
+			updateSnooze(VALID_SYS, SAMPLE_CASE, "reason", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "", "<script></script>"))
+		).andExpect(status().isBadRequest());
 	}
 
 	@Test
