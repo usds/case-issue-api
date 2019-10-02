@@ -8,10 +8,10 @@ ch.qos.logback:logback-core:1.2.3
 com.fasterxml.jackson.core:jackson-annotations:2.9.10
 com.fasterxml.jackson.core:jackson-core:2.9.10
 com.fasterxml.jackson.core:jackson-databind:2.9.10
-com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.9.10
-com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.10
-com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.10
-com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.10
+com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.9.9
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.9
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9
+com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.9
 com.fasterxml:classmate:1.4.0
 com.github.stephenc.jcip:jcip-annotations:1.0-1
 com.google.guava:guava:20.0
