@@ -1,5 +1,6 @@
 package gov.usds.case_issues.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,8 +25,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
+import gov.usds.case_issues.db.model.AttachmentSubtype;
 import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
 
 @WithMockUser(authorities = {"READ_CASES", "UPDATE_CASES"})
@@ -36,6 +39,8 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	private static final String SAMPLE_CASE_DETAIL_JSON = "{\"receiptNumber\": \"" + SAMPLE_CASE + "\", \"snoozes\": []}";
 
 	private CaseManagementSystem _sys;
+	@Autowired
+	private AttachmentSubtypeRepository _subtypeRepository;
 
 	@Before
 	public void resetDb() {
@@ -153,6 +158,25 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snoozeWithAttachment_technicalIssue_notesStored() throws Exception {
+		initSampleCase();
+		createSubtype("noteSubtypeTag");
+
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isNoContent());
+		_mvc.perform(updateSnooze(
+				VALID_SYS, SAMPLE_CASE, "assigned_case", 5, null,
+				new AttachmentRequest(AttachmentType.TAG, "assignee", "noteSubtypeTag")
+			))
+			.andExpect(status().isOk());
+		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isOk())
+			.andExpect(content().json("{\"notes\": [{\"content\": \"assignee\"}]}"))
+			;
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
 	public void snoozeWithNotes_validCase_notesStored() throws Exception {
 		initSampleCase();
 		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
@@ -240,6 +264,18 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
 		return _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
 	}
+
+
+	private AttachmentSubtype createSubtype(String externalTag) {
+		return _subtypeRepository.save(new AttachmentSubtype(
+			externalTag,
+			AttachmentType.TAG,
+			"Assignee",
+			"Who is the case assigned to?",
+			""
+		));
+	}
+
 
 	private MockHttpServletRequestBuilder detailsRequest(String systemTag, String receipt) {
 		return get("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}", systemTag, receipt);
