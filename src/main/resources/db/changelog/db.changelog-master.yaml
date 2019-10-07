@@ -293,3 +293,21 @@ databaseChangeLog:
             tableName: case_attachment_association
             constraint_name: uk__case_attachment_association
             columnNames: snooze_internal_id, attachment_internal_id
+  - changeSet:
+      id: data-updated-at
+      author: tim.best@usds.dhs.gov
+      comment: records when the
+      changes:
+        - createTable:
+            tableName: case_metadata
+            remarks: Meta data about the case information stored in this database.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: last_updated
+                  type: DATETIME
+                  remarks: the last time the case data was updated successfully

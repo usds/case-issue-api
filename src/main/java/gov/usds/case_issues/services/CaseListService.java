@@ -21,12 +21,14 @@ import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
+import gov.usds.case_issues.db.model.CaseMetadata;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
+import gov.usds.case_issues.db.repositories.CaseMetadataRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
@@ -62,6 +64,8 @@ public class CaseListService {
 	private CaseAttachmentService _attachmentService;
 	@Autowired
 	private WebConfigurationProperties _webProperties;
+	@Autowired
+	private CaseMetadataRepository _metadataRepo;
 
 	public List<TroubleCase> getCases(String caseManagementSystemTag, String caseTypeTag, String query) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
@@ -203,6 +207,8 @@ public class CaseListService {
 				newIssues.stream()
 			).collect(Collectors.toSet())
 		);
+
+		updateMetadata();
 	}
 
 	public DataFormatSpec getUploadFormat(String uploadFormatId) {
@@ -214,6 +220,17 @@ public class CaseListService {
 			throw new IllegalArgumentException("Not a recognized data format");
 		}
 		return spec;
+	}
+
+	private void updateMetadata() {
+		List<CaseMetadata> metadataRecords = _metadataRepo.findAllOrderByLastUpdatedDesc();
+		if (metadataRecords.size() == 0) {
+			_metadataRepo.save(new CaseMetadata(ZonedDateTime.now()));
+		} else {
+			CaseMetadata metadata = metadataRecords.get(0);
+			metadata.setLastUpdated(ZonedDateTime.now());
+			_metadataRepo.save(metadata);
+		}
 	}
 
 	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {

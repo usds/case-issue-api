@@ -170,6 +170,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isBadRequest())
 		;
 	}
+
 	/**
 	 * Create some data on our default case type!
 	 *
@@ -188,6 +189,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	private static MockHttpServletRequestBuilder doSearch(String cmsTag, String ctTag, String queryString) {
 		return get(API_PATH + "search", cmsTag, ctTag).param("query", queryString);
 	}
+
 	private static MockHttpServletRequestBuilder getActive(String cmsTag, String ctTag) {
 		return get(API_PATH + "active", cmsTag, ctTag);
 	}

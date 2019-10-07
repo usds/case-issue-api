@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.ZonedDateTime;
@@ -53,6 +54,8 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	private TroubleCaseRepository _caseRepo;
 	@Autowired
 	private CaseIssueRepository _issueRepo;
+	@Autowired
+	private ApplicationMetadataService _metadataService;
 
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
@@ -131,8 +134,10 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 	@Test
 	@WithMockUser(authorities="UPDATE_ISSUES")
-	public void putIssueList_noIssuesNoInput_nothingTerribleHappens() {
+	public void putIssueList_noIssuesNoInput_lastUpdatedIsUpdated() {
+		assertNull(_metadataService.getCaseMetadata());
 		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "SUPER-OLD", Collections.emptyList(), _now);
+		assertNotNull(_metadataService.getCaseMetadata());
 	}
 
 	@Test
