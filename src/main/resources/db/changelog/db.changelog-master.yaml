@@ -293,3 +293,20 @@ databaseChangeLog:
             tableName: case_attachment_association
             constraint_name: uk__case_attachment_association
             columnNames: snooze_internal_id, attachment_internal_id
+  - changeSet:
+      id: subtypes
+      author: tim.best@usds.dhs.gov
+      comment: subtypes required for search party
+      changes:
+        - sql:
+            comment: trouble case subtype
+            sql: "INSERT INTO attachment_subtype (name, external_id, for_attachment_type, url_template,
+                  internal_id, created_at, updated_at)
+                  VALUES ('Trouble Ticket', 'troubleticket', 'LINK', 'http://tickets.example.com/ticket/%s/details',
+                  1, NOW(), NOW())"
+        - sql:
+            comment: assignee subtype
+            sql: "INSERT INTO attachment_subtype (name, external_id, for_attachment_type, description,
+                  internal_id, created_at, updated_at)
+                  VALUES ('Assignee', 'assignee', 'TAG', 'Who is the case assigned to?',
+                  2, NOW(), NOW())"
