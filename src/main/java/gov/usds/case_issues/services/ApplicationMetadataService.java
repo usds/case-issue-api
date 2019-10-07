@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
+import gov.usds.case_issues.db.model.CaseMetadata;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
+import gov.usds.case_issues.db.repositories.CaseMetadataRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.model.NavigationEntry;
 
@@ -28,6 +30,8 @@ public class ApplicationMetadataService {
 	private CaseManagementSystemRepository _systemRepo;
 	@Autowired
 	private CaseTypeRepository _typeRepo;
+	@Autowired
+	private CaseMetadataRepository _metadataRepo;
 
 	public List<NavigationEntry> getCaseNavigation() {
 		LOG.info("Getting all case management systems from {}.", _systemRepo);
@@ -39,5 +43,16 @@ public class ApplicationMetadataService {
 		List<NavigationEntry> result = new ArrayList<>();
 		allSystems.forEach(sys -> result.add(new NavigationEntry(sys, allTypesIterable)));
 		return result;
+	}
+
+	public CaseMetadata getCaseMetadata() {
+		List<CaseMetadata> metadata = _metadataRepo.findAllOrderByLastUpdatedDesc();
+		if (metadata.size() < 1) {
+			return null;
+		}
+		if (metadata.size() > 1) {
+			LOG.error("There are more than one CaseMetadata records");
+		}
+		return metadata.get(0);
 	}
 }

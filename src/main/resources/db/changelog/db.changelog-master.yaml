@@ -294,19 +294,20 @@ databaseChangeLog:
             constraint_name: uk__case_attachment_association
             columnNames: snooze_internal_id, attachment_internal_id
   - changeSet:
-      id: subtypes
+      id: data-updated-at
       author: tim.best@usds.dhs.gov
-      comment: subtypes required for search party
+      comment: records when the
       changes:
-        - sql:
-            comment: trouble case subtype
-            sql: "INSERT INTO attachment_subtype (name, external_id, for_attachment_type, url_template,
-                  internal_id, created_at, updated_at)
-                  VALUES ('Trouble Ticket', 'troubleticket', 'LINK', 'http://tickets.example.com/ticket/%s/details',
-                  1, NOW(), NOW())"
-        - sql:
-            comment: assignee subtype
-            sql: "INSERT INTO attachment_subtype (name, external_id, for_attachment_type, description,
-                  internal_id, created_at, updated_at)
-                  VALUES ('Assignee', 'assignee', 'TAG', 'Who is the case assigned to?',
-                  2, NOW(), NOW())"
+        - createTable:
+            tableName: case_metadata
+            remarks: Meta data about the case information stored in this database.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: last_updated
+                  type: DATETIME
+                  remarks: the last time the case data was updated successfully

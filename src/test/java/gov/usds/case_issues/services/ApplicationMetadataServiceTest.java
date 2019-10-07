@@ -3,8 +3,11 @@ package gov.usds.case_issues.services;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,12 +15,15 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import gov.usds.case_issues.model.NavigationEntry;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
 public class ApplicationMetadataServiceTest extends CaseIssueApiTestBase {
 
+	@Autowired
+	private CaseListService _caseListService;
 	@Autowired
 	private ApplicationMetadataService _service;
 
@@ -72,6 +78,22 @@ public class ApplicationMetadataServiceTest extends CaseIssueApiTestBase {
 		assertEquals("two types found", 2, typeTags.size());
 		assertTrue("FOO found", typeTags.contains("FOO"));
 		assertTrue("BAR found", typeTags.contains("FOO"));
+	}
+
+	@Test
+	public void getCaseMetaData_neverUploaded_null() {
+		assertNull(_service.getCaseMetadata());
+	}
+
+	@Test
+	@WithMockUser(authorities="UPDATE_ISSUES")
+	public void getCaseMetaData_uploadedEmptyList_lastUpdatedNow() {
+		initTypes();
+		initSystems();
+		_caseListService.putIssueList(
+			"ABC", "FOO", "SUPER-OLD", Collections.emptyList(), ZonedDateTime.now()
+		);
+		assertNotNull(_service.getCaseMetadata());
 	}
 
 	private void initTypes() {
