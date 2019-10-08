@@ -1,6 +1,8 @@
 package gov.usds.case_issues.authorization;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 
 import javax.servlet.ServletException;
@@ -30,7 +32,12 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 				JSONObject message = new JSONObject();
 				try {
 					message.put("User", auth.getName());
-					message.put("RequestURI", request.getRequestURI());
+					try {
+						URI uri = new URI(request.getRequestURI());
+						message.put("RequestURI", uri);
+					} catch(URISyntaxException e) {
+						message.put("RequestURI", "Invalid URI");
+					}
 					message.put("Details", auth.getDetails());
 					message.put("Date", ZonedDateTime.now());
 					message.put("StatusCode", HttpStatus.FORBIDDEN.value());
