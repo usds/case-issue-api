@@ -53,7 +53,6 @@ public class AttachmentRequest {
 	@ApiModelProperty(required=false,
 			value="The type code for a NoteSubType entity, which contains information about what kind of tag or link this is.")
 	@JsonAlias("subType")
-	@EscapeXSS
 	public String getSubtype() {
 		return subType;
 	}
