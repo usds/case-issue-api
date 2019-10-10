@@ -29,11 +29,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import gov.usds.case_issues.config.DataFormatSpec;
-import gov.usds.case_issues.db.model.CaseMetadata;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
-import gov.usds.case_issues.services.ApplicationMetadataService;
 import gov.usds.case_issues.services.CaseListService;
 import gov.usds.case_issues.validators.TagFragment;
 import io.swagger.annotations.ApiImplicitParam;
@@ -48,13 +46,6 @@ public class HitlistApiController {
 
 	@Autowired
 	private CaseListService _listService;
-	@Autowired
-	private ApplicationMetadataService _metadataService;
-
-	@GetMapping("metadata")
-	public CaseMetadata getMetadata() {
-		return _metadataService.getCaseMetadata();
-	}
 
 	@GetMapping("search")
 	public List<TroubleCase> getCases(
@@ -87,7 +78,7 @@ public class HitlistApiController {
 	}
 
 	@RequestMapping(value="summary", method=RequestMethod.GET)
-	public Map<String, Number> getSummary(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag) {
+	public Map<String, Object> getSummary(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag) {
 		return _listService.getSummaryInfo(caseManagementSystemTag, caseTypeTag);
 	}
 

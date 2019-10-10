@@ -55,7 +55,8 @@ public class CaseListService {
 	private CaseSnoozeRepository _snoozeRepo;
 	@Autowired
 	private BulkCaseRepository _bulkRepo;
-
+	@Autowired
+	private ApplicationMetadataService _metadataService;
 	@Autowired
 	private CaseIssueRepository _issueRepo;
 	@Autowired
@@ -107,11 +108,13 @@ public class CaseListService {
 		);
 	}
 
-	public Map<String, Number> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
+	public Map<String, Object> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		return _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
-				.stream()
-				.collect(Collectors.toMap(a->((String) a[0]).trim(), a->(Number) a[1]));
+		Map<String, Object> summary = _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
+			.stream()
+			.collect(Collectors.toMap(a->((String) a[0]).trim(), a->(Number) a[1]));
+		summary.put("lastUpdated", getLastUpdated());
+		return summary;
 	}
 
 	public CaseGroupInfo translatePath(String caseManagementSystemTag, String caseTypeTag) {
@@ -220,6 +223,14 @@ public class CaseListService {
 			throw new IllegalArgumentException("Not a recognized data format");
 		}
 		return spec;
+	}
+
+	private ZonedDateTime getLastUpdated() {
+		CaseMetadata metadata = _metadataService.getCaseMetadata();
+		if (metadata == null) {
+			return null;
+		}
+		return metadata.getLastUpdated();
 	}
 
 	private void updateMetadata() {
