@@ -32,12 +32,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 				JSONObject message = new JSONObject();
 				try {
 					message.put("User", auth.getName());
-					try {
-						URI uri = new URI(request.getRequestURI());
-						message.put("RequestURI", uri);
-					} catch(URISyntaxException e) {
-						message.put("RequestURI", "Invalid URI");
-					}
+					message.put("RequestURI", getURI(request));
 					message.put("Details", auth.getDetails());
 					message.put("Date", ZonedDateTime.now());
 					message.put("StatusCode", HttpStatus.FORBIDDEN.value());
@@ -47,5 +42,13 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 				}
 			}
 			response.sendError(HttpStatus.FORBIDDEN.value());
+	}
+
+	private String getURI(HttpServletRequest request) {
+		try {
+			return new URI(request.getRequestURI()).toString();
+		} catch(URISyntaxException e) {
+			return "Invalid URI";
+		}
 	}
 }
