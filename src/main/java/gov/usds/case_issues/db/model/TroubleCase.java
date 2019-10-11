@@ -51,7 +51,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 				+ "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
 				+ "AND last_snooze_end >= :lastSnoozeEnd "
 				+ "AND case_creation >= :caseCreation "
-				+ "AND internal_id >= :internalId "
+				+ "AND internal_id > :internalId "
 				+ "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
 				+ "LIMIT :size",
 		resultSetMapping="snoozeCaseMapping"
@@ -73,9 +73,9 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 	@NamedNativeQuery(
 		name = "unSnoozedAfter",
 		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
-				+ "WHERE last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP "
+				+ "WHERE (last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP) "
 				+ "AND case_creation >= :caseCreation "
-				+ "AND internal_id >= :internalId "
+				+ "AND internal_id > :internalId "
 				+ "ORDER BY case_creation ASC, internal_id ASC "
 				+ "LIMIT :size",
 		resultSetMapping="snoozeCaseMapping"
