@@ -339,6 +339,22 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_service.getUploadFormat("INVALID DATE FORMAT");
 	}
 
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void getActiveCases_addedNewestFirest_paginatedCorrectly() {
+		String oldestReceiptNumber = "FKE7487700";
+		TroubleCase a = _dataService.initCase(_system, "FKE3742810", _type, ZonedDateTime.parse("2018-08-29T00:00:00-04:00"));
+		TroubleCase b = _dataService.initCase(_system, "FKE7209266", _type, ZonedDateTime.parse("2017-08-29T00:00:00-04:00"));
+		TroubleCase c = _dataService.initCase(_system, oldestReceiptNumber, _type, ZonedDateTime.parse("2016-08-29T00:00:00-04:00"));
+		ZonedDateTime lastMonth = ZonedDateTime.now().minusMonths(1);
+		_dataService.initIssue(a, "FOOBAR", lastMonth, null);
+		_dataService.initIssue(b, "FOOBAR", lastMonth, null);
+		_dataService.initIssue(c, "FOOBAR", lastMonth, null);
+
+		List<CaseSummary> activeCases = _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, oldestReceiptNumber, 20);
+		assertEquals("The two newer cases should be returned", 2, activeCases.size());
+	}
+
 	@SuppressWarnings("checkstyle:MagicNumber")
 	private List<CaseSummary> fetchCasesForSystem(String systemTag) {
 		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, null, 20);
