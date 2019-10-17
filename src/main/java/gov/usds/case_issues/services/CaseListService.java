@@ -38,11 +38,11 @@ import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.NoteSummary;
 
 /**
- * Service object for fetching paged lists of cases (and information about case counts)
- * for the main hit-list API.
+ * Service object for fetching paged lists of cases (and information about case
+ * counts) for the main hit-list API.
  */
 @Service
-@Transactional(readOnly=true)
+@Transactional(readOnly = true)
 public class CaseListService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseListService.class);
@@ -73,144 +73,104 @@ public class CaseListService {
 		}
 
 		return _caseRepo.getFirst5ByCaseManagementSystemAndCaseTypeAndReceiptNumberContains(
-			translated.getCaseManagementSystem(),
-			translated.getCaseType(),
-			query
-		);
+				translated.getCaseManagementSystem(), translated.getCaseType(), query);
 	}
 
-	public List<CaseSummary> getActiveCases(
-		String caseManagementSystemTag,
-		String caseTypeTag,
-		String receiptNumber,
-		Integer size
-	) {
+	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, String receiptNumber,
+			Integer size) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug(
-			"Request for active cases after case with systemTag: {} and reciptNumber: {}",
-			caseManagementSystemTag,
-			receiptNumber
-		);
-		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
-			translated.getCaseManagementSystem(),
-			receiptNumber
-		);
+		LOG.debug("Request for active cases after case with systemTag: {} and reciptNumber: {}",
+				caseManagementSystemTag, receiptNumber);
+		Optional<TroubleCase> lastCase = _caseRepo
+				.findByCaseManagementSystemAndReceiptNumber(translated.getCaseManagementSystem(), receiptNumber);
 		if (!lastCase.isPresent()) {
 			return rewrap(
-				_bulkRepo.getActiveCases(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					size
-				),
-				false
-			);
+					_bulkRepo.getActiveCases(translated.getCaseManagementSystemId(), translated.getCaseTypeId(), size));
 		}
 		TroubleCase troubleCase = lastCase.get();
 
-		return rewrap(
-			_bulkRepo.getActiveCasesAfter(
-				translated.getCaseManagementSystemId(),
-				translated.getCaseTypeId(),
-				troubleCase.getCaseCreation(),
-				troubleCase.getInternalId(),
-				size
-			),
-			false
-		);
+		return rewrap(_bulkRepo.getActiveCasesAfter(translated.getCaseManagementSystemId(), translated.getCaseTypeId(),
+				troubleCase.getCaseCreation(), troubleCase.getInternalId(), size));
 	}
 
-	public List<CaseSummary> getSnoozedCases(
-			String caseManagementSystemTag,
-			String caseTypeTag,
-			String receiptNumber,
-			Integer size
-	) {
+	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, String receiptNumber,
+			Integer size) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug(
-			"Request for snoozed cases after case with systemTag: {} and reciptNumber: {}",
-			caseManagementSystemTag,
-			receiptNumber
-		);
-		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
-			translated.getCaseManagementSystem(),
-			receiptNumber
-		);
+		LOG.debug("Request for snoozed cases after case with systemTag: {} and reciptNumber: {}",
+				caseManagementSystemTag, receiptNumber);
+		Optional<TroubleCase> lastCase = _caseRepo
+				.findByCaseManagementSystemAndReceiptNumber(translated.getCaseManagementSystem(), receiptNumber);
 
 		if (!lastCase.isPresent()) {
-			return rewrap(
-				_bulkRepo.getSnoozedCases(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					size
-				),
-				false
-			);
+			return rewrap(_bulkRepo.getSnoozedCases(translated.getCaseManagementSystemId(), translated.getCaseTypeId(),
+					size));
 		}
 
 		TroubleCase troubleCase = lastCase.get();
 		try {
 			CaseSnooze lastSnoozeEnd = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase).get();
-			return rewrap(
-				_bulkRepo.getSnoozedCasesAfter(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					lastSnoozeEnd.getSnoozeEnd(),
-					troubleCase.getCaseCreation(),
-					troubleCase.getInternalId(),
-					size
-				),
-				false
-			);
+			return rewrap(_bulkRepo.getSnoozedCasesAfter(translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(), lastSnoozeEnd.getSnoozeEnd(), troubleCase.getCaseCreation(),
+					troubleCase.getInternalId(), size));
 		} catch (NoSuchElementException _exception) {
-			throw new IllegalArgumentException(
-				"Receipt number given does not correspond to a snoozed case"
-			);
+			throw new IllegalArgumentException("Receipt number given does not correspond to a snoozed case");
 		}
 
 	}
 
 	public Map<String, Number> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		return _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
-				.stream()
-				.collect(Collectors.toMap(a->((String) a[0]).trim(), a->(Number) a[1]));
+		return _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId()).stream()
+				.collect(Collectors.toMap(a -> ((String) a[0]).trim(), a -> (Number) a[1]));
 	}
 
 	public CaseGroupInfo translatePath(String caseManagementSystemTag, String caseTypeTag) {
 		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByExternalId(caseManagementSystemTag)
-				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
+				.orElseThrow(() -> new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
 		CaseType caseType = _caseTypeRepo.findByExternalId(caseTypeTag)
-				.orElseThrow(()->new ApiModelNotFoundException("Case Type", caseTypeTag));
+				.orElseThrow(() -> new ApiModelNotFoundException("Case Type", caseTypeTag));
 		return new CaseGroupInfo(caseManagementSystem, caseType);
 	}
 
 	/**
-	 * Hard set the list of open issues for the given {@link CaseManagementSystem}, {@link CaseType} and
-	 * {@link CaseIssue#getIssueType()} to the supplied list of cases.
+	 * Hard set the list of open issues for the given {@link CaseManagementSystem},
+	 * {@link CaseType} and {@link CaseIssue#getIssueType()} to the supplied list of
+	 * cases.
 	 * <ul>
-	 * <li>Issues that are open for cases that are not on the list will be marked closed;</li>
+	 * <li>Issues that are open for cases that are not on the list will be marked
+	 * closed;</li>
 	 * <li>Cases that are in the list and do not exist will be created and have an
-	 *     issue of the correct type created.</li>
-	 * <li>Cases that are in the list and already exist will have their additional data updated,
-	 *     and an issue created if no open issue of the correct type exists;</li>
+	 * issue of the correct type created.</li>
+	 * <li>Cases that are in the list and already exist will have their additional
+	 * data updated, and an issue created if no open issue of the correct type
+	 * exists;</li>
 	 * </ul>
-	 * @param systemTag the {@link CaseManagementSystem#getExternalId()} for the system we are updating.
-	 * @param caseTypeTag {@link CaseType#getExternalId()} for the case type we are updating.
-	 * @param issueTypeTag the type of issue we are updating.
-	 * @param newIssueCases case information for each case that has this issue as of the date for which we are uploading data.
-	 * @param eventDate the date (usually but not always {@link ZonedDateTime#now()}) to attach to this update
-	 *    (this will be reflected in the {@link CaseIssue#getIssueCreated()} and {@link CaseIssue#getIssueClosed()}
-	 *    values that are set by this method).
-	 * @throws ApiModelNotFoundException if the {@link CaseManagementSystem} or {@link CaseType} could not be found.
+	 * 
+	 * @param systemTag     the {@link CaseManagementSystem#getExternalId()} for the
+	 *                      system we are updating.
+	 * @param caseTypeTag   {@link CaseType#getExternalId()} for the case type we
+	 *                      are updating.
+	 * @param issueTypeTag  the type of issue we are updating.
+	 * @param newIssueCases case information for each case that has this issue as of
+	 *                      the date for which we are uploading data.
+	 * @param eventDate     the date (usually but not always
+	 *                      {@link ZonedDateTime#now()}) to attach to this update
+	 *                      (this will be reflected in the
+	 *                      {@link CaseIssue#getIssueCreated()} and
+	 *                      {@link CaseIssue#getIssueClosed()} values that are set
+	 *                      by this method).
+	 * @throws ApiModelNotFoundException if the {@link CaseManagementSystem} or
+	 *                                   {@link CaseType} could not be found.
 	 */
-	@Transactional(readOnly=false)
+	@Transactional(readOnly = false)
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
 	public void putIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
 			Iterable<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
 		CaseGroupInfo translated = translatePath(systemTag, caseTypeTag);
-		List<CaseIssue> currentIssues = _issueRepo.findActiveIssues(translated.getCaseManagementSystem(), translated.getCaseType(),
-				issueTypeTag);
-		Map<String, CaseIssue> currentMap = currentIssues.stream().collect(Collectors.toMap(i->i.getIssueCase().getReceiptNumber(), i->i));
+		List<CaseIssue> currentIssues = _issueRepo.findActiveIssues(translated.getCaseManagementSystem(),
+				translated.getCaseType(), issueTypeTag);
+		Map<String, CaseIssue> currentMap = currentIssues.stream()
+				.collect(Collectors.toMap(i -> i.getIssueCase().getReceiptNumber(), i -> i));
 
 		// build a list containing only CaseSummary objects with no existing CaseIssue
 		List<CaseRequest> requestedNewIssues = new ArrayList<>();
@@ -228,14 +188,16 @@ public class CaseListService {
 		}
 
 		// terminate all the remaining issues in the current collection
-		// this could also be done directly in the database, which might not be a bad idea?
+		// this could also be done directly in the database, which might not be a bad
+		// idea?
 		currentMap.values().forEach(i -> i.setIssueClosed(eventDate));
 
 		// get or create cases
 		HashSet<String> newReceipts = requestedNewIssues.stream().map(CaseRequest::getReceiptNumber)
 				.collect(Collectors.toCollection(HashSet::new));
-		Map<String, TroubleCase> existingCases = _caseRepo.getAllByCaseManagementSystemAndReceiptNumberIn(
-				translated.getCaseManagementSystem(), newReceipts).stream().collect(Collectors.toMap(TroubleCase::getReceiptNumber, i->i));
+		Map<String, TroubleCase> existingCases = _caseRepo
+				.getAllByCaseManagementSystemAndReceiptNumberIn(translated.getCaseManagementSystem(), newReceipts)
+				.stream().collect(Collectors.toMap(TroubleCase::getReceiptNumber, i -> i));
 		newReceipts.removeAll(existingCases.keySet());
 
 		List<TroubleCase> unsavedCases = new ArrayList<>();
@@ -243,9 +205,8 @@ public class CaseListService {
 		for (CaseRequest candidate : requestedNewIssues) {
 			String receiptNumber = candidate.getReceiptNumber();
 			if (newReceipts.contains(receiptNumber)) {
-				unsavedCases.add(new TroubleCase(translated.getCaseManagementSystem(),
-						receiptNumber, translated.getCaseType(),
-						candidate.getCaseCreation(), candidate.getExtraData()));
+				unsavedCases.add(new TroubleCase(translated.getCaseManagementSystem(), receiptNumber,
+						translated.getCaseType(), candidate.getCaseCreation(), candidate.getExtraData()));
 			} else {
 				TroubleCase found = existingCases.get(receiptNumber);
 				if (found.getCaseType() != translated.getCaseType()) {
@@ -255,7 +216,8 @@ public class CaseListService {
 			}
 		}
 		// slightly dumb bit of DRY factory work
-		Function<? super TroubleCase, ? extends CaseIssue> createIssue = tc -> new CaseIssue(tc, issueTypeTag, eventDate);
+		Function<? super TroubleCase, ? extends CaseIssue> createIssue = tc -> new CaseIssue(tc, issueTypeTag,
+				eventDate);
 
 		// well this is ugly
 		Iterable<TroubleCase> newlySavedCases = _caseRepo.saveAll(unsavedCases);
@@ -263,12 +225,8 @@ public class CaseListService {
 		newlySavedCases.forEach(tc -> newIssues.add(createIssue.apply(tc)));
 
 		// aaaand save everything!
-		_issueRepo.saveAll(
-			Stream.concat(
-				existingCases.values().stream().map(createIssue),
-				newIssues.stream()
-			).collect(Collectors.toSet())
-		);
+		_issueRepo.saveAll(Stream.concat(existingCases.values().stream().map(createIssue), newIssues.stream())
+				.collect(Collectors.toSet()));
 	}
 
 	public DataFormatSpec getUploadFormat(String uploadFormatId) {
@@ -282,17 +240,16 @@ public class CaseListService {
 		return spec;
 	}
 
-	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {
+	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
 		LOG.info("Finding snoozed case from {}.", _snoozeRepo);
 		LOG.info("Finding attachment from {}.", _attachmentService);
-		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
+		Function<? super Object[], ? extends CaseSummary> mapper = row -> {
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
-			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null : _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			List<NoteSummary> notes = null;
-			if(includeNotes) {
-				notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
-			}
+			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
+					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
+			List<NoteSummary> notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new)
+					.collect(Collectors.toList());
 			return new CaseSummary(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
