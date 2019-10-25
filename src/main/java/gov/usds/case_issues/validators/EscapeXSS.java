@@ -20,14 +20,14 @@ import javax.validation.constraints.Pattern;
  * A custom constraint for escaping script tags and other strings containing potential XSS attacks.
  */
 @Constraint(validatedBy = { })
-/**
- * ((   ).)* Warps expressions to allow 0 more of any charecter other than a line break
- * Wrapped expresions us ?! to preform a negative lookahead and define expression that cannot exist
- *   (?!(\\b)(on\\S+)(\\s*)=) "on(string | whitespcae) =" to catch onerror= or onclick= html attributes
- *   (?!javascript)           the string litteral "javascript"
+/*
+ * ((   ).|\\s)* Warps expressions to allow 0 more of any character (including line breaks)
+ * Wrapped expressions use ?! to perform a negative lookahead and define expression that cannot exist
+ *   (?!(\\b)(on\\S+)(\\s*)=) "on(string | whitespace) =" to catch onerror= or onclick= html attributes
+ *   (?!javascript)           the string literal "javascript"
  *   (?!(<(\\s*)script))      the opening or closing of a script tag "<script" or "</script"
  */
-@Pattern(regexp="((?!(\\b)(on\\S+)(\\s*)=)(?!javascript)(?!(<(\\s*)script)).)*")
+@Pattern(regexp="((?!(\\b)(on\\S+)(\\s*)=)(?!javascript)(?!(<(\\s*)script)).|\\s)*")
 @Documented
 @Retention(RUNTIME)
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
