@@ -169,6 +169,22 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snoozeWithNotes_validCase_notesStoreda() throws Exception {
+		initSampleCase();
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isNoContent());
+		_mvc.perform(
+				updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "Hello\\nWorld", null))
+			)
+			.andExpect(status().isOk());
+		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.notes[0].content").value("Hello\\nWorld"))
+			;
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
 	public void snooze_reasonScriptTag_badRequest() throws Exception {
 		initSampleCase();
 		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE)).andExpect(status().isNoContent());
