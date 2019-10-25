@@ -67,18 +67,6 @@ Several custom sections can be added to the application properties:
     user's `attributes` to internal authorities for this application.
 
 ## Loading Sample Data
-Unless you want to create all the data by hand using the `resources` API (not recommended),
-you will want to configure the application to load some sample data. This is most easily done
-by running the following command from the root of this project
-
-```bash
-$ cp src/main/resources/_application-local.yml src/main/resources/application-local.yml
-```
-
-See see (SampleDataConfig)[src/main/java/gov/usds/case_issues/config/SampleDataConfig.java] for more insight.
-
-### Loading Data into a running application
-
 If you have successfully started the application with the `dev` profile and don't want to mess
 with the profiles and restart just to see some data, this command should get you started:
 

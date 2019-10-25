@@ -13,6 +13,10 @@ import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 @WithMockUser
 public abstract class ControllerTestBase extends CaseIssueApiTestBase {
 
+	protected static final String ORIGIN_HTTPS_OK = "https://ok-client.gov";
+	protected static final String ORIGIN_HTTP_OK = "http://ok-client.net";
+	protected static final String ORIGIN_NOT_OK = "http://evil-client.com";
+
 	@Autowired
 	protected MockMvc _mvc;
 

@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -66,7 +65,6 @@ public class CaseListService {
 
 	public List<TroubleCase> getCases(String caseManagementSystemTag, String caseTypeTag, String query) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug("Request for query cases by: {}", query);
 
 		if (query == null) {
 			return new ArrayList<>();
@@ -82,17 +80,27 @@ public class CaseListService {
 	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for active cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
-		Page<Object[]> cases = _bulkRepo.getActiveCases(
-			translated.getCaseManagementSystemId(), translated.getCaseTypeId(), pageRequest);
-		return rewrap(cases.getContent(), false);
+		return rewrap(
+			_bulkRepo.getActiveCases(
+				translated.getCaseManagementSystemId(),
+				translated.getCaseTypeId(),
+				pageRequest
+			).getContent(),
+			false
+		);
 	}
 
 	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug("Paged request for snoozed cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
-		Page<Object[]> cases = _bulkRepo.getSnoozedCases(
-			translated.getCaseManagementSystemId(), translated.getCaseTypeId(), pageRequest);
-		return rewrap(cases.getContent(), true);
+		return rewrap(
+			_bulkRepo.getSnoozedCases(
+				translated.getCaseManagementSystemId(),
+				translated.getCaseTypeId(),
+				pageRequest
+			).getContent(),
+			false
+		);
 	}
 
 	public Map<String, Number> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
@@ -140,13 +148,11 @@ public class CaseListService {
 
 		// build a list containing only CaseSummary objects with no existing CaseIssue
 		List<CaseRequest> requestedNewIssues = new ArrayList<>();
-		int updatedCaseCount = 0;
 		for (CaseRequest caseSummary : newIssueCases) {
 			CaseIssue existingIssue = currentMap.remove(caseSummary.getReceiptNumber());
 			if (null == existingIssue) {
 				requestedNewIssues.add(caseSummary);
 			} else {
-				updatedCaseCount++;
 				TroubleCase issueCase = existingIssue.getIssueCase();
 				issueCase.getExtraData().putAll(caseSummary.getExtraData());
 				if (issueCase.getCaseType() != translated.getCaseType()) {
@@ -155,8 +161,6 @@ public class CaseListService {
 			}
 		}
 
-		LOG.debug("For PUT of {}/{}/{}, opening {} and closing {} issues; updating cases of {} existing issues", systemTag, caseTypeTag, issueTypeTag,
-				requestedNewIssues.size(), currentMap.size(), updatedCaseCount);
 		// terminate all the remaining issues in the current collection
 		// this could also be done directly in the database, which might not be a bad idea?
 		currentMap.values().forEach(i -> i.setIssueClosed(eventDate));
@@ -167,9 +171,6 @@ public class CaseListService {
 		Map<String, TroubleCase> existingCases = _caseRepo.getAllByCaseManagementSystemAndReceiptNumberIn(
 				translated.getCaseManagementSystem(), newReceipts).stream().collect(Collectors.toMap(TroubleCase::getReceiptNumber, i->i));
 		newReceipts.removeAll(existingCases.keySet());
-
-		LOG.debug("For PUT of {}/{}/{}, found {} existing cases, creating {}", systemTag, caseTypeTag, issueTypeTag,
-				existingCases.size(), newReceipts.size());
 
 		List<TroubleCase> unsavedCases = new ArrayList<>();
 		// create or update cases
@@ -195,9 +196,6 @@ public class CaseListService {
 		List<CaseIssue> newIssues = new ArrayList<>();
 		newlySavedCases.forEach(tc -> newIssues.add(createIssue.apply(tc)));
 
-		LOG.debug("For PUT of {}/{}/{}, attempting to save {} new issues", systemTag, caseTypeTag, issueTypeTag,
-				newIssues.size() + existingCases.size());
-
 		// aaaand save everything!
 		_issueRepo.saveAll(
 			Stream.concat(
@@ -219,6 +217,8 @@ public class CaseListService {
 	}
 
 	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {
+		LOG.info("Finding snoozed case from {}.", _snoozeRepo);
+		LOG.info("Finding attachment from {}.", _attachmentService);
 		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];

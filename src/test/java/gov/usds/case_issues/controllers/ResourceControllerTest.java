@@ -131,7 +131,7 @@ public class ResourceControllerTest extends ControllerTestBase {
 	public void unsafeOperations_noCsrf_forbidden() throws Exception {
 		createFixtureEntities();
 		doCreate(CaseManagementSystem.class, taggedResourceBody("MINE3", "MyCaseManager 3.1", "The manager that manages."),
-				HttpStatus.FORBIDDEN, false);
+				HttpStatus.FORBIDDEN, false, null);
 		perform(delete(getFixtureCaseManagerUrl()))
 			.andExpect(status().isForbidden());
 		perform(patch(getFixtureCaseManagerUrl()).content("{\"name\": \"Other Name\"}"))
@@ -139,8 +139,25 @@ public class ResourceControllerTest extends ControllerTestBase {
 		perform(put(getFixtureCaseManagerUrl()).content("{\"name\": \"Other Name\"}"))
 			.andExpect(status().isForbidden());
 		doCreate(CaseType.class, taggedResourceBody("STD", "Standard Case", "Nothing interesting"),
-				HttpStatus.FORBIDDEN, false);
+				HttpStatus.FORBIDDEN, false, null);
 		perform(delete(getFixtureCaseTypeUrl()))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	public void crossOriginRequests_anyOrigin_forbidden() throws Exception {
+		createFixtureEntities();
+		perform(get(getFixtureCaseManagerUrl()).header("Origin", ORIGIN_HTTP_OK))
+			.andExpect(status().isForbidden());
+		doCreate(CaseManagementSystem.class, taggedResourceBody("MINE4", "MyCaseManager 3.2", ""),
+				HttpStatus.FORBIDDEN, false, ORIGIN_HTTPS_OK);
+		perform(get(linkFor(TroubleCase.class)).header("Origin", ORIGIN_HTTPS_OK))
+			.andExpect(status().isForbidden());
+		perform(get(getFixtureCaseManagerUrl()).header("Origin", ORIGIN_NOT_OK))
+			.andExpect(status().isForbidden());
+		doCreate(CaseManagementSystem.class, taggedResourceBody("MINE4", "MyCaseManager 3.2", ""),
+				HttpStatus.FORBIDDEN, false, ORIGIN_NOT_OK);
+		perform(get(linkFor(TroubleCase.class)).header("Origin", ORIGIN_NOT_OK))
 			.andExpect(status().isForbidden());
 	}
 
@@ -252,14 +269,17 @@ public class ResourceControllerTest extends ControllerTestBase {
 	}
 
 	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus created) throws Exception {
-		return doCreate(entityType, body, created, true);
+		return doCreate(entityType, body, created, true, null);
 	}
 
-	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus expectedStatus, boolean withCsrf) throws Exception {
+	private MockHttpServletResponse doCreate(Class<?> entityType, JSONObject body, HttpStatus expectedStatus, boolean withCsrf, String origin) throws Exception {
 		MockHttpServletRequestBuilder postRequest = post(linkFor(entityType))
 			.content(body.toString());
 		if (withCsrf) {
 			postRequest.with(csrf());
+		}
+		if (origin != null) {
+			postRequest.header("Origin", origin);
 		}
 		return _mvc.perform(postRequest)
 			.andExpect(status().is(expectedStatus.value()))

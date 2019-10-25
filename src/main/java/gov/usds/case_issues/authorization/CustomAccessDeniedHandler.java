@@ -1,6 +1,8 @@
 package gov.usds.case_issues.authorization;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 
 import javax.servlet.ServletException;
@@ -24,21 +26,29 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response,
-		AccessDeniedException exc) throws IOException, ServletException {
+		AccessDeniedException _exc) throws IOException, ServletException {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			if (auth != null) {
 				JSONObject message = new JSONObject();
 				try {
 					message.put("User", auth.getName());
-					message.put("RequestURI", request.getRequestURI());
+					message.put("RequestURI", getURI(request));
 					message.put("Details", auth.getDetails());
 					message.put("Date", ZonedDateTime.now());
 					message.put("StatusCode", HttpStatus.FORBIDDEN.value());
-					LOG.warn(message.toString());
+					LOG.warn("{}", message);
 				} catch(JSONException e) {
 					LOG.error("Unable to parse log event into JSON ", e);
 				}
 			}
 			response.sendError(HttpStatus.FORBIDDEN.value());
+	}
+
+	private String getURI(HttpServletRequest request) {
+		try {
+			return new URI(request.getRequestURI()).toString();
+		} catch(URISyntaxException e) {
+			return "Invalid URI";
+		}
 	}
 }

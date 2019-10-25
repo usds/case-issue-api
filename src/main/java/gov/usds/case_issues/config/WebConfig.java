@@ -2,11 +2,8 @@ package gov.usds.case_issues.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -33,8 +30,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnWebApplication
 public class WebConfig implements WebMvcConfigurer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class);
-
 	/** A filter order that allows us to get in before the Spring Security filter chain. */
 	private static final int BEFORE_SECURITY = -100;
 
@@ -44,17 +39,19 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		String[] origins = _customProperties.getCorsOrigins();
-		LOG.info("Configuring CORS allowed origins for API to {}", Arrays.toString(origins));
+		// NOTE: Spring Data Rest (/resources) CORS configuration is in RestConfig, not here.
 		if (origins != null && 0 < origins.length) {
-			registry
-				.addMapping("/api/**")
+			registry.addMapping("/api/**")
 					.allowCredentials(true)
 					.allowedMethods("*")
-					.allowedOrigins(origins)
-			;
+					.allowedOrigins(origins);
+			registry.addMapping("/csrf")
+					.allowCredentials(true)
+					.allowedMethods("GET")
+					.allowedOrigins(origins);
 		}
 	}
-	
+
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addStatusController("/health", HttpStatus.OK);

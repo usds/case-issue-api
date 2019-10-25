@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +35,6 @@ import gov.usds.case_issues.model.SnoozeRequest;
 @Service
 @Transactional(readOnly=true)
 public class CaseDetailsService {
-
-	private static final Logger LOG = LoggerFactory.getLogger(CaseDetailsService.class);
 
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
@@ -89,31 +85,25 @@ public class CaseDetailsService {
 
 	@Transactional(readOnly=false)
 	public boolean endActiveSnooze(String caseManagementSystemTag, String receiptNumber) {
-		LOG.debug("Ending current snooze on {}/{}", caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> found = findSnooze(caseManagementSystemTag, receiptNumber);
 		if (snoozeIsActive(found)) {
 			found.get().endSnoozeNow();
 			return true;
 		} else {
-			LOG.debug("No active snooze found for {}/{}", caseManagementSystemTag, receiptNumber);
 			return false;
 		}
 	}
 
 	@Transactional(readOnly=false)
-	public CaseSnoozeSummary updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
+	public CaseSnoozeSummaryFacade updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
 		if (snoozeIsActive(foundSnooze)) {
 			CaseSnooze oldSnooze = foundSnooze.get();
-			LOG.debug("Found snooze on {}/{} expiring {}: ending it now",
-				caseManagementSystemTag, receiptNumber, oldSnooze.getSnoozeEnd());
 			oldSnooze.endSnoozeNow();
 		}
 		String reason = requestedSnooze.getSnoozeReason();
 		int duration = requestedSnooze.getDuration();
-		LOG.debug("Setting snooze on {}/{} to {} for {} days",
-				caseManagementSystemTag, receiptNumber, reason, duration);
 		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration);
 		_snoozeRepo.save(replacement);
 		List<NoteSummary> savedNotes = requestedSnooze.getNotes().stream()

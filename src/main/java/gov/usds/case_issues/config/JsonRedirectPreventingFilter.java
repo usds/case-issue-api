@@ -29,7 +29,6 @@ public class JsonRedirectPreventingFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		String accept = request.getHeader("Accept");
-		LOG.debug("Handling request for {} with Accept: {}", request.getRequestURI(), accept);
 		if (accept != null && accept.contains("text/html")) { // this is probably a browser qua browser, not JS client or curl
 			chain.doFilter(servletRequest, servletResponse);
 		} else {
@@ -46,7 +45,7 @@ public class JsonRedirectPreventingFilter implements Filter {
 		}
 
 		@Override
-		public void sendRedirect(String location) throws IOException {
+		public void sendRedirect(String _location) throws IOException {
 			LOG.info("Intercepted a redirect on a JSON request: sending 401 instead");
 			sendError(SC_UNAUTHORIZED);
 		}

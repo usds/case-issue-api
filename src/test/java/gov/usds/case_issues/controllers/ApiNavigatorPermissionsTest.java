@@ -32,9 +32,6 @@ public class ApiNavigatorPermissionsTest extends ControllerTestBase {
 	public void getHalResource_anonymous_ok() throws Exception {
 		browserGet("/browser/vendor/img/ajax-loader.gif").andExpect(status().isOk());
 	}
-	public void getHalProfile_anonymous_unauthorized() throws Exception {
-		browserGet("/").andExpect(status().isUnauthorized());
-	}
 
 	@Test
 	public void getSwaggerUi_anonymous_ok() throws Exception {

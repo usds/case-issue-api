@@ -144,7 +144,7 @@ public class OAuthMappingConfigTest {
 		Map<String, Object> attr = simpleAttributes();
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "name_list");
 		OAuth2User user = service.loadUser(null); // we ignore the input anyway
-		assertEquals("actual_name", user.getName());
+		assertEquals("actual_name;04c6752c-31cd-437a-b7a3-70f25676af1b", user.getName());
 		assertEquals(attr, user.getAttributes());
 		assertEquals(Collections.singleton(new SimpleGrantedAuthority("respect")), user.getAuthorities());
 	}
@@ -153,7 +153,7 @@ public class OAuthMappingConfigTest {
 	public void createDelegatingUserService_nameInScalar_correctUser() {
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
 		OAuth2User user = service.loadUser(null);
-		assertEquals("name_in_scalar", user.getName());
+		assertEquals("name_in_scalar;04c6752c-31cd-437a-b7a3-70f25676af1b", user.getName());
 		assertEquals(simpleAttributes(), user.getAttributes());
 		assertEquals(Collections.singleton(new SimpleGrantedAuthority("respect")), user.getAuthorities());
 	}
@@ -185,7 +185,7 @@ public class OAuthMappingConfigTest {
 
 	private Map<String, Object> simpleAttributes() {
 		Map<String, Object> attr = new HashMap<>();
-		attr.put("name", "not actually the name");
+		attr.put("name", "04c6752c-31cd-437a-b7a3-70f25676af1b");
 		Map<String, Object> myAttr = new HashMap<>();
 		myAttr.put("name_list", Arrays.asList("actual_name"));
 		myAttr.put("empty_list", Collections.emptyList());
