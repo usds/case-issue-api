@@ -10,20 +10,23 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 /**
  * A record of an issue upload request (successful or unsuccessful).
  */
 @Entity
+@DynamicUpdate
 public class CaseIssueUpload extends UpdatableEntity {
 
 	@ManyToOne(optional=false)
-	@JoinColumn(nullable=false)
+	@JoinColumn(nullable=false, updatable=false)
 	private CaseManagementSystem caseManagementSystem;
 	@ManyToOne(optional=false)
-	@JoinColumn(nullable=false)
+	@JoinColumn(nullable=false, updatable=false)
 	private CaseType caseType;
 	@NotNull
-	@Column(nullable=false)
+	@Column(nullable=false, updatable=false)
 	private String issueType;
 	@NotNull
 	@Column(nullable=false)
