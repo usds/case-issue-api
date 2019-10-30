@@ -55,6 +55,10 @@ public class FixtureDataInitializationService {
 		return _caseManagementSystemRepo.save(new CaseManagementSystem(tag, name, description));
 	}
 
+	public CaseType ensureCaseTypeInitialized(String tag, String name) {
+		return ensureCaseTypeInitialized(tag, name, null);
+	}
+
 	public CaseType ensureCaseTypeInitialized(String tag, String name, String description) {
 		LOG.debug("(Re)initializing case type '{}'", tag);
 		Optional<CaseType> found = _caseTypeRepository.findByExternalId(tag);
