@@ -64,6 +64,8 @@ public class CaseListService {
 	@Autowired
 	private CaseAttachmentService _attachmentService;
 	@Autowired
+	private UploadStatusService _uploadStatusService; // we should not have this and the repo injected in the same class!
+	@Autowired
 	private CaseIssueUploadRepository _uploadRepo;
 	@Autowired
 	private WebConfigurationProperties _webProperties;
@@ -108,11 +110,17 @@ public class CaseListService {
 		);
 	}
 
-	public Map<String, Number> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
+	public Map<String, Object> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		return _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
+		Map<String, Object> caseCounts = _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
 				.stream()
 				.collect(Collectors.toMap(a->((String) a[0]).trim(), a->(Number) a[1]));
+		CaseIssueUpload lastSuccess = _uploadStatusService.getLastUpload(
+			translated.getCaseManagementSystem(), translated.getCaseType(), UploadStatus.SUCCESSFUL);
+		if (lastSuccess != null) {
+			caseCounts.put("lastUpdated", lastSuccess.getEffectiveDate());
+		}
+		return caseCounts;
 	}
 
 	public CaseGroupInfo translatePath(String caseManagementSystemTag, String caseTypeTag) {

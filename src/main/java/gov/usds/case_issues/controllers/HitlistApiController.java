@@ -82,7 +82,7 @@ public class HitlistApiController {
 	}
 
 	@RequestMapping(value="summary", method=RequestMethod.GET)
-	public Map<String, Number> getSummary(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag) {
+	public Map<String, Object> getSummary(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag) {
 		return _listService.getSummaryInfo(caseManagementSystemTag, caseTypeTag);
 	}
 

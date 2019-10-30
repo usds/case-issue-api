@@ -89,7 +89,9 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		;
 		_mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
-			.andExpect(content().json("{}", true))
+			.andExpect(jsonPath("$.NEVER_SNOOZED").doesNotExist())
+			.andExpect(jsonPath("$.CURRENTLY_SNOOZED").doesNotExist())
+			.andExpect(jsonPath("$.PREVIOUSLY_SNOOZED").doesNotExist())
 		;
 	}
 
@@ -98,7 +100,8 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		initCaseData();
 		_mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
-			.andExpect(content().json("{'NEVER_SNOOZED': 1, 'CURRENTLY_SNOOZED': 1}", true))
+			.andExpect(jsonPath("$.NEVER_SNOOZED").value("1"))
+			.andExpect(jsonPath("$.CURRENTLY_SNOOZED").value("1"))
 		;
 		_mvc.perform(getActive(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
@@ -162,6 +165,32 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		perform(jsonPut).andExpect(status().isBadRequest());
 		assertEquals("No upload records should exist",
 			0, _uploadService.getUploadHistory(_system, _type).size());
+	}
+
+	@Test
+	public void getSummary_dataNeverAdded_noLastActive() throws Exception {
+		initCaseData();
+		_mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.lastUpdated").doesNotExist());
+	}
+
+
+	@Test
+	@WithMockUser(authorities = {"READ_CASES", "UPDATE_ISSUES"})
+	public void getSummary_emptyCasesAdded_lastActviePresent() throws Exception {
+		initCaseData();
+		perform(put(API_PATH + "{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
+			.contentType("text/csv")
+			.with(csrf())
+			.content(
+				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
+				"FKE5250608,2014-08-29T00:00:00-04:00,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing\n"
+		)).andExpect(status().isAccepted());
+
+		_mvc.perform(getSummary(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.lastUpdated").isString());
 	}
 
 	@Test

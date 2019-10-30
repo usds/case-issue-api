@@ -60,6 +60,10 @@ public class UploadStatusService {
 		return _uploadRepository.findFirstByCaseManagementSystemAndCaseTypeAndIssueTypeAndUploadStatusOrderByEffectiveDateDesc(
 				sys, type, issueTypeTag, UploadStatus.SUCCESSFUL).orElse(null);
 	}
+	public CaseIssueUpload getLastUpload(CaseManagementSystem sys, CaseType type, UploadStatus successful) {
+		return _uploadRepository.findFirstByCaseManagementSystemAndCaseTypeAndUploadStatusOrderByEffectiveDateDesc(
+				sys, type, UploadStatus.SUCCESSFUL).orElse(null);
+	}
 
 	/** Simple fetch-by-ID, for something where people rarely want to know the ID: initially just for test/verification */ 
 	public CaseIssueUpload readUploadInformation(Long id) {

@@ -25,4 +25,6 @@ public interface CaseIssueUploadRepository extends CrudRepository<CaseIssueUploa
 			CaseManagementSystem sys, CaseType type, String issueType, UploadStatus uploadStatus);
 	public Optional<CaseIssueUpload> findFirstByCaseManagementSystemAndCaseTypeAndIssueTypeAndUploadStatusOrderByEffectiveDateDesc(
 			CaseManagementSystem sys, CaseType type, String issueType, UploadStatus uploadStatus);
+	public Optional<CaseIssueUpload> findFirstByCaseManagementSystemAndCaseTypeAndUploadStatusOrderByEffectiveDateDesc(
+			CaseManagementSystem sys, CaseType type, UploadStatus uploadStatus);
 }
