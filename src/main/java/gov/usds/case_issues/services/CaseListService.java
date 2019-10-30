@@ -108,8 +108,7 @@ public class CaseListService {
 					translated.getCaseManagementSystemId(),
 					translated.getCaseTypeId(),
 					size
-				),
-				false
+				)
 			);
 		}
 		TroubleCase troubleCase = lastCase.get();
