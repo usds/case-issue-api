@@ -34,6 +34,7 @@ import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
@@ -43,6 +44,7 @@ import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
+@SuppressWarnings("checkstyle:MagicNumber")
 public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 	private static final String VALID_TYPE_TAG = "1040E-Z";
@@ -167,7 +169,11 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		List<String> issueReceipts = Arrays.asList("A1","A2","A3");
 		List<CaseRequest> newIssueCases = issueReceipts.stream()
 				.map(CaseRequestImpl::new).collect(Collectors.toList());
-		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueType, newIssueCases, _now.minusDays(1));
+		CaseIssueUpload uploadInfo = wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueType, newIssueCases, _now.minusDays(1));
+		assertEquals(3, uploadInfo.getUploadedRecordCount());
+		assertEquals(Long.valueOf(3), uploadInfo.getNewIssueCount());
+		assertEquals(Long.valueOf(0), uploadInfo.getClosedIssueCount());
+		assertEquals(UploadStatus.SUCCESSFUL, uploadInfo.getUploadStatus());
 		for (String receipt : issueReceipts) {
 			Optional<TroubleCase> mainCase = _caseRepo.findByCaseManagementSystemAndReceiptNumber(_system, receipt);
 			List<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase.get());
@@ -341,12 +347,12 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_service.getUploadFormat("INVALID DATE FORMAT");
 	}
 
-	private void wrappedPutIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
+	private CaseIssueUpload wrappedPutIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
 			List<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
 		CaseGroupInfo translated = _service.translatePath(systemTag, caseTypeTag);
 		CaseIssueUpload uploadInfo = new CaseIssueUpload(translated.getCaseManagementSystem(),
 		    translated.getCaseType(), issueTypeTag, eventDate, newIssueCases.size());
-		_service.putIssueList(uploadInfo, newIssueCases);
+		return _service.putIssueList(uploadInfo, newIssueCases);
 	}
 
 	@SuppressWarnings("checkstyle:MagicNumber")
