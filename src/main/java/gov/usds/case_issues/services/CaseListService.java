@@ -142,15 +142,6 @@ public class CaseListService {
 	 *    values that are set by this method).
 	 * @throws ApiModelNotFoundException if the {@link CaseManagementSystem} or {@link CaseType} could not be found.
 	 */
-	@Transactional(readOnly=false)
-	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
-	public void putIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
-			List<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
-		CaseGroupInfo translated = translatePath(systemTag, caseTypeTag);
-		CaseIssueUpload uploadInfo = new CaseIssueUpload(translated.getCaseManagementSystem(),
-		    translated.getCaseType(), issueTypeTag, eventDate, newIssueCases.size());
-		putIssueList(uploadInfo, newIssueCases);
-	}
 
 	@Transactional(readOnly=false)
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
