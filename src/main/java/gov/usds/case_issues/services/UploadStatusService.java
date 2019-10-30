@@ -2,6 +2,7 @@ package gov.usds.case_issues.services;
 
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,9 @@ public class UploadStatusService {
 	}
 
 	@Transactional(readOnly=false, propagation=Propagation.REQUIRES_NEW)
-	public CaseIssueUpload completeUpload(CaseIssueUpload upload, long newIssues, long closedIssues) {
+	public CaseIssueUpload completeUpload(CaseIssueUpload upload) {
 		LOG.debug("Finalizing upload record {} as success", upload.getInternalId());
 		upload.setUploadStatus(UploadStatus.SUCCESSFUL);
-		upload.setClosedIssueCount(closedIssues);
-		upload.setNewIssueCount(newIssues);
 		return _uploadRepository.save(upload);
 	}
 
@@ -49,6 +48,20 @@ public class UploadStatusService {
 		return _uploadRepository.save(upload);
 	}
 
+	/** Return <b>all</b> uploads (successful and otherwise) for this system and case type,
+	 * sorted by effective date (not by created date, unless we change our minds).
+	 */
+	public List<CaseIssueUpload> getUploadHistory(CaseManagementSystem sys, CaseType type) {
+		List<CaseIssueUpload> history = _uploadRepository.findAllByCaseManagementSystemAndCaseType(sys, type);
+		history.sort((a,b)->a.getEffectiveDate().compareTo(b.getEffectiveDate()));
+		return history;
+	}
+	public CaseIssueUpload getLastUpload(CaseManagementSystem sys, CaseType type, String issueTypeTag) {
+		return _uploadRepository.findFirstByCaseManagementSystemAndCaseTypeAndIssueTypeAndUploadStatusOrderByEffectiveDateDesc(
+				sys, type, issueTypeTag, UploadStatus.SUCCESSFUL).orElse(null);
+	}
+
+	/** Simple fetch-by-ID, for something where people rarely want to know the ID: initially just for test/verification */ 
 	public CaseIssueUpload readUploadInformation(Long id) {
 		return _uploadRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("Upload information not found"));

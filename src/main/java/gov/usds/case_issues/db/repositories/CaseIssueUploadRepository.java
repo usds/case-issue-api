@@ -1,6 +1,7 @@
 package gov.usds.case_issues.db.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 
@@ -21,5 +22,7 @@ public interface CaseIssueUploadRepository extends CrudRepository<CaseIssueUploa
 	public List<CaseIssueUpload> findAllByCaseManagementSystemAndCaseTypeAndIssueType(
 			CaseManagementSystem sys, CaseType type, String issueType);
 	public List<CaseIssueUpload> findAllByCaseManagementSystemAndCaseTypeAndIssueTypeAndUploadStatus(
+			CaseManagementSystem sys, CaseType type, String issueType, UploadStatus uploadStatus);
+	public Optional<CaseIssueUpload> findFirstByCaseManagementSystemAndCaseTypeAndIssueTypeAndUploadStatusOrderByEffectiveDateDesc(
 			CaseManagementSystem sys, CaseType type, String issueType, UploadStatus uploadStatus);
 }

@@ -63,7 +63,9 @@ public class UploadStatusServiceTest extends CaseIssueApiTestBase {
 		Long id = uploadInfo.getInternalId();
 		assertEquals(UploadStatus.STARTED, uploadInfo.getUploadStatus());
 		assertNull(uploadInfo.getNewIssueCount());
-		uploadInfo = _service.completeUpload(uploadInfo, 25, 37);
+		uploadInfo.setNewIssueCount(25L);
+		uploadInfo.setClosedIssueCount(37);
+		uploadInfo = _service.completeUpload(uploadInfo);
 		assertEquals(id, uploadInfo.getInternalId());
 		Optional<CaseIssueUpload> found = _repo.findById(id);
 		assertTrue(found.isPresent());
