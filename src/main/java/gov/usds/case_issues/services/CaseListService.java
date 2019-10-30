@@ -92,8 +92,7 @@ public class CaseListService {
 				translated.getCaseManagementSystemId(),
 				translated.getCaseTypeId(),
 				pageRequest
-			).getContent(),
-			false
+			).getContent()
 		);
 	}
 
@@ -105,8 +104,7 @@ public class CaseListService {
 				translated.getCaseManagementSystemId(),
 				translated.getCaseTypeId(),
 				pageRequest
-			).getContent(),
-			false
+			).getContent()
 		);
 	}
 
@@ -238,17 +236,14 @@ public class CaseListService {
 		return spec;
 	}
 
-	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {
+	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
 		LOG.info("Finding snoozed case from {}.", _snoozeRepo);
 		LOG.info("Finding attachment from {}.", _attachmentService);
 		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null : _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			List<NoteSummary> notes = null;
-			if(includeNotes) {
-				notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
-			}
+			List<NoteSummary> notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
 			return new CaseSummary(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
