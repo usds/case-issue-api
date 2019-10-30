@@ -32,6 +32,8 @@ import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.CaseListService;
+import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
+import gov.usds.case_issues.services.IssueUploadService;
 import gov.usds.case_issues.validators.TagFragment;
 
 @RestController
@@ -42,6 +44,8 @@ public class HitlistApiController {
 
 	@Autowired
 	private CaseListService _listService;
+	@Autowired
+	private IssueUploadService _uploadService;
 
 	@GetMapping("search")
 	public List<TroubleCase> getCases(
@@ -80,13 +84,14 @@ public class HitlistApiController {
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
 	public ResponseEntity<?> updateIssueListCsv(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
 			@RequestBody InputStream csvStream, @RequestParam(required=false) String uploadSchema) throws IOException {
+		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
 		CsvSchema schema = CsvSchema.emptySchema().withHeader();
 		MappingIterator<Map<String, Object>> valueIterator = new CsvMapper()
 			.readerFor(Map.class)
 			.with(schema)
 			.readValues(csvStream);
 		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
-		_listService.putIssueList(caseManagementSystemTag, caseTypeTag, issueTag, newIssueCases, ZonedDateTime.now());
+		_uploadService.putIssueList(translated, issueTag, newIssueCases, ZonedDateTime.now());
 		return ResponseEntity.accepted().build();
 	}
 
@@ -94,9 +99,10 @@ public class HitlistApiController {
 	@PutMapping(value="/{issueTag}",consumes= {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<?> updateIssueListJson(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
 			@RequestBody List<Map<String,Object>> jsonData, @RequestParam(required=false) String uploadSchema) throws IOException {
+		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
 		Iterator<Map<String,Object>> valueIterator = jsonData.listIterator();
 		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
-		_listService.putIssueList(caseManagementSystemTag, caseTypeTag, issueTag, newIssueCases, ZonedDateTime.now());
+		_uploadService.putIssueList(translated, issueTag, newIssueCases, ZonedDateTime.now());
 		return ResponseEntity.accepted().build();
 	}
 

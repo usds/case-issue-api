@@ -21,13 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.model.CaseIssue;
+import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
+import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
@@ -62,6 +65,8 @@ public class CaseListService {
 	private TroubleCaseRepository _caseRepo;
 	@Autowired
 	private CaseAttachmentService _attachmentService;
+	@Autowired
+	private CaseIssueUploadRepository _uploadRepo;
 	@Autowired
 	private WebConfigurationProperties _webProperties;
 
@@ -162,15 +167,16 @@ public class CaseListService {
 	 * @throws ApiModelNotFoundException if the {@link CaseManagementSystem} or
 	 *                                   {@link CaseType} could not be found.
 	 */
-	@Transactional(readOnly = false)
+	@Transactional(readOnly=false)
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
-	public void putIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
-			Iterable<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
-		CaseGroupInfo translated = translatePath(systemTag, caseTypeTag);
-		List<CaseIssue> currentIssues = _issueRepo.findActiveIssues(translated.getCaseManagementSystem(),
-				translated.getCaseType(), issueTypeTag);
-		Map<String, CaseIssue> currentMap = currentIssues.stream()
-				.collect(Collectors.toMap(i -> i.getIssueCase().getReceiptNumber(), i -> i));
+	public CaseIssueUpload putIssueList(CaseIssueUpload translated, List<CaseRequest> newIssueCases) {
+		// convenience aliases to local variables, for use in closures
+		final ZonedDateTime eventDate = translated.getEffectiveDate();
+		final String issueTypeTag = translated.getIssueType();
+
+		List<CaseIssue> currentIssues = _issueRepo.findActiveIssues(translated.getCaseManagementSystem(), translated.getCaseType(),
+				translated.getIssueType());
+		Map<String, CaseIssue> currentMap = currentIssues.stream().collect(Collectors.toMap(i->i.getIssueCase().getReceiptNumber(), i->i));
 
 		// build a list containing only CaseSummary objects with no existing CaseIssue
 		List<CaseRequest> requestedNewIssues = new ArrayList<>();
@@ -191,6 +197,8 @@ public class CaseListService {
 		// this could also be done directly in the database, which might not be a bad
 		// idea?
 		currentMap.values().forEach(i -> i.setIssueClosed(eventDate));
+		LOG.info("Closing {} issues", currentMap.size());
+		translated.setClosedIssueCount(currentMap.size());
 
 		// get or create cases
 		HashSet<String> newReceipts = requestedNewIssues.stream().map(CaseRequest::getReceiptNumber)
@@ -225,8 +233,16 @@ public class CaseListService {
 		newlySavedCases.forEach(tc -> newIssues.add(createIssue.apply(tc)));
 
 		// aaaand save everything!
-		_issueRepo.saveAll(Stream.concat(existingCases.values().stream().map(createIssue), newIssues.stream())
-				.collect(Collectors.toSet()));
+		_issueRepo.saveAll(
+			Stream.concat(
+				existingCases.values().stream().map(createIssue),
+				newIssues.stream()
+			).collect(Collectors.toSet())
+		);
+		translated.setNewIssueCount(existingCases.size() + newIssues.size());
+		translated.setUploadStatus(UploadStatus.SUCCESSFUL);
+		_uploadRepo.save(translated);
+		return translated;
 	}
 
 	public DataFormatSpec getUploadFormat(String uploadFormatId) {

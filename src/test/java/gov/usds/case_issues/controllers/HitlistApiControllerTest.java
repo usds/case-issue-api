@@ -1,5 +1,7 @@
 package gov.usds.case_issues.controllers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -11,25 +13,34 @@ import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.UploadStatus;
+import gov.usds.case_issues.services.UploadStatusService;
 
 @WithMockUser(username = "default_hitlist_user", authorities = "READ_CASES")
 public class HitlistApiControllerTest extends ControllerTestBase {
 
+	private static final String VALUE_ISSUE_TYPE = "WONKY";
 	private static final String VALID_CASE_TYPE = "C1";
 	private static final String VALID_CASE_MGT_SYS = "F1";
 	private static final String API_PATH = "/api/cases/{caseManagementSystemTag}/{caseTypeTag}/";
+	private static final String ISSUE_UPLOAD_PATH = API_PATH + "{issueTag}";
 	private static final String CASE_TYPE_NOPE = "Case Type 'NOPE' was not found";
 	private static final String CASE_MANAGEMENT_SYSTEM_NOPE = "Case Management System 'NOPE' was not found";
 
 	private CaseManagementSystem _system;
 	private CaseType _type;
+
+	@Autowired
+	private UploadStatusService _uploadService;
 
 	@Before
 	public void resetDb() {
@@ -102,56 +113,55 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putJson_emptyList_accepted() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = put(API_PATH + "{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
-			.contentType(MediaType.APPLICATION_JSON)
-			.with(csrf())
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
 			.content("[]");
 		perform(jsonPut).andExpect(status().isAccepted());
+		checkUploadRecord(0, 0, 0);
 	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putJson_emptyListNoCsrf_forbidden() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = put(API_PATH + "{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
+		MockHttpServletRequestBuilder jsonPut = put(ISSUE_UPLOAD_PATH, VALID_CASE_MGT_SYS, VALID_CASE_TYPE, VALUE_ISSUE_TYPE)
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("[]");
 		perform(jsonPut).andExpect(status().isForbidden());
+		assertEquals("No upload records should exist",
+				0, _uploadService.getUploadHistory(_system, _type).size());
 	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_emptyList_accepted() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = put(API_PATH + "{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
-			.contentType("text/csv")
-			.with(csrf())
+		MockHttpServletRequestBuilder jsonPut = putIssues("text/csv")
 			.content("header1,header2\n");
 		perform(jsonPut).andExpect(status().isAccepted());
+		checkUploadRecord(0, 0, 0);
 	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_singleCase_accepted() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = put(API_PATH + "{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
-			.contentType("text/csv")
-			.with(csrf())
+		MockHttpServletRequestBuilder jsonPut = putIssues("text/csv")
 			.content(
 				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
 				"FKE5250608,2014-08-29T00:00:00-04:00,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing\n"
 			);
 		perform(jsonPut).andExpect(status().isAccepted());
+		checkUploadRecord(1, 1, 0);
 	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_invalidCreationDate_badRequest() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = put("/api/cases/{caseManagementSystemTag}/{caseTypeTag}/{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
-			.contentType("text/csv")
-			.with(csrf())
+		MockHttpServletRequestBuilder jsonPut = putIssues("text/csv")
 			.content(
 				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
 				"FKE5250608,NOT A DATE,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing\n"
 			);
 		perform(jsonPut).andExpect(status().isBadRequest());
+		assertEquals("No upload records should exist",
+			0, _uploadService.getUploadHistory(_system, _type).size());
 	}
 
 	@Test
@@ -192,6 +202,15 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		_dataService.snoozeCase(case2);
 	}
 
+	private void checkUploadRecord(int recordCount, int newIssues, int closedIssues) {
+		CaseIssueUpload uploadInfo = _uploadService.getLastUpload(_system, _type, VALUE_ISSUE_TYPE);
+		assertNotNull(uploadInfo);
+		assertEquals(UploadStatus.SUCCESSFUL, uploadInfo.getUploadStatus());
+		assertEquals(newIssues, uploadInfo.getNewIssueCount().intValue());
+		assertEquals(closedIssues, uploadInfo.getClosedIssueCount().intValue());
+		assertEquals(recordCount, uploadInfo.getUploadedRecordCount());
+	}
+
 	private static MockHttpServletRequestBuilder doSearch(String cmsTag, String ctTag, String queryString) {
 		return get(API_PATH + "search", cmsTag, ctTag).param("query", queryString);
 	}
@@ -205,6 +224,12 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	private static MockHttpServletRequestBuilder getSummary(String cmsTag, String ctTag) {
 		return get(API_PATH + "summary", cmsTag, ctTag);
+	}
+
+	private static MockHttpServletRequestBuilder putIssues(String contentType) {
+		return put(ISSUE_UPLOAD_PATH, VALID_CASE_MGT_SYS, VALID_CASE_TYPE, VALUE_ISSUE_TYPE)
+			.contentType(contentType)
+			.with(csrf());
 	}
 
 }
