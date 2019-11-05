@@ -12,6 +12,8 @@ logging:
       # org.hibernate.type: TRACE
       # org.springframework.data.rest=DEBUG
       gov.usds: DEBUG
+management:
+  info.git.mode: full
 web-customization:
   cors-origins:
     - http://localhost:3000
@@ -29,6 +31,9 @@ web-customization:
     - name: service
       grants:
         - UPDATE_ISSUES
+    - name: devops
+      grants:
+        - MANAGE_APPLICATION
 access-log-format: combined
 sample-data:
   case-management-systems:
