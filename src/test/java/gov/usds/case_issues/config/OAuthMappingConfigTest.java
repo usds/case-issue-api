@@ -144,7 +144,7 @@ public class OAuthMappingConfigTest {
 		Map<String, Object> attr = simpleAttributes();
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "name_list");
 		OAuth2User user = service.loadUser(null); // we ignore the input anyway
-		assertEquals("actual_name;04c6752c-31cd-437a-b7a3-70f25676af1b", user.getName());
+		assertEquals("actual_name", user.getName());
 		assertEquals(attr, user.getAttributes());
 		assertEquals(Collections.singleton(new SimpleGrantedAuthority("respect")), user.getAuthorities());
 	}

@@ -35,12 +35,7 @@ public class NamedOAuth2User implements OAuth2User {
 
 	@Override
 	public String getName() {
-		Object attributeName = attributes.get("name");
-		if (attributeName != null) {
-			return name + ";" + attributeName;
-		} else {
-			return name;
-		}
+		return name;
 	}
 
 	@Override
@@ -54,6 +49,6 @@ public class NamedOAuth2User implements OAuth2User {
 	}
 
 	public String toString() {
-		return getName();
+		return name;
 	}
 }
