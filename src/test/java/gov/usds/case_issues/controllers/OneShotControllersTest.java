@@ -76,4 +76,17 @@ public class OneShotControllersTest extends ControllerTestBase {
 	public void getCsrf_badOrigin_forbidden() throws Exception {
 		perform(getCsrf().header("Origin", ORIGIN_NOT_OK)).andExpect(status().isForbidden());
 	}
+
+	@Test
+	@WithAnonymousUser
+	public void getHealth_anonymous_okResult() throws Exception {
+		perform(get("/health")).andExpect(status().isOk()).andExpect(content().string(""));
+	}
+
+	@Test
+	@WithMockUser
+	public void getHealth_loggedInUser_okResult() throws Exception {
+		perform(get("/health")).andExpect(status().isOk()).andExpect(content().string(""));
+	}
+
 }

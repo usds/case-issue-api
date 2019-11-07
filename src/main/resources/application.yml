@@ -19,3 +19,10 @@ spring:
 logback:
   access:
     enabled: true
+management:
+  endpoints.web.exposure:
+    exclude: shutdown,env
+    include: '*'
+  endpoint:
+    health:
+      show-details: always

@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.actuate.info.InfoEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -48,8 +50,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.httpStrictTransportSecurity().and()
 				.and()
 			.authorizeRequests()
-				.antMatchers("/actuator/health", "/health")
+				.antMatchers(HttpMethod.GET, "/health", "/favicon.ico")
 					.permitAll()
+				.requestMatchers(EndpointRequest.to(InfoEndpoint.class))
+					.permitAll()
+				.requestMatchers(EndpointRequest.toAnyEndpoint())
+					.hasAuthority(CaseIssuePermission.MANAGE_APPLICATION.name())
 				.anyRequest()
 					.authenticated()
 				.and()
