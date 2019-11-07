@@ -150,10 +150,11 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
-	public void saveCase_noUser_auditInfoCorrect() {
+	public void saveCase_noUser_auditInfoCorrect() throws InterruptedException {
 		Instant startTime = new Date().toInstant();
 		TroubleCase c = _dataService.initCase(_system, "ABC1234", _type, _now.minusDays(1));
 		CaseIssue saved = _repo.save(new CaseIssue(c, "FAKE", _now.minusHours(1)));
+		Thread.sleep(1);
 		Instant end = new Date().toInstant();
 		assertNull(saved.getCreatedBy());
 		assertNull(saved.getUpdatedBy());
@@ -165,10 +166,11 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 
 	@Test
 	@WithMockUser(DUMMY_USERNAME)
-	public void saveCaseAndUpdate_withUser_auditInfoCorrect() {
+	public void saveCaseAndUpdate_withUser_auditInfoCorrect() throws InterruptedException {
 		Instant startTime = new Date().toInstant();
 		TroubleCase c = _dataService.initCase(_system, "ABC1234", _type, _now.minusDays(1));
 		CaseIssue saved = _repo.save(new CaseIssue(c, "FAKE", _now.minusHours(1)));
+		Thread.sleep(1);
 		Instant middle = new Date().toInstant();
 		assertEquals(DUMMY_USERNAME, saved.getCreatedBy());
 		assertEquals(DUMMY_USERNAME, saved.getUpdatedBy());
@@ -181,6 +183,7 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 		assertInstantOrder(updatedAt, middle, false);
 		saved.setIssueClosed(ZonedDateTime.now());
 		CaseIssue resaved = _repo.save(saved);
+		Thread.sleep(1);
 		Instant end = new Date().toInstant();
 		assertEquals(createdAt, resaved.getCreatedAt().toInstant());
 		assertInstantOrder(middle, resaved.getUpdatedAt().toInstant(), false);
