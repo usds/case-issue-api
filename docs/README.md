@@ -131,3 +131,58 @@ The CSRF token will be automatically read and used by the Swagger UI at `/swagge
 the HAL browser at `/resources`. However, the HAL browser has an entry field for "Custom Request Headers"
 at the  top of the screen: simply paste your desired CSRF header (probably something along the lines
 of `X-CSRF-TOKEN: abcd-ef01234-567890`) into that text area before making an unsafe request.
+
+# Deployment
+
+As a standalone Spring Boot jar, this application is intended to be deployed in a platform-as-a-service
+(PaaS) environment. Properties files that are included in the source tree should be included in the
+runnable jar file, but local properties (such as the connection information for a database) should be
+injected separately, either as environment variables or as separate managed properties files that are
+added to Spring's property-resolution path at runtime.
+
+## Deployment-specific Properties
+
+### Local Property/YAML Files
+
+Using docker, you can copy global properties files into your image in a separate directory and add
+arguments like the following to your ENTRYPOINT invocation:
+
+    --spring.config.additional-location=file:/etc/case-issue-api/config/,file:/usr/local/case-issue-api/config/
+
+(Note that the terminal `/` on each entry is extremely required.)
+
+Equivalently, you can have those files stored in an independent repository, and mount them at the
+required location when pods are started in your PaaS system.
+
+### Environment Variables
+
+Any property that can be set in a file should also be able to be set as an environment variable through
+your PaaS, and picked up automatically by Spring at runtime (see the
+[Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config)
+for more details).
+
+## Customizing Web Application Behaviors
+
+### Favicon
+
+At build time, you can place a favicon.ico file in src/main/resources/ or src/main/resources/static
+to override the default favicon with one that is more specific to your environment. Alternatively,
+setting `spring.mvc.favicon.enabled=false` in a properties file (or `SPRING_MVC_FAVICON_ENABLED=false`
+in the environment) will cause no favicon to be served.
+
+### Build Information
+
+The build information actuator (at /actuator/info) provides basic information about the application as
+built, including the git hash and the version. If you wish to include additional information (for instance,
+information about a docker image or the deployment configuration), you can extend this either by modifying
+the build.gradle file or by adding a gradle init file with a block like the following:
+
+    afterEvaluate {
+        tasks.bootBuildInfo.properties.additional["docker_version"] =
+            System.getenv("BUILD_NUMBER") ?: "NO DOCKER VERSION"
+    }
+
+Alternatively, if you would package this information in your Dockerfile, you can pass the version
+to the docker build command and add an argument to the ENDPOINT directive along these lines:
+
+    --info.docker.version=${VERSION}
