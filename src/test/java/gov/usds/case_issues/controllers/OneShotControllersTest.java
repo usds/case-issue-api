@@ -4,17 +4,30 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import gov.usds.case_issues.db.model.User;
+import gov.usds.case_issues.db.repositories.UserRepository;
 
 /**
  * Consolidated tests for the controllers that have one handler each and are too annoying.
  */
 @ActiveProfiles("auth-testing")
 public class OneShotControllersTest extends ControllerTestBase {
+
+	@Autowired
+	private UserRepository _userRepo;
+
+	@Before
+	public void resetDb() {
+		truncateDb();
+	}
 
 	private static MockHttpServletRequestBuilder getUser() {
 		return get(UserDetailsApiController.USER_INFO_ENDPOINT);
@@ -33,6 +46,7 @@ public class OneShotControllersTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(username="Freddie Fixer", authorities={"RESPECT", "FIGURE"})
 	public void getUser_loggedInUser_expectedResult() throws Exception {
+		createMockDatabaseUser("Freddie Fixer");
 		perform(getUser())
 			.andExpect(status().isOk())
 			.andExpect(content().json("{\"name\": \"Freddie Fixer\"}"))
@@ -42,6 +56,7 @@ public class OneShotControllersTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(username="Freddie Fixer", authorities={"RESPECT", "FIGURE"})
 	public void getUser_loggedInUserOkOrigin_okResult() throws Exception {
+		createMockDatabaseUser("Freddie Fixer");
 		perform(getUser().header("Origin", ORIGIN_HTTPS_OK))
 			.andExpect(status().isOk())
 			;
@@ -89,4 +104,8 @@ public class OneShotControllersTest extends ControllerTestBase {
 		perform(get("/health")).andExpect(status().isOk()).andExpect(content().string(""));
 	}
 
+	private void createMockDatabaseUser(String name) {
+		User user = new User(name, name);
+		_userRepo.save(user);
+	}
 }

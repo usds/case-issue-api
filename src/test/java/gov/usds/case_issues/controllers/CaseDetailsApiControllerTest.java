@@ -28,7 +28,9 @@ import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.AttachmentSubtype;
 import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.User;
 import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
+import gov.usds.case_issues.db.repositories.UserRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
 
 @WithMockUser(authorities = {"READ_CASES", "UPDATE_CASES"})
@@ -41,6 +43,8 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	private CaseManagementSystem _sys;
 	@Autowired
 	private AttachmentSubtypeRepository _subtypeRepository;
+	@Autowired
+	private UserRepository _userRepo;
 
 	@Before
 	public void resetDb() {
@@ -191,9 +195,26 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			;
 	}
 
+
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
-	public void snoozeWithNotes_validCase_notesStoreda() throws Exception {
+	public void snoozeWithNotes_validCase_containsUserName() throws Exception {
+		initSampleCase();
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isNoContent());
+		_mvc.perform(
+				updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null))
+			)
+			.andExpect(status().isOk());
+		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isOk())
+			.andExpect(content().json("{\"notes\": [{\"userName\": \"user\", \"userId\": \"user\"}]}"))
+			;
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snoozeWithNotes_newLineInContent_notesStored() throws Exception {
 		initSampleCase();
 		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isNoContent());
@@ -278,7 +299,13 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	private TroubleCase initSampleCase() {
 		CaseType type = _dataService.ensureCaseTypeInitialized("T2", "Ahnold", "Metal and scary");
-		return _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
+		TroubleCase troubleCase = _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
+
+		String createdBy = troubleCase.getCreatedBy();
+		User user = new User(createdBy, createdBy);
+		_userRepo.save(user);
+
+		return troubleCase;
 	}
 
 
@@ -291,7 +318,6 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			""
 		));
 	}
-
 
 	private MockHttpServletRequestBuilder detailsRequest(String systemTag, String receipt) {
 		return get("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}", systemTag, receipt);

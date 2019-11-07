@@ -4,6 +4,7 @@ import java.util.Date;
 
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
+import gov.usds.case_issues.db.model.User;
 import gov.usds.case_issues.db.model.AttachmentType;
 
 public class NoteSummary {
@@ -13,6 +14,7 @@ public class NoteSummary {
 	private String subType;
 	private String href;
 	private String userId;
+	private String userName;
 	private Date timestamp;
 
 	public NoteSummary(CaseAttachmentAssociation backEnd) {
@@ -31,7 +33,13 @@ public class NoteSummary {
 			}
 		}
 		userId = backEnd.getCreatedBy();
+		userName = "";
 		timestamp = backEnd.getCreatedAt();
+	}
+
+	public NoteSummary(CaseAttachmentAssociation backEnd, User user) {
+		this(backEnd);
+		userName = user.getName();
 	}
 
 	public String getContent() {
@@ -49,6 +57,10 @@ public class NoteSummary {
 
 	public String getUserId() {
 		return userId;
+	}
+
+	public String getUserName() {
+		return userName;
 	}
 
 	public Date getTimestamp() {
