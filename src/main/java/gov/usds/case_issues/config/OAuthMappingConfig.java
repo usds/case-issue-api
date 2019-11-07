@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.authorization.NamedOAuth2User;
+import gov.usds.case_issues.db.repositories.UserRepository;
 import gov.usds.case_issues.utils.HashUtils;
 
 /**
@@ -55,6 +56,8 @@ public class OAuthMappingConfig {
 	private static final Logger LOG = LoggerFactory.getLogger(OAuthMappingConfig.class);
 
 	@Autowired
+	static UserRepository _userRepo;
+	@Autowired
 	private OAuth2CustomizationProperties mappedConfig;
 	@Autowired(required=false) //  this is a sneaky way of making the bean conditional: being less sneaky would be better
 	private OAuth2ClientProperties clientConfig;
@@ -66,15 +69,15 @@ public class OAuthMappingConfig {
 			return null; // see above "sneaky" remark
 		}
 		final GrantedAuthoritiesMapper mapper = oauthAuthorityMapper(mappedConfig.getAuthorityPaths());
-		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService =
-				createDelegatingUserService(new DefaultOAuth2UserService(), mappedConfig.getNamePath());
+		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService = createDelegatingUserService(
+				new DefaultOAuth2UserService(), mappedConfig.getNamePath(), _userRepo);
 		return http -> {
 			LOG.info("Configuring OAuth user info service");
 			OAuth2LoginConfigurer<HttpSecurity> oauth2Login = http.oauth2Login();
 			if (userService != null) {
 				oauth2Login.userInfoEndpoint().userService(userService);
 			} else {
-				LOG.info("No custom username mapping provided: using fallback service");
+				LOG.warn("No custom username mapping provided: using fallback service");
 			}
 			if (mapper != null) {
 				oauth2Login.userInfoEndpoint().userAuthoritiesMapper(mapper);
@@ -83,7 +86,8 @@ public class OAuthMappingConfig {
 	}
 
 	protected static OAuth2UserService<OAuth2UserRequest, OAuth2User> createDelegatingUserService(
-			final OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate, List<String> inputPath) {
+			final OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate, List<String> inputPath,
+			UserRepository u) {
 		if (inputPath == null || inputPath.isEmpty()) {
 			return null;
 		}
@@ -95,7 +99,8 @@ public class OAuthMappingConfig {
 					.map(String.class::cast)
 					;
 			if (nameAttr.isPresent()) {
-				return new NamedOAuth2User(nameAttr.get(), wrapped);
+				NamedOAuth2User user = new NamedOAuth2User(nameAttr.get(), wrapped, u);
+				return user;
 			} else {
 				// AuthenticationException or AccessDeniedException might be better, but probably still
 				// produce an infinite redirect loop

@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import gov.usds.case_issues.controllers.UserDetailsApiController;
+import gov.usds.case_issues.db.repositories.UserRepository;
 import springfox.documentation.service.ApiInfo;
 
 @Configuration
@@ -26,6 +27,8 @@ public class DemoUserLoginConfig {
 
 	@Autowired
 	private WebConfigurationProperties _webProperties;
+	@Autowired
+	UserRepository _userRepo;
 	@Autowired
 	private ApiInfo _apiInfo;
 
@@ -58,6 +61,14 @@ public class DemoUserLoginConfig {
 					.build())
 				.collect(Collectors.toList()
 		);
+
+		for (UserDetails u : users) {
+			gov.usds.case_issues.db.model.User user = new gov.usds.case_issues.db.model.User(
+				u.getUsername(), u.getUsername()
+			);
+			_userRepo.save(user);
+		}
+
 		return new InMemoryUserDetailsManager(users);
 	}
 }
