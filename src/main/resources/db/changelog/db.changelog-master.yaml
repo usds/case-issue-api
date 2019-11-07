@@ -353,3 +353,28 @@ databaseChangeLog:
                   name: closed_issue_count
                   type: bigint
                   remarks: The number of existing issues closed by this request (if it was successfully processed at all).
+  - changeSet:
+      id: users-table
+      author: tim.best@usds.dhs.gov
+      comment: information about the users of the case-issue-api
+      changes:
+        - createTable:
+            tableName: user
+            remarks: Data about the users that login to the api.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column: *name_column
+              - column:
+                  name: user_id
+                  type: *string
+                  remarks: The external unique identifier for this user
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_active
+                  type: DATETIME
+                  remarks: the last time this user has logged into the application
