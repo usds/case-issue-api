@@ -39,7 +39,7 @@ public class NoteSummary {
 
 	public NoteSummary(CaseAttachmentAssociation backEnd, User user) {
 		this(backEnd);
-		userName = user.getName();
+		userName = user.getPrintName();
 	}
 
 	public String getContent() {

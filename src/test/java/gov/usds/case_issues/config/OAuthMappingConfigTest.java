@@ -187,7 +187,7 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
 		service.loadUser(null);
 		User user = _userRepo.findByUserId("name_in_scalar");
-		assertTrue(user.getlastActive().compareTo(now) > 0);
+		assertTrue(user.getLastSeen().compareTo(now) > 0);
 	}
 
 	@Test(expected=IllegalArgumentException.class)

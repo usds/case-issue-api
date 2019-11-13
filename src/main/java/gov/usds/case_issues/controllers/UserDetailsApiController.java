@@ -31,7 +31,7 @@ public class UserDetailsApiController {
 		User user = _userRepo.findByUserId(id);
 		HashMap<String, Object> response = new HashMap<String, Object>();
 		response.put("ID", user.getId());
-		response.put("name", user.getName());
+		response.put("name", user.getPrintName());
 		return response;
 	}
 

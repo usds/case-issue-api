@@ -367,7 +367,12 @@ databaseChangeLog:
               - column: *created_by_column
               - column: *updated_at_column
               - column: *updated_by_column
-              - column: *name_column
+              - column:
+                  name: print_name
+                  type: *string
+                  remarks: The human-readable name of this entity (may contain spaces and punctuation).
+                  constraints:
+                    nullable: false
               - column:
                   name: user_id
                   type: *string
@@ -375,6 +380,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: last_active
+                  name: last_seen
                   type: DATETIME
                   remarks: the last time this user has logged into the application

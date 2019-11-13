@@ -28,7 +28,7 @@ public class CaseSnoozeSummary {
 
 	public CaseSnoozeSummary(CaseSnooze backEnd, User user) {
 		this(backEnd);
-		userName = user.getName();
+		userName = user.getPrintName();
 	}
 
 	public String getSnoozeReason() {

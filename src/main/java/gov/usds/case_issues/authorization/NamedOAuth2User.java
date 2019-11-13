@@ -53,7 +53,7 @@ public class NamedOAuth2User implements OAuth2User {
 	private void updateUsers(UserRepository userRepo) {
 		User existingUser = userRepo.findByUserId(name);
 		if (existingUser != null) {
-			existingUser.setlastActive();
+			existingUser.updateLastSeen();
 			userRepo.save(existingUser);
 			return;
 		}

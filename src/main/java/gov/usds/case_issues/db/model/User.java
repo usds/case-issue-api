@@ -12,33 +12,33 @@ import javax.validation.constraints.NotNull;
 public class User extends UpdatableEntity {
 
 	@NotNull
-	private ZonedDateTime lastActive;
-	private String name;
+	private ZonedDateTime lastSeen;
+	private String printName;
 	private String userId;
 
 	protected User() {
 		/* for hibernate/JPA */ }
 
-	public User(String name, String id) {
+	public User(String printName, String id) {
 		super();
-		this.lastActive = ZonedDateTime.now();
-		this.name = name;
+		this.lastSeen = ZonedDateTime.now();
+		this.printName = printName;
 		this.userId = id;
 	}
 
-	public ZonedDateTime getlastActive() {
-		return lastActive;
+	public ZonedDateTime getLastSeen() {
+		return lastSeen;
 	}
 
-	public String getName() {
-		return name;
+	public String getPrintName() {
+		return printName;
 	}
 
 	public String getId() {
 		return userId;
 	}
 
-	public void setlastActive() {
-		this.lastActive = ZonedDateTime.now();
+	public void updateLastSeen() {
+		this.lastSeen = ZonedDateTime.now();
 	}
 }
