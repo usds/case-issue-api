@@ -65,12 +65,6 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
-		name = "snoozed.count",
-		query = "SELECT count(1) as entity_count from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP ",
-		resultSetMapping = "rowCount"
-	),
-	@NamedNativeQuery(
 		name = "unSnoozedAfter",
 		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
 				+ "WHERE (last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP) "
@@ -79,12 +73,6 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 				+ "ORDER BY case_creation ASC, internal_id ASC "
 				+ "LIMIT :size",
 		resultSetMapping="snoozeCaseMapping"
-	),
-	@NamedNativeQuery(
-		name = "unSnoozed.count",
-		query = "SELECT count(1) as entity_count from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP ",
-		resultSetMapping = "rowCount"
 	),
 	@NamedNativeQuery(
 		name = "summary",
@@ -98,10 +86,6 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		name="snoozeCaseMapping",
 		entities=@EntityResult(entityClass=TroubleCase.class),
 		columns=@ColumnResult(name="last_snooze_end", type=ZonedDateTime.class)
-	),
-	@SqlResultSetMapping(
-		name="rowCount",
-		columns=@ColumnResult(name="entity_count", type=Long.class)
 	),
 })
 public class TroubleCase extends UpdatableEntity {
