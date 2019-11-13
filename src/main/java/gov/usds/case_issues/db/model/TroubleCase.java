@@ -38,40 +38,36 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @TypeDef(name="json", typeClass=JsonStringType.class)
 @NamedNativeQueries({
 	@NamedNativeQuery(
-		name = "snoozed",
+		name = "snoozedFirstPage",
 		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
 				+ "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
-				+ "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
-				+ "LIMIT :size",
+				+ TroubleCase.SNOOZED_CASE_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
-		name = "snoozedAfter",
+		name = "snoozedLaterPage",
 		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
 				+ "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
 				+ "AND last_snooze_end >= :lastSnoozeEnd "
 				+ "AND case_creation >= :caseCreation "
 				+ "AND internal_id != :internalId "
-				+ "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
-				+ "LIMIT :size",
+				+ TroubleCase.SNOOZED_CASE_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
-		name = "unSnoozed",
+		name = "notCurrentlySnoozedFirstPage",
 		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
 				+ "WHERE last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP "
-				+ "ORDER BY case_creation ASC, internal_id ASC "
-				+ "LIMIT :size",
+				+ TroubleCase.ACTIVE_CASE_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
-		name = "unSnoozedAfter",
+		name = "notCurrentlySnoozedLaterPage",
 		query = "SELECT * FROM " + TroubleCase.CASE_DTO_CTE
 				+ "WHERE (last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP) "
 				+ "AND case_creation >= :caseCreation "
 				+ "AND internal_id != :internalId "
-				+ "ORDER BY case_creation ASC, internal_id ASC "
-				+ "LIMIT :size",
+				+ TroubleCase.ACTIVE_CASE_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
@@ -106,6 +102,12 @@ public class TroubleCase extends UpdatableEntity {
 			+ "where c.internal_id=openissues1_.issue_case_internal_id "
 			+ "and ( openissues1_.issue_closed is null)"
 		+ ")";
+	public static final String ACTIVE_CASE_POSTAMBLE =
+		"  ORDER BY case_creation ASC, internal_id ASC "
+		+ "LIMIT :size";
+	public static final String SNOOZED_CASE_POSTAMBLE =
+		"  ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
+		+ "LIMIT :size";
 	public static final String CASE_DTO_CTE = "(" + CASE_DTO_QUERY + ") as trouble_case_dto ";
 
 	@NaturalId

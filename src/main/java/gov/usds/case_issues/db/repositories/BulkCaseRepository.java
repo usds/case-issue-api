@@ -12,11 +12,11 @@ import org.springframework.data.rest.core.annotation.RestResource;
  */
 public interface BulkCaseRepository {
 
-	@Query(name="snoozed")
+	@Query(name="snoozedFirstPage")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCases(Long caseManagementSystemId, Long caseTypeId, Integer size);
 
-	@Query(name="snoozedAfter")
+	@Query(name="snoozedLaterPage")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCasesAfter(
 		Long caseManagementSystemId,
@@ -27,7 +27,7 @@ public interface BulkCaseRepository {
 		Integer size
 	);
 
-	@Query(name="unSnoozed")
+	@Query(name="notCurrentlySnoozedFirstPage")
 	@RestResource(exported=false)
 	public List<Object[]> getActiveCases(
 		Long caseManagementSystemId,
@@ -35,7 +35,7 @@ public interface BulkCaseRepository {
 		Integer size
 	);
 
-	@Query(name="unSnoozedAfter")
+	@Query(name="notCurrentlySnoozedLaterPage")
 	@RestResource(exported=false)
 	public List<Object[]> getActiveCasesAfter(
 		Long caseManagementSystemId,
