@@ -28,7 +28,7 @@ import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.AttachmentSubtype;
 import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
-import gov.usds.case_issues.db.model.User;
+import gov.usds.case_issues.db.model.OAuthUser;
 import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
 import gov.usds.case_issues.db.repositories.UserRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
@@ -302,7 +302,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		TroubleCase troubleCase = _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
 
 		String createdBy = troubleCase.getCreatedBy();
-		User user = new User(createdBy, createdBy);
+		OAuthUser user = new OAuthUser(createdBy, createdBy);
 		_userRepo.save(user);
 
 		return troubleCase;

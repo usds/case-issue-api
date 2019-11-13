@@ -12,7 +12,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import gov.usds.case_issues.db.model.User;
+import gov.usds.case_issues.db.model.OAuthUser;
 import gov.usds.case_issues.db.repositories.UserRepository;
 
 /**
@@ -105,7 +105,7 @@ public class OneShotControllersTest extends ControllerTestBase {
 	}
 
 	private void createMockDatabaseUser(String name) {
-		User user = new User(name, name);
+		OAuthUser user = new OAuthUser(name, name);
 		_userRepo.save(user);
 	}
 }

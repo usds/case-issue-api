@@ -9,17 +9,17 @@ import javax.validation.constraints.NotNull;
  * Metadata about the case issue data stored in this system
  */
 @Entity
-public class User extends UpdatableEntity {
+public class OAuthUser extends UpdatableEntity {
 
 	@NotNull
 	private ZonedDateTime lastSeen;
 	private String printName;
 	private String userId;
 
-	protected User() {
+	protected OAuthUser() {
 		/* for hibernate/JPA */ }
 
-	public User(String printName, String id) {
+	public OAuthUser(String printName, String id) {
 		super();
 		this.lastSeen = ZonedDateTime.now();
 		this.printName = printName;

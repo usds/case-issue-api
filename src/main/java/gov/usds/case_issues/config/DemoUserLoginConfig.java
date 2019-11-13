@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import gov.usds.case_issues.controllers.UserDetailsApiController;
+import gov.usds.case_issues.db.model.OAuthUser;
 import gov.usds.case_issues.db.repositories.UserRepository;
 import springfox.documentation.service.ApiInfo;
 
@@ -63,9 +64,7 @@ public class DemoUserLoginConfig {
 		);
 
 		for (UserDetails u : users) {
-			gov.usds.case_issues.db.model.User user = new gov.usds.case_issues.db.model.User(
-				u.getUsername(), u.getUsername()
-			);
+			OAuthUser user = new OAuthUser(u.getUsername(), u.getUsername());
 			_userRepo.save(user);
 		}
 

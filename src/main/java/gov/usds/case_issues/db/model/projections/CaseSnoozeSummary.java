@@ -3,7 +3,7 @@ package gov.usds.case_issues.db.model.projections;
 import java.time.ZonedDateTime;
 
 import gov.usds.case_issues.db.model.CaseSnooze;
-import gov.usds.case_issues.db.model.User;
+import gov.usds.case_issues.db.model.OAuthUser;
 
 /**
  * A projection that returns the information about a snooze that most people
@@ -26,7 +26,7 @@ public class CaseSnoozeSummary {
 		snoozeEnd = backEnd.getSnoozeEnd();
 	}
 
-	public CaseSnoozeSummary(CaseSnooze backEnd, User user) {
+	public CaseSnoozeSummary(CaseSnooze backEnd, OAuthUser user) {
 		this(backEnd);
 		userName = user.getPrintName();
 	}

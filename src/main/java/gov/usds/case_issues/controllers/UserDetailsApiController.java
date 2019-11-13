@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import gov.usds.case_issues.db.model.User;
+import gov.usds.case_issues.db.model.OAuthUser;
 import gov.usds.case_issues.db.repositories.UserRepository;
 
 /**
@@ -28,7 +28,7 @@ public class UserDetailsApiController {
 	@GetMapping(UserDetailsApiController.USER_INFO_ENDPOINT)
 	public Object getCurrentUser(Authentication auth) {
 		String id = auth.getName();
-		User user = _userRepo.findByUserId(id);
+		OAuthUser user = _userRepo.findByUserId(id);
 		HashMap<String, Object> response = new HashMap<String, Object>();
 		response.put("ID", user.getId());
 		response.put("name", user.getPrintName());

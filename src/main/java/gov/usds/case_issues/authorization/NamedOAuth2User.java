@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import gov.usds.case_issues.db.model.User;
+import gov.usds.case_issues.db.model.OAuthUser;
 import gov.usds.case_issues.db.repositories.UserRepository;
 
 /**
@@ -51,13 +51,13 @@ public class NamedOAuth2User implements OAuth2User {
 	}
 
 	private void updateUsers(UserRepository userRepo) {
-		User existingUser = userRepo.findByUserId(name);
+		OAuthUser existingUser = userRepo.findByUserId(name);
 		if (existingUser != null) {
 			existingUser.updateLastSeen();
 			userRepo.save(existingUser);
 			return;
 		}
-		User newUser = new User(name, getAttributeName());
+		OAuthUser newUser = new OAuthUser(name, getAttributeName());
 		userRepo.save(newUser);
 	}
 
