@@ -183,7 +183,7 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
-	public void createDelegatingUserService_existingUser_userLastActiveUpdated() {
+	public void createDelegatingUserService_existingUser_userLastSeenUpdated() {
 		ZonedDateTime now = ZonedDateTime.now();
 		_userRepo.save(new OAuthUser("name_in_scalar", "print name"));
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
