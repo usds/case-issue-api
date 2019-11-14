@@ -72,8 +72,8 @@ public class CaseDetailsService {
 	public CaseDetails findCaseDetails(String caseManagementSystemTag, String receiptNumber) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Collection<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase);
-		List<CaseSnoozeSummary> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase).stream()
-													.map(row -> new CaseSnoozeSummary(
+		List<CaseSnoozeSummaryFacade> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase).stream()
+													.map(row -> new CaseSnoozeSummaryFacade(
 														row,
 														_userRepo.findByUserId(row.getCreatedBy())
 													))

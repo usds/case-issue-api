@@ -11,9 +11,11 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.DynamicUpdate;
 
+import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
+
 @Entity
 @DynamicUpdate
-public class CaseSnooze extends UpdatableEntity {
+public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 
 	/** The hour of the day (in server local time) at which all snoozes expire, if they are not manually terminated first */
 	public static final int EXPIRES_TIME = 3;

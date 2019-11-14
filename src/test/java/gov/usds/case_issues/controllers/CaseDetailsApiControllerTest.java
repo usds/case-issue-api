@@ -208,7 +208,8 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isOk());
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
-			.andExpect(content().json("{\"notes\": [{\"userName\": \"user\", \"userId\": \"user\"}]}"))
+			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"user\", \"name\": \"user\"}}]}"))
+			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"user\", \"name\": \"user\"}}]}"))
 			;
 	}
 

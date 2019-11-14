@@ -11,7 +11,6 @@ import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
-import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
 /**
  * API Model for the full details of a {@link TroubleCase}, including all issues (open and closed)
@@ -21,12 +20,12 @@ public class CaseDetails {
 
 	private TroubleCase rootCase;
 	private Collection<? extends CaseIssueSummary> issues;
-	private Collection<? extends CaseSnoozeSummary> snoozes;
+	private Collection<? extends CaseSnoozeSummaryFacade> snoozes;
 	private List<NoteSummary> notes;
 
 	public CaseDetails(TroubleCase rootCase,
 			Collection<? extends CaseIssueSummary> issues,
-			Collection<? extends CaseSnoozeSummary> snoozes,
+			Collection<? extends CaseSnoozeSummaryFacade> snoozes,
 			List<NoteSummary> notes) {
 		super();
 		this.rootCase = rootCase;
@@ -56,8 +55,8 @@ public class CaseDetails {
 		return issues;
 	}
 
-	@JsonSerialize(contentAs=CaseSnoozeSummary.class)
-	public Collection<? extends CaseSnoozeSummary> getSnoozes() {
+	@JsonSerialize(contentAs=CaseSnoozeSummaryFacade.class)
+	public Collection<? extends CaseSnoozeSummaryFacade> getSnoozes() {
 		return snoozes;
 	}
 

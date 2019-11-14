@@ -1,6 +1,7 @@
 package gov.usds.case_issues.model;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
@@ -13,8 +14,8 @@ public class NoteSummary {
 	private AttachmentType type;
 	private String subType;
 	private String href;
-	private String userId;
-	private String userName;
+	private String id;
+	private String name;
 	private Date timestamp;
 
 	public NoteSummary(CaseAttachmentAssociation backEnd) {
@@ -32,14 +33,15 @@ public class NoteSummary {
 				href = urlTemplate + content;
 			}
 		}
-		userId = backEnd.getCreatedBy();
-		userName = "";
+		id = backEnd.getCreatedBy();
+		name = "";
 		timestamp = backEnd.getCreatedAt();
 	}
 
-	public NoteSummary(CaseAttachmentAssociation backEnd, OAuthUser user) {
+	public NoteSummary(CaseAttachmentAssociation backEnd, OAuthUser u) {
 		this(backEnd);
-		userName = user.getPrintName();
+		id = u.getId();
+		name = u.getPrintName();
 	}
 
 	public String getContent() {
@@ -55,12 +57,11 @@ public class NoteSummary {
 		return href;
 	}
 
-	public String getUserId() {
-		return userId;
-	}
-
-	public String getUserName() {
-		return userName;
+	public HashMap<String, String> getUser() {
+		HashMap<String, String> user = new HashMap<String, String>();
+		user.put("id", id);
+		user.put("name", name);
+		return user;
 	}
 
 	public Date getTimestamp() {
