@@ -82,11 +82,6 @@ configurations {
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
 
-task copyDeps(type: Copy) {
-	from configurations.runtimeClasspath
-	into "${project.buildDir}/libs/"
-}
-
 springBoot {
 	buildInfo()
 }
