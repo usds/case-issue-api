@@ -5,6 +5,8 @@ import java.time.ZonedDateTime;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.NaturalId;
+
 /**
  * Metadata about the case issue data stored in this system
  */
@@ -13,7 +15,10 @@ public class OAuthUser extends UpdatableEntity {
 
 	@NotNull
 	private ZonedDateTime lastSeen;
+	@NotNull
 	private String printName;
+	@NaturalId
+	@NotNull
 	private String userId;
 
 	protected OAuthUser() {
