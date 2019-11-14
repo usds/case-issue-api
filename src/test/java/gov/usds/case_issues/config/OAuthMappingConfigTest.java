@@ -29,11 +29,14 @@ import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.db.model.OAuthUser;
 import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.services.UserService;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
 
 public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 
+	@Autowired
+	private UserService _userService;
 	@Autowired
 	private UserRepository _userRepo;
 
@@ -149,8 +152,8 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void createDelegatingUserService_emptyInput_nullService() {
-		assertNull(OAuthMappingConfig.createDelegatingUserService(null, null, _userRepo));
-		assertNull(OAuthMappingConfig.createDelegatingUserService(null, Collections.emptyList(), _userRepo));
+		assertNull(OAuthMappingConfig.createDelegatingUserService(null, null, _userService));
+		assertNull(OAuthMappingConfig.createDelegatingUserService(null, Collections.emptyList(), _userService));
 	}
 
 	@Test
@@ -208,7 +211,7 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 		return OAuthMappingConfig.createDelegatingUserService(
 			r->new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority("respect")), simpleAttributes(), "name"),
 			Arrays.asList(namePath),
-			_userRepo
+			_userService
 		);
 	}
 	private Set<OAuth2UserAuthority> simpleAuthority() {

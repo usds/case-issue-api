@@ -6,9 +6,6 @@ import java.util.Map;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import gov.usds.case_issues.db.model.OAuthUser;
-import gov.usds.case_issues.db.repositories.UserRepository;
-
 /**
  * A simple {@link OAuth2User} implementation that receives its name from outside,
  * rather than looking it up in the attributes with a simple key.
@@ -24,11 +21,10 @@ public class NamedOAuth2User implements OAuth2User {
 	private Collection<? extends GrantedAuthority> authorities;
 	private Map<String, Object> attributes;
 
-	public NamedOAuth2User(String name, OAuth2User wrapped, UserRepository userRepo) {
+	public NamedOAuth2User(String name, OAuth2User wrapped) {
 		this.name = name;
 		this.authorities =  wrapped.getAuthorities();
 		this.attributes = wrapped.getAttributes();
-		updateUsers(userRepo);
 	}
 
 	@Override
@@ -48,21 +44,5 @@ public class NamedOAuth2User implements OAuth2User {
 
 	public String toString() {
 		return name;
-	}
-
-	private void updateUsers(UserRepository userRepo) {
-		OAuthUser existingUser = userRepo.findByUserId(name);
-		if (existingUser != null) {
-			existingUser.updateLastSeen();
-			userRepo.save(existingUser);
-			return;
-		}
-		OAuthUser newUser = new OAuthUser(name, getAttributeName());
-		userRepo.save(newUser);
-	}
-
-	private String getAttributeName() {
-		Object attributeName = attributes.get("name");
-		return attributeName.toString();
 	}
 }
