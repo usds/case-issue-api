@@ -19,7 +19,7 @@ public class OAuthUser extends UpdatableEntity {
 	protected OAuthUser() {
 		/* for hibernate/JPA */ }
 
-	public OAuthUser(String printName, String id) {
+	public OAuthUser(String id, String printName) {
 		super();
 		this.lastSeen = ZonedDateTime.now();
 		this.printName = printName;

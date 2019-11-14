@@ -38,7 +38,6 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 	private UserRepository _userRepo;
 
 	private static final List<String> NEVER_FOUND = Arrays.asList("no_such_attribute","nopenopenope");
-	private final String userId = "04c6752c-31cd-437a-b7a3-70f25676af1b";
 
 	@Before
 	public void resetDb() {
@@ -177,13 +176,13 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 	public void createDelegatingUserService_newUser_userCreated() {
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
 		service.loadUser(null);
-		assertNotNull(_userRepo.findByUserId(userId));
+		assertNotNull(_userRepo.findByUserId("name_in_scalar"));
 	}
 
 	@Test
 	public void createDelegatingUserService_existingUser_userLastActiveUpdated() {
 		ZonedDateTime now = ZonedDateTime.now();
-		_userRepo.save(new OAuthUser(userId, "name_in_scalar"));
+		_userRepo.save(new OAuthUser("name_in_scalar", "print name"));
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
 		service.loadUser(null);
 		OAuthUser user = _userRepo.findByUserId("name_in_scalar");
@@ -218,7 +217,7 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 
 	private Map<String, Object> simpleAttributes() {
 		Map<String, Object> attr = new HashMap<>();
-		attr.put("name", userId);
+		attr.put("name", "Print Name");
 		Map<String, Object> myAttr = new HashMap<>();
 		myAttr.put("name_list", Arrays.asList("actual_name"));
 		myAttr.put("empty_list", Collections.emptyList());
