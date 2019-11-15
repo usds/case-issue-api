@@ -2,10 +2,10 @@ package gov.usds.case_issues.db.repositories;
 
 import org.springframework.data.repository.CrudRepository;
 
-import gov.usds.case_issues.db.model.OAuthUser;;
+import gov.usds.case_issues.db.model.UserInformation;;
 
 
-public interface UserRepository extends CrudRepository<OAuthUser, Long> {
+public interface UserRepository extends CrudRepository<UserInformation, Long> {
 
-	public OAuthUser findByUserId(String userId);
+	public UserInformation findByUserId(String userId);
 }

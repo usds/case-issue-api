@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import gov.usds.case_issues.db.model.CaseSnooze;
-import gov.usds.case_issues.db.model.OAuthUser;
+import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
 /**
@@ -37,7 +37,7 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		this.notes = savedNotes;
 	}
 
-	public CaseSnoozeSummaryFacade(CaseSnoozeSummary wrapped, OAuthUser user) {
+	public CaseSnoozeSummaryFacade(CaseSnoozeSummary wrapped, UserInformation user) {
 		this(wrapped);
 		id = user.getId();
 		name = user.getPrintName();

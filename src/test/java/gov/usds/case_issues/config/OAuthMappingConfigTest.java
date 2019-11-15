@@ -27,7 +27,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
-import gov.usds.case_issues.db.model.OAuthUser;
+import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.repositories.UserRepository;
 import gov.usds.case_issues.services.UserService;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
@@ -185,10 +185,10 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 	@Test
 	public void createDelegatingUserService_existingUser_userLastSeenUpdated() {
 		ZonedDateTime now = ZonedDateTime.now();
-		_userRepo.save(new OAuthUser("name_in_scalar", "print name"));
+		_userRepo.save(new UserInformation("name_in_scalar", "print name"));
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
 		service.loadUser(null);
-		OAuthUser user = _userRepo.findByUserId("name_in_scalar");
+		UserInformation user = _userRepo.findByUserId("name_in_scalar");
 		assertTrue(user.getLastSeen().compareTo(now) > 0);
 	}
 

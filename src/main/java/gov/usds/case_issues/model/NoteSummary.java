@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
-import gov.usds.case_issues.db.model.OAuthUser;
+import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.AttachmentType;
 
 public class NoteSummary {
@@ -38,7 +38,7 @@ public class NoteSummary {
 		timestamp = backEnd.getCreatedAt();
 	}
 
-	public NoteSummary(CaseAttachmentAssociation backEnd, OAuthUser u) {
+	public NoteSummary(CaseAttachmentAssociation backEnd, UserInformation u) {
 		this(backEnd);
 		id = u.getId();
 		name = u.getPrintName();

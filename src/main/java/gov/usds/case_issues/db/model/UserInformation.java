@@ -11,7 +11,7 @@ import org.hibernate.annotations.NaturalId;
  * Metadata about the case issue data stored in this system
  */
 @Entity
-public class OAuthUser extends UpdatableEntity {
+public class UserInformation extends UpdatableEntity {
 
 	@NotNull
 	private ZonedDateTime lastSeen;
@@ -21,10 +21,10 @@ public class OAuthUser extends UpdatableEntity {
 	@NotNull
 	private String userId;
 
-	protected OAuthUser() {
+	protected UserInformation() {
 		/* for hibernate/JPA */ }
 
-	public OAuthUser(String id, String printName) {
+	public UserInformation(String id, String printName) {
 		super();
 		this.lastSeen = ZonedDateTime.now();
 		this.printName = printName;

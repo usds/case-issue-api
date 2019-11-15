@@ -359,7 +359,7 @@ databaseChangeLog:
       comment: information about the users of the case-issue-api
       changes:
         - createTable:
-            tableName: oauth_user
+            tableName: user_information
             remarks: Data about the users that login to the api.
             columns:
               - column: *pk_column

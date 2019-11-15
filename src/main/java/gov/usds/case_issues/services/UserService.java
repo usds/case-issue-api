@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import gov.usds.case_issues.db.model.OAuthUser;
+import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.repositories.UserRepository;
 
 @Service
@@ -15,13 +15,13 @@ public class UserService {
 	private UserRepository _userRepo;
 
 	public void createUserOrUpdateLastSeen(String id, String printName) {
-        OAuthUser user = _userRepo.findByUserId(id);
+        UserInformation user = _userRepo.findByUserId(id);
         if (user != null) {
             user.updateLastSeen();
             _userRepo.save(user);
             return;
         }
-        OAuthUser newUser = new OAuthUser(id, printName);
+        UserInformation newUser = new UserInformation(id, printName);
          _userRepo.save(newUser);
 	}
 
