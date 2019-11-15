@@ -46,6 +46,10 @@ public class FixtureDataInitializationService {
 		return ensureCaseManagementSystemInitialized(tag, name, null);
 	}
 
+	public boolean checkForCaseManagementSystem(String tag) {
+		return _caseManagementSystemRepo.findByExternalId(tag).isPresent();
+	}
+
 	public CaseManagementSystem ensureCaseManagementSystemInitialized(String tag, String name, String description) {
 		LOG.debug("(Re)initializing case management system '{}'", tag);
 		Optional<CaseManagementSystem> found = _caseManagementSystemRepo.findByExternalId(tag);
@@ -80,6 +84,17 @@ public class FixtureDataInitializationService {
 		return _caseRepo.save(new TroubleCase(caseManagementSystem, receiptNumber, caseType, caseCreation, extraData ));
 	}
 
+	public TroubleCase initCaseAndOpenIssue(CaseManagementSystem caseManagementSystem, String receiptNumber, CaseType caseType,  ZonedDateTime caseCreation,
+			String issueType, String... keyValueData) {
+		return initCaseAndIssue(caseManagementSystem, receiptNumber, caseType, caseCreation, issueType, null, keyValueData);
+	}
+
+	public TroubleCase initCaseAndIssue(CaseManagementSystem caseManagementSystem, String receiptNumber, CaseType caseType,  ZonedDateTime caseCreation,
+			String issueType, ZonedDateTime issueClosedDate, String... keyValueData) {
+		TroubleCase c = initCase(caseManagementSystem, receiptNumber, caseType, caseCreation, keyValueData);
+		initIssue(c, issueType, caseCreation, issueClosedDate);
+		return c;
+	}
 	/** Create an open issue for this case, with the same creation date as the case itself */
 	public CaseIssue initOpenIssue(TroubleCase troubleCase, String issueType) {
 		return initIssue(troubleCase, issueType, troubleCase.getCaseCreation(), null);
@@ -101,5 +116,13 @@ public class FixtureDataInitializationService {
 
 	public CaseSnooze snoozeCase(TroubleCase troubleCase) {
 		return _snoozeRepo.save(new CaseSnooze(troubleCase, "DONOTCARE", DEFAULT_SNOOZE));
+	}
+
+	public CaseSnooze snoozeCase(TroubleCase tc, String snoozeReason, int requestedDays, boolean cancel) {
+		CaseSnooze snzed = new CaseSnooze(tc, snoozeReason, requestedDays);
+		if (cancel) {
+			snzed.endSnoozeNow();
+		}
+		return _snoozeRepo.save(snzed);
 	}
 }
