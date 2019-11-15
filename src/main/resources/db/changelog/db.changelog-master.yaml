@@ -383,3 +383,5 @@ databaseChangeLog:
                   name: last_seen
                   type: DATETIME
                   remarks: the last time this user has logged into the application
+                  constraints:
+                    nullable: false
