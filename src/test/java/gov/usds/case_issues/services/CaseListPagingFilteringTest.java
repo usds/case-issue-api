@@ -161,6 +161,29 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	}
 
+	@Test(expected=IllegalArgumentException.class)
+	public void getSnoozedCases_invalidPageActiveCase_exception() {
+		_service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.ACTIVE01.name(), PAGE_SIZE);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void getSnoozedCases_invalidPageDeSnoozedCase_exception() {
+		_service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED01.name(), PAGE_SIZE);
+	}
+
+	@Test
+	public void getActiveCases_invalidPageInvalidReceipt_firstPageFirstPageReturned() {
+		List<CaseSummary> activeCases = _service.getActiveCases(SYSTEM, CASE_TYPE, "NOSUCHANIMAL", PAGE_SIZE);
+		assertCaseOrder(activeCases, FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01);
+	}
+
+	@Test
+	public void getSnoozedCases_invalidPageInvalidReceipt_firstPageReturned() {
+		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, "NOSUCHANIMAL", PAGE_SIZE);
+		assertCaseOrder(foundCases, FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
+
+	}
+
 	@Test
 	public void getSnoozedCases_fetchSecondPage_correctResult() {
 		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(), PAGE_SIZE);

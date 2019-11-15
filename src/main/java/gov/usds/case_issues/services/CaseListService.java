@@ -154,16 +154,22 @@ public class CaseListService {
 		TroubleCase troubleCase = lastCase.get();
 		try {
 			CaseSnooze lastSnoozeEnd = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase).get();
-			return rewrap(
-				_bulkRepo.getSnoozedCasesAfter(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					lastSnoozeEnd.getSnoozeEnd(),
-					troubleCase.getCaseCreation(),
-					troubleCase.getInternalId(),
-					size
-				)
-			);
+			// in theory, reversing this and using isBefore would work nicely, only this might produce a 1-millisecond
+			// race condition in tests
+			if (lastSnoozeEnd.getSnoozeEnd().isAfter(ZonedDateTime.now())) {
+				return rewrap(
+					_bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd.getSnoozeEnd(),
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						size
+					)
+				);
+			} else {
+				throw new IllegalArgumentException("Snooze was ended for this case before page request was sent.");
+			}
 		} catch (NoSuchElementException _exception) {
 			throw new IllegalArgumentException(
 				"Receipt number given does not correspond to a snoozed case"
