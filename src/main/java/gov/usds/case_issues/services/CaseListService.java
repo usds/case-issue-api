@@ -96,7 +96,7 @@ public class CaseListService {
 		@TagFragment String caseManagementSystemTag,
 		@TagFragment String caseTypeTag,
 		@TagFragment String receiptNumber, // wrong validator!
-		Integer size
+		int size
 	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug(
@@ -134,7 +134,7 @@ public class CaseListService {
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber, // wrong validation tag!
-			Integer size
+			int size
 	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug(
