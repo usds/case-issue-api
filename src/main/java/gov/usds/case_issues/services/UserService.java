@@ -10,7 +10,7 @@ import gov.usds.case_issues.db.repositories.UserRepository;
 import gov.usds.case_issues.model.SerializedUserInformation;
 
 @Service
-@Transactional
+@Transactional(readOnly = false)
 public class UserService {
 
 	@Autowired
