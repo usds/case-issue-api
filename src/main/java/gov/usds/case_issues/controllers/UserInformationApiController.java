@@ -18,14 +18,14 @@ import gov.usds.case_issues.db.repositories.UserRepository;
  */
 @RestController
 @Profile("auth-testing")
-public class UserDetailsApiController {
+public class UserInformationApiController {
 
 	@Autowired
 	private UserRepository _userRepo;
 
 	public static final String USER_INFO_ENDPOINT = "/api/users";
 
-	@GetMapping(UserDetailsApiController.USER_INFO_ENDPOINT)
+	@GetMapping(UserInformationApiController.USER_INFO_ENDPOINT)
 	public Object getCurrentUser(Authentication auth) {
 		String id = auth.getName();
 		UserInformation user = _userRepo.findByUserId(id);
@@ -35,7 +35,7 @@ public class UserDetailsApiController {
 		return response;
 	}
 
-	@GetMapping(UserDetailsApiController.USER_INFO_ENDPOINT + "/loggedin")
+	@GetMapping(UserInformationApiController.USER_INFO_ENDPOINT + "/loggedin")
 	public ResponseEntity<?> getUserLoggedin() {
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}

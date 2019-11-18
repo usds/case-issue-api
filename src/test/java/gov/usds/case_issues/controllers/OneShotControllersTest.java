@@ -30,7 +30,7 @@ public class OneShotControllersTest extends ControllerTestBase {
 	}
 
 	private static MockHttpServletRequestBuilder getUser() {
-		return get(UserDetailsApiController.USER_INFO_ENDPOINT);
+		return get(UserInformationApiController.USER_INFO_ENDPOINT);
 	}
 
 	private static MockHttpServletRequestBuilder getCsrf() {

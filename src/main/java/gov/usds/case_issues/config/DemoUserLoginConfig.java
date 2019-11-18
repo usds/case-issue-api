@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-import gov.usds.case_issues.controllers.UserDetailsApiController;
+import gov.usds.case_issues.controllers.UserInformationApiController;
 import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.repositories.UserRepository;
 import springfox.documentation.service.ApiInfo;
@@ -43,7 +43,7 @@ public class DemoUserLoginConfig {
 			LOG.info("Configuring form login and basic auth on {} with realm {}.", http, apiTitle);
 			http
 				.formLogin()
-					.defaultSuccessUrl(UserDetailsApiController.USER_INFO_ENDPOINT)
+					.defaultSuccessUrl(UserInformationApiController.USER_INFO_ENDPOINT)
 					.and()
 				.httpBasic()
 					.realmName(apiTitle)
