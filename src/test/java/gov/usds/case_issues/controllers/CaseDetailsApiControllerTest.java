@@ -208,8 +208,8 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isOk());
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
-			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"user\", \"name\": \"user\"}}]}"))
-			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"user\", \"name\": \"user\"}}]}"))
+			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"user\", \"name\": \"Admin Anna\"}}]}"))
+			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"user\", \"name\": \"Admin Anna\"}}]}"))
 			;
 	}
 
@@ -303,7 +303,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		TroubleCase troubleCase = _dataService.initCase(_sys, SAMPLE_CASE, type, ZonedDateTime.now());
 
 		String createdBy = troubleCase.getCreatedBy();
-		UserInformation user = new UserInformation(createdBy, createdBy);
+		UserInformation user = new UserInformation(createdBy, "Admin Anna");
 		_userRepo.save(user);
 
 		return troubleCase;
