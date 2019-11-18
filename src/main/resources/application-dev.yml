@@ -20,15 +20,18 @@ web-customization:
     - http://localhost:3001
   users:
     - name: admin
+      print-name: Admin Anna
       grants:
         - READ_CASES
         - UPDATE_CASES
         - UPDATE_STRUCTURE
     - name: boring_user
+      print-name: Boring Bruce
       grants:
         - READ_CASES
         - UPDATE_CASES
     - name: service
+      print-name: Service Sam
       grants:
         - UPDATE_ISSUES
     - name: devops

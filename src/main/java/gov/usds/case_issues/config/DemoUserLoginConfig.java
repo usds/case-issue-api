@@ -1,5 +1,6 @@
 package gov.usds.case_issues.config;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,17 +55,21 @@ public class DemoUserLoginConfig {
 	@Bean
 	public UserDetailsService getUserService() {
 		LOG.info("Configuring demo users from {}.", _webProperties);
+		HashMap<String, String> printNames = new HashMap<String, String>();
 		List<UserDetails> users = _webProperties.getUsers().stream()
-				.map(u -> User
+				.map(u -> {
+					printNames.put(u.getName(), u.getPrintName());
+					return User
 					.withUsername(u.getName())
 					.password("{noop}"+ u.getName())
 					.authorities(u.getGrants())
-					.build())
+					.build();
+				})
 				.collect(Collectors.toList()
 		);
 
 		for (UserDetails u : users) {
-			UserInformation user = new UserInformation(u.getUsername(), u.getUsername());
+			UserInformation user = new UserInformation(u.getUsername(), printNames.get(u.getUsername()));
 			_userRepo.save(user);
 		}
 
