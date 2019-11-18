@@ -1,7 +1,6 @@
 package gov.usds.case_issues.model;
 
 import java.util.Date;
-import java.util.HashMap;
 
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
@@ -57,11 +56,8 @@ public class NoteSummary {
 		return href;
 	}
 
-	public HashMap<String, String> getUser() {
-		HashMap<String, String> user = new HashMap<String, String>();
-		user.put("id", id);
-		user.put("name", name);
-		return user;
+	public SerializedUserInformation getUser() {
+		return new SerializedUserInformation(id, name);
 	}
 
 	public Date getTimestamp() {

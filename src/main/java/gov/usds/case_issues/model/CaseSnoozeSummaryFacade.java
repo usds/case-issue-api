@@ -1,7 +1,6 @@
 package gov.usds.case_issues.model;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,11 +61,8 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		return id;
 	}
 
-	public HashMap<String, String> getUser() {
-		HashMap<String, String> user = new HashMap<String, String>();
-		user.put("id", id);
-		user.put("name", name);
-		return user;
+	public SerializedUserInformation getUser() {
+		return new SerializedUserInformation(id, name);
 	}
 
 	public List<NoteSummary> getNotes() {
