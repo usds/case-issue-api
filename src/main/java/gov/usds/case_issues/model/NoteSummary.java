@@ -37,10 +37,10 @@ public class NoteSummary {
 		timestamp = backEnd.getCreatedAt();
 	}
 
-	public NoteSummary(CaseAttachmentAssociation backEnd, UserInformation u) {
+	public NoteSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
 		this(backEnd);
-		id = u.getId();
-		name = u.getPrintName();
+		id = user != null ? user.getId() : backEnd.getCreatedBy();
+		name = user != null ? user.getPrintName() : "";
 	}
 
 	public String getContent() {

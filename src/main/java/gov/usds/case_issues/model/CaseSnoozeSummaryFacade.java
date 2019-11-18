@@ -40,8 +40,8 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 
 	public CaseSnoozeSummaryFacade(CaseSnoozeSummary wrapped, UserInformation user) {
 		this(wrapped);
-		id = user.getId();
-		name = user.getPrintName();
+		id = user != null ? user.getId() : wrapped.getCreatedBy();
+		name = user != null ? user.getPrintName() : "";
 	}
 
 	public String getSnoozeReason() {

@@ -195,6 +195,24 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			;
 	}
 
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void snoozeWithNotes_noUserRecord_userNameEmpty() throws Exception {
+		initSampleCase();
+		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isNoContent());
+		_mvc.perform(
+				updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null))
+			)
+			.andExpect(status().isOk());
+		UserInformation user = _userRepo.findByUserId("user");
+		_userRepo.delete(user);
+		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isOk())
+			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"user\", \"name\": \"\"}}]}"))
+			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"user\", \"name\": \"\"}}]}"))
+			;
+	}
 
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
