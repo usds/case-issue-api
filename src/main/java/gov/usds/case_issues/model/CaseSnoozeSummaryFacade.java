@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
@@ -55,6 +57,7 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		return wrapped.getSnoozeEnd();
 	}
 
+	@JsonIgnore
 	public String getCreatedBy() {
 		return id;
 	}
