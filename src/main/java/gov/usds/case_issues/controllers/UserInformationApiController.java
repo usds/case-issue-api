@@ -10,8 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import gov.usds.case_issues.db.model.UserInformation;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.services.UserService;
 
 /**
  * Controller to see information about the current user.
@@ -21,18 +20,13 @@ import gov.usds.case_issues.db.repositories.UserRepository;
 public class UserInformationApiController {
 
 	@Autowired
-	private UserRepository _userRepo;
+	private UserService _userService;
 
 	public static final String USER_INFO_ENDPOINT = "/api/users";
 
 	@GetMapping(UserInformationApiController.USER_INFO_ENDPOINT)
-	public Object getCurrentUser(Authentication auth) {
-		String id = auth.getName();
-		UserInformation user = _userRepo.findByUserId(id);
-		HashMap<String, Object> response = new HashMap<String, Object>();
-		response.put("ID", user.getId());
-		response.put("name", user.getPrintName());
-		return response;
+	public HashMap<String, String> getCurrentUser(Authentication auth) {
+		return _userService.getCurrentUser(auth);
 	}
 
 	@GetMapping(UserInformationApiController.USER_INFO_ENDPOINT + "/loggedin")
