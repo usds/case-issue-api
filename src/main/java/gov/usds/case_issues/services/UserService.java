@@ -15,14 +15,14 @@ public class UserService {
 	private UserRepository _userRepo;
 
 	public void createUserOrUpdateLastSeen(String id, String printName) {
-        UserInformation user = _userRepo.findByUserId(id);
-        if (user != null) {
-            user.updateLastSeen();
-            _userRepo.save(user);
-            return;
-        }
-        UserInformation newUser = new UserInformation(id, printName);
-         _userRepo.save(newUser);
+		UserInformation user = _userRepo.findByUserId(id);
+		if (user != null) {
+			user.updateLastSeen();
+			_userRepo.save(user);
+			return;
+		}
+		UserInformation newUser = new UserInformation(id, printName);
+		_userRepo.save(newUser);
 	}
 
 }
