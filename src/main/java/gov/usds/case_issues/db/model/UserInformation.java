@@ -1,6 +1,7 @@
 package gov.usds.case_issues.db.model;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ import org.hibernate.annotations.NaturalId;
 public class UserInformation extends UpdatableEntity {
 
 	@NotNull
-	private ZonedDateTime lastSeen;
+	private Date lastSeen;
 	@NotNull
 	private String printName;
 	@NaturalId
@@ -26,12 +27,12 @@ public class UserInformation extends UpdatableEntity {
 
 	public UserInformation(String id, String printName) {
 		super();
-		this.lastSeen = ZonedDateTime.now();
+		updateLastSeen();
 		this.printName = printName;
 		this.userId = id;
 	}
 
-	public ZonedDateTime getLastSeen() {
+	public Date getLastSeen() {
 		return lastSeen;
 	}
 
@@ -44,6 +45,6 @@ public class UserInformation extends UpdatableEntity {
 	}
 
 	public void updateLastSeen() {
-		this.lastSeen = ZonedDateTime.now();
+		this.lastSeen = Date.from(ZonedDateTime.now().toInstant());
 	}
 }

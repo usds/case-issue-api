@@ -1,7 +1,7 @@
 package gov.usds.case_issues.services;
 
+import static gov.usds.case_issues.test_util.Assert.assertInstantOrder;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.time.ZonedDateTime;
 
@@ -33,10 +33,10 @@ public class UserServiceTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void createUserOrUpdateLastSeen_existingUser_lastSeenUpdated() {
-		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime start = ZonedDateTime.now();
 		_userRepo.save(new UserInformation("cbc1b10b-fe73-4367-806f-027d30d27f84", "Tim"));
 		_service.createUserOrUpdateLastSeen("cbc1b10b-fe73-4367-806f-027d30d27f84", "Tim");
 		UserInformation user = _userRepo.findByUserId("cbc1b10b-fe73-4367-806f-027d30d27f84");
-		assertTrue(user.getLastSeen().compareTo(now) > 0);
+		assertInstantOrder(start.toInstant(), user.getLastSeen().toInstant(), false);
 	}
 }

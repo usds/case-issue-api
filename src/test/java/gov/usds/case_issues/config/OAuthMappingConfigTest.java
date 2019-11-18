@@ -1,5 +1,6 @@
 package gov.usds.case_issues.config;
 
+import static gov.usds.case_issues.test_util.Assert.assertInstantOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -184,12 +185,12 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void createDelegatingUserService_existingUser_userLastSeenUpdated() {
-		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime start = ZonedDateTime.now();
 		_userRepo.save(new UserInformation("name_in_scalar", "print name"));
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
 		service.loadUser(null);
 		UserInformation user = _userRepo.findByUserId("name_in_scalar");
-		assertTrue(user.getLastSeen().compareTo(now) > 0);
+		assertInstantOrder(start.toInstant(), user.getLastSeen().toInstant(), false);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
