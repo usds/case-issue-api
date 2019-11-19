@@ -33,7 +33,7 @@ import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
 import gov.usds.case_issues.db.repositories.UserRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
 
-@WithMockUser(authorities = {"READ_CASES", "UPDATE_CASES"})
+@WithMockUser(username = "d15f7835-7fe7-438d-b889-90a5f5974ec2", authorities = {"READ_CASES", "UPDATE_CASES"})
 public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	private static final String VALID_SYS = "C1";
@@ -205,12 +205,12 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 				updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null))
 			)
 			.andExpect(status().isOk());
-		UserInformation user = _userRepo.findByUserId("user");
+		UserInformation user = _userRepo.findByUserId("d15f7835-7fe7-438d-b889-90a5f5974ec2");
 		_userRepo.delete(user);
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
-			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"user\", \"name\": \"\"}}]}"))
-			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"user\", \"name\": \"\"}}]}"))
+			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"d15f7835-7fe7-438d-b889-90a5f5974ec2\", \"name\": \"\"}}]}"))
+			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"d15f7835-7fe7-438d-b889-90a5f5974ec2\", \"name\": \"\"}}]}"))
 			;
 	}
 
@@ -226,8 +226,8 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isOk());
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
-			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"user\", \"name\": \"Admin Anna\"}}]}"))
-			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"user\", \"name\": \"Admin Anna\"}}]}"))
+			.andExpect(content().json("{\"snoozes\": [{\"user\": {\"id\": \"d15f7835-7fe7-438d-b889-90a5f5974ec2\", \"name\": \"Admin Anna\"}}]}"))
+			.andExpect(content().json("{\"notes\": [{\"user\": {\"id\": \"d15f7835-7fe7-438d-b889-90a5f5974ec2\", \"name\": \"Admin Anna\"}}]}"))
 			;
 	}
 
