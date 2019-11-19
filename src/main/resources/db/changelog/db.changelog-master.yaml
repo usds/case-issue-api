@@ -370,7 +370,7 @@ databaseChangeLog:
               - column:
                   name: print_name
                   type: *string
-                  remarks: The human-readable name of this entity (may contain spaces and punctuation).
+                  remarks: The human-readable name of this user (may contain spaces and punctuation).
                   constraints:
                     nullable: false
               - column:
