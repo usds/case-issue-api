@@ -51,6 +51,24 @@ public interface BulkCaseRepository {
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
+	@Query(name="previouslySnoozedFirstPage")
+	@RestResource(exported=false)
+	public List<Object[]> getPreviouslySnoozedCases(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
+	@Query(name="previouslySnoozedLaterPage")
+	@RestResource(exported=false)
+	public List<Object[]> getPreviouslySnoozedCasesAfter(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		ZonedDateTime caseCreation,
+		Long internalId,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
 	@Query(name="summary")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozeSummary(Long caseManagementSystemId, Long caseTypeId);

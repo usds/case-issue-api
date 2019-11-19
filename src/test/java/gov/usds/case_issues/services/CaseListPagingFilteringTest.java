@@ -190,6 +190,18 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED04, FixtureCase.SNOOZED03);
 	}
 
+	@Test
+	public void getPreviouslySnoozedCases_fetchFirstPage_correctResult() {
+		List<CaseSummary> foundCases = _service.getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
+		assertCaseOrder(foundCases, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01, FixtureCase.DESNOOZED03);
+	}
+
+	@Test
+	public void getPreviouslySnoozedCases_fetchSecondPage_correctResult() {
+		List<CaseSummary> foundCases = _service.getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED03.name(), PAGE_SIZE);
+		assertCaseOrder(foundCases, FixtureCase.DESNOOZED04);
+	}
+
 	private static void assertCaseOrder(List<CaseSummary> foundCases, FixtureCase... expected) {
 		List<String> foundReceipts = foundCases.stream().map(CaseSummary::getReceiptNumber).collect(Collectors.toList());
 		List<String> expectedReceipts = Stream.of(expected).map(FixtureCase::name).collect(Collectors.toList());

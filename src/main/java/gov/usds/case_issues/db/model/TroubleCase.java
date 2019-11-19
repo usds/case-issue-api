@@ -68,6 +68,21 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
+		name = "previouslySnoozedFirstPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "previouslySnoozedLaterPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
 		name = "summary",
 		query = "SELECT " + TroubleCase.CASE_SNOOZE_DECODE + " as snooze_state, count(1) "
 				+ "FROM " + TroubleCase.CASE_DTO_CTE
@@ -87,6 +102,7 @@ public class TroubleCase extends UpdatableEntity {
 		"case when last_snooze_end is null then 'NEVER_SNOOZED' "
 		+ "when last_snooze_end < CURRENT_TIMESTAMP then 'PREVIOUSLY_SNOOZED' "
 		+ "else 'CURRENTLY_SNOOZED' end";
+
 	public static final String CASE_DTO_QUERY =
 		"SELECT c.*, "
 		+ "(SELECT MAX(snooze_end) FROM {h-schema}case_snooze s where s.snooze_case_internal_id = c.internal_id) last_snooze_end "
@@ -99,20 +115,25 @@ public class TroubleCase extends UpdatableEntity {
 			+ "where c.internal_id=openissues1_.issue_case_internal_id "
 			+ "and ( openissues1_.issue_closed is null)"
 		+ ")";
+
 	public static final String NOT_SNOOZED_NOW_CONSTRAINT = " (last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP) ";
 	public static final String SNOOZED_NOW_CONSTRAINT = " last_snooze_end >= CURRENT_TIMESTAMP ";
+	public static final String SNOOZED_PREVIOUSLY_CONSTRAINT = " last_snooze_end < CURRENT_TIMESTAMP ";
+
 	public static final String NOT_SNOOZED_NOW_PAGE_CONSTRAINT =
-			"  AND case_creation >= :caseCreation "
-			+ "AND internal_id != :internalId ";
+		"  AND case_creation >= :caseCreation "
+		+ "AND internal_id != :internalId ";
 	public static final String SNOOZED_PAGE_CONSTRAINT =
-			"  AND last_snooze_end >= :lastSnoozeEnd "
-			+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT;
+		"  AND last_snooze_end >= :lastSnoozeEnd "
+		+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT;
+
 	public static final String NOT_SNOOZED_NOW_POSTAMBLE =
 		"  ORDER BY case_creation ASC, internal_id ASC "
 		+ "LIMIT :size";
 	public static final String SNOOZED_NOW_POSTAMBLE =
 		"  ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
 		+ "LIMIT :size";
+
 	public static final String CASE_DTO_CTE = "(" + CASE_DTO_QUERY + ") as trouble_case_dto ";
 	public static final String CASE_SELECT_STEM = "SELECT * FROM" + CASE_DTO_CTE + " WHERE ";
 
