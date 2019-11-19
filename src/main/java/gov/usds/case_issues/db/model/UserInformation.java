@@ -1,6 +1,5 @@
 package gov.usds.case_issues.db.model;
 
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -45,6 +44,6 @@ public class UserInformation extends UpdatableEntity {
 	}
 
 	public void updateLastSeen() {
-		this.lastSeen = Date.from(ZonedDateTime.now().toInstant());
+		this.lastSeen = new Date();
 	}
 }
