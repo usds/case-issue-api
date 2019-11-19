@@ -1,6 +1,7 @@
 package gov.usds.case_issues.db.repositories;
 
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.repository.CrudRepository;
 
@@ -10,7 +11,7 @@ import gov.usds.case_issues.db.model.UserInformation;;
 public interface UserRepository extends CrudRepository<UserInformation, Long> {
 
 	@Override
-	@CacheEvict(value="byUserId", key="#entity.getId()")
+	@CachePut(value="byUserId", key="#entity.getId()")
 	<S extends UserInformation> S save(S entity);
 
 	@Override
