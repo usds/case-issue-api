@@ -18,11 +18,11 @@ public interface BulkCaseRepository {
 	/** The maximum allowed page size for a paged request. */
 	public static final int MAX_PAGE_SIZE = 100;
 
-	@Query(name="snoozed")
+	@Query(name="snoozedFirstPage")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCases(Long caseManagementSystemId, Long caseTypeId, @Range(max=MAX_PAGE_SIZE)  int size);
 
-	@Query(name="snoozedAfter")
+	@Query(name="snoozedLaterPage")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCasesAfter(
 		Long caseManagementSystemId,
@@ -33,7 +33,7 @@ public interface BulkCaseRepository {
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
-	@Query(name="unSnoozed")
+	@Query(name="notCurrentlySnoozedFirstPage")
 	@RestResource(exported=false)
 	public List<Object[]> getActiveCases(
 		Long caseManagementSystemId,
@@ -41,7 +41,7 @@ public interface BulkCaseRepository {
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
-	@Query(name="unSnoozedAfter")
+	@Query(name="notCurrentlySnoozedLaterPage")
 	@RestResource(exported=false)
 	public List<Object[]> getActiveCasesAfter(
 		Long caseManagementSystemId,

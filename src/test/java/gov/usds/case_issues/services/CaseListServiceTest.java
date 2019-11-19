@@ -476,6 +476,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_service.getUploadFormat("INVALID DATE FORMAT");
 	}
 
+	// if this test breaks during a re-build of the paging feature, delete it and re-implement it in CaseListPagingFilteringTest
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
 	public void getActiveCases_addedNewestFirst_paginatedCorrectly() {
