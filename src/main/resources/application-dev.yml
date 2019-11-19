@@ -35,6 +35,7 @@ web-customization:
       grants:
         - UPDATE_ISSUES
     - name: devops
+      print-name: Devops Debbie
       grants:
         - MANAGE_APPLICATION
 access-log-format: combined
