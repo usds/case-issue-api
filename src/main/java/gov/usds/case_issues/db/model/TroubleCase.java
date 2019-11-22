@@ -45,9 +45,26 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
+		name = "snoozedFirstPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+		),
+	@NamedNativeQuery(
 		name = "snoozedLaterPage",
 		query = TroubleCase.CASE_SELECT_STEM
 				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.SNOOZED_PAGE_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "snoozedLaterPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
 				+ TroubleCase.SNOOZED_PAGE_CONSTRAINT
 				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
@@ -60,9 +77,26 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
+		name = "notCurrentlySnoozedFirstPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
 		name = "notCurrentlySnoozedLaterPage",
 		query = TroubleCase.CASE_SELECT_STEM
 				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "notCurrentlySnoozedLaterPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
 				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
 				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
@@ -75,9 +109,26 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
+		name = "previouslySnoozedFirstPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
 		name = "previouslySnoozedLaterPage",
 		query = TroubleCase.CASE_SELECT_STEM
 				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "previouslySnoozedLaterPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
 				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
 				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
@@ -119,6 +170,9 @@ public class TroubleCase extends UpdatableEntity {
 	public static final String NOT_SNOOZED_NOW_CONSTRAINT = " (last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP) ";
 	public static final String SNOOZED_NOW_CONSTRAINT = " last_snooze_end >= CURRENT_TIMESTAMP ";
 	public static final String SNOOZED_PREVIOUSLY_CONSTRAINT = " last_snooze_end < CURRENT_TIMESTAMP ";
+
+	public static final String CASE_CREATION_DATE_CONSTRAINT =
+		" AND case_creation BETWEEN :caseCreationWindowStart and :caseCreationWindowEnd "; // BETWEEN treats the endpoint values as included in the range.
 
 	public static final String NOT_SNOOZED_NOW_PAGE_CONSTRAINT =
 		"  AND case_creation >= :caseCreation "

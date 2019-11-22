@@ -3,6 +3,9 @@ package gov.usds.case_issues.db.repositories;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PastOrPresent;
+
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RestResource;
@@ -22,6 +25,15 @@ public interface BulkCaseRepository {
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCases(Long caseManagementSystemId, Long caseTypeId, @Range(max=MAX_PAGE_SIZE)  int size);
 
+	@Query(name="snoozedFirstPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getSnoozedCases(
+			Long caseManagementSystemId,
+			Long caseTypeId,
+			@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+			@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
+		    @Range(max=MAX_PAGE_SIZE) int size);
+
 	@Query(name="snoozedLaterPage")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCasesAfter(
@@ -32,12 +44,33 @@ public interface BulkCaseRepository {
 		Long internalId,
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
-
+	@Query(name="snoozedLaterPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getSnoozedCasesAfter(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		ZonedDateTime lastSnoozeEnd,
+		ZonedDateTime caseCreation,
+		Long internalId,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
 	@Query(name="notCurrentlySnoozedFirstPage")
 	@RestResource(exported=false)
 	public List<Object[]> getActiveCases(
 		Long caseManagementSystemId,
 		Long caseTypeId,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
+	@Query(name="notCurrentlySnoozedFirstPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getActiveCases(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
@@ -51,11 +84,33 @@ public interface BulkCaseRepository {
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
+	@Query(name="notCurrentlySnoozedLaterPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getActiveCasesAfter(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		ZonedDateTime caseCreation,
+		Long internalId,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
 	@Query(name="previouslySnoozedFirstPage")
 	@RestResource(exported=false)
 	public List<Object[]> getPreviouslySnoozedCases(
 		Long caseManagementSystemId,
 		Long caseTypeId,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
+	@Query(name="previouslySnoozedFirstPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getPreviouslySnoozedCases(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
@@ -66,6 +121,18 @@ public interface BulkCaseRepository {
 		Long caseTypeId,
 		ZonedDateTime caseCreation,
 		Long internalId,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
+	@Query(name="previouslySnoozedLaterPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getPreviouslySnoozedCasesAfter(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		ZonedDateTime caseCreation,
+		Long internalId,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
