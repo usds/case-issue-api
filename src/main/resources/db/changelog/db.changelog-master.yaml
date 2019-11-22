@@ -385,3 +385,16 @@ databaseChangeLog:
                   remarks: the last time this user has logged into the application
                   constraints:
                     nullable: false
+  - changeSet:
+      id: back-populate-users-table
+      author: ben.warfield@usds.dhs.gov
+      comment: Back-populate the user_information table with users whose names we had stored before, and normalize the created_by/updated_by fields.
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            path: prepopulate-user-information.sql
+            relativeToChangelogFile: true
+        - sqlFile:
+            dbms: postgresql
+            path: repair-createdby-updatedby.sql
+            relativeToChangelogFile: true
