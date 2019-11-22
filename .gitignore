@@ -37,3 +37,6 @@ out/
 
 ### MacOS ###
 .DS_Store
+
+### postgres ###
+postgres-data

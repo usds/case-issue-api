@@ -5,17 +5,21 @@ spring:
     rest:
       basePath: /resources
   jpa:
-    database: HSQL
-    # we do not want Hibernate to start making DB calls during Jackson rendering: much better to have that
-    # throw an exception so we know we have to update the persistence configuration.
-    open-in-view: false
+    database: POSTGRESQL
     hibernate.ddl-auto: validate
-    properties:
-      hibernate:
-        format_sql: false
-        generate_statistics: true # possibly too verbose, but useful to have around
-  liquibase:
-    enabled: false
+    # properties:
+    #   hibernate:
+    #     default_schema: casedb
+    #     generate_statistics: off
+  datasource:
+    username: postgres
+    password: postgres
+    platform: postgres
+    url: jdbc:postgresql://db:5432/postgres
+    driver-class-name: org.postgresql.Driver
+  # liquibase:
+  #   user: postgres
+  #   default-schema: ${spring.jpa.properties.hibernate.default_schema}
 logback:
   access:
     enabled: true
