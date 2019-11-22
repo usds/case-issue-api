@@ -178,9 +178,9 @@ public class TroubleCase extends UpdatableEntity {
 		"  AND case_creation >= :caseCreation "
 		+ "AND internal_id != :internalId ";
 	public static final String SNOOZED_PAGE_CONSTRAINT =
-		"  AND last_snooze_end >= :lastSnoozeEnd "
-		+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT;
-
+		"  AND (last_snooze_end > :lastSnoozeEnd"
+		+ "     OR (last_snooze_end = :lastSnoozeEnd AND case_creation >= :caseCreation) ) "
+		+ "AND internal_id != :internalId ";
 	public static final String NOT_SNOOZED_NOW_POSTAMBLE =
 		"  ORDER BY case_creation ASC, internal_id ASC "
 		+ "LIMIT :size";
