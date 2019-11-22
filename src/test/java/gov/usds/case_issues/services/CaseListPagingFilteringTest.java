@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -150,6 +152,28 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		assertCaseOrder(foundCases, FixtureCase.ACTIVE04, FixtureCase.ACTIVE02, FixtureCase.ACTIVE03);
 	}
 
+	// exhaustively test paged requests for stability
+	@Test(expected=java.lang.AssertionError.class) // this fails because of the issue documented by the next test
+	public void getActiveCases_walkThroughCaseList_correctResults() {
+		int includeAllCases = FixtureCase.values().length;
+		List<FixtureCase> allFixtures = new ArrayList<>(Arrays.asList(
+			FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01,
+			FixtureCase.ACTIVE04, FixtureCase.ACTIVE02, FixtureCase.ACTIVE03,
+			FixtureCase.DESNOOZED03, FixtureCase.ACTIVE05, FixtureCase.DESNOOZED04
+		));
+		assertCaseOrder(
+			"all cases",
+			allFixtures,
+			_service.getActiveCases(SYSTEM, CASE_TYPE, null, includeAllCases)
+		);
+		while (!allFixtures.isEmpty()) {
+			String firstReceipt = allFixtures.remove(0).name();
+			String message = "page after case " + firstReceipt;
+			assertCaseOrder(message, allFixtures,
+				_service.getActiveCases(SYSTEM, CASE_TYPE, firstReceipt, includeAllCases));
+		}
+	}
+
 	/** This test validates and documents a behavior of active-case sorting that we probably do not want to maintain
 	 * in the long run */
 	@Test
@@ -209,7 +233,26 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 	public void getSnoozedCases_fetchFirstPage_correctResult() {
 		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
+	}
 
+	// exhaustively test paged requests for stability
+	@Test
+	public void getSnoozedCases_walkThroughCaseList_correctResults() {
+		int includeAllCases = FixtureCase.values().length;
+		List<FixtureCase> allFixtures = new ArrayList<>(Arrays.asList(
+				FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01,
+				FixtureCase.SNOOZED04, FixtureCase.SNOOZED03));
+		assertCaseOrder(
+			"all snoozed cases",
+			allFixtures,
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, null, includeAllCases)
+		);
+		while (!allFixtures.isEmpty()) {
+			String firstReceipt = allFixtures.remove(0).name();
+			String message = "page after case " + firstReceipt;
+			assertCaseOrder(message, allFixtures,
+				_service.getSnoozedCases(SYSTEM, CASE_TYPE, firstReceipt, includeAllCases));
+		}
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -283,6 +326,26 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		assertCaseOrder(foundCases, FixtureCase.DESNOOZED04);
 	}
 
+	// exhaustively test paged requests for stability
+	@Test
+	public void getPreviouslySnoozedCases_walkThroughCaseList_correctResults() {
+		int includeAllCases = FixtureCase.values().length;
+		List<FixtureCase> allFixtures = new ArrayList<>(Arrays.asList(
+			FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01, FixtureCase.DESNOOZED03, FixtureCase.DESNOOZED04
+		));
+		assertCaseOrder(
+			"all snoozed cases",
+			allFixtures,
+			_service.getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, null, includeAllCases)
+		);
+		while (!allFixtures.isEmpty()) {
+			String firstReceipt = allFixtures.remove(0).name();
+			String message = "page after case " + firstReceipt;
+			assertCaseOrder(message, allFixtures,
+				_service.getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, firstReceipt, includeAllCases));
+		}
+	}
+
 	@Test
 	public void getPreviouslySnoozedCases_firstPageEmptyDateRange_noCases() {
 		assertCaseOrder(_service.getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_BEFORE_TIME, PAGE_SIZE));
@@ -309,6 +372,12 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		assertCaseOrder(
 			_service.getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED03.name(), RANGE_MIDDLE, PAGE_SIZE)
 		);
+	}
+
+	private static void assertCaseOrder(String message, List<FixtureCase> expected, List<CaseSummary> foundCases) {
+		List<String> foundReceipts = foundCases.stream().map(CaseSummary::getReceiptNumber).collect(Collectors.toList());
+		List<String> expectedReceipts = expected.stream().map(FixtureCase::name).collect(Collectors.toList());
+		assertEquals(message, expectedReceipts, foundReceipts);
 	}
 
 	private static void assertCaseOrder(List<CaseSummary> foundCases, FixtureCase... expected) {
