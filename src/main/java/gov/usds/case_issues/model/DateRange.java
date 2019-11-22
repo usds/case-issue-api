@@ -19,7 +19,7 @@ public class DateRange {
 			endTime = ZonedDateTime.now();
 		}
 		if (endTime.isBefore(startTime)) {
-			throw new IllegalArgumentException(); // jerks
+			throw new IllegalArgumentException("Range end must be after beginning"); // jerks
 		}
 		_end = endTime;
 	}
