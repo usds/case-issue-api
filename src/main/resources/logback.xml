@@ -12,7 +12,7 @@
             </encoder>
         </springProfile>
     </appender>
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
