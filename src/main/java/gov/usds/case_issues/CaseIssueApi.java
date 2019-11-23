@@ -55,19 +55,22 @@ public class CaseIssueApi {
 class RetryableDataSource extends AbstractDataSource {
 
 	private DataSource delegate;
+	private final int maxAttempts = 10;
+	private final double multiplier = 2.3;
+	private final int maxDelay = 30000;
 
 	public RetryableDataSource(DataSource delegate) {
 		this.delegate = delegate;
 	}
 
 	@Override
-	@Retryable(maxAttempts=10, backoff=@Backoff(multiplier=2.3, maxDelay=30000))
+	@Retryable(maxAttempts=maxAttempts, backoff=@Backoff(multiplier=multiplier, maxDelay=maxDelay))
 	public Connection getConnection() throws SQLException {
 		return delegate.getConnection();
 	}
 
 	@Override
-	@Retryable(maxAttempts=10, backoff=@Backoff(multiplier=2.3, maxDelay=20000))
+	@Retryable(maxAttempts=maxAttempts, backoff=@Backoff(multiplier=multiplier, maxDelay=maxDelay))
 	public Connection getConnection(String username, String password)
 			throws SQLException {
 		return delegate.getConnection(username, password);
