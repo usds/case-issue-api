@@ -1,6 +1,7 @@
 package gov.usds.case_issues.model;
 
-import java.util.Date;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
@@ -15,7 +16,7 @@ public class NoteSummary {
 	private String href;
 	private String id;
 	private String name;
-	private Date timestamp;
+	private ZonedDateTime timestamp;
 
 	public NoteSummary(CaseAttachmentAssociation backEnd) {
 		CaseAttachment note = backEnd.getAttachment();
@@ -34,7 +35,7 @@ public class NoteSummary {
 		}
 		id = backEnd.getCreatedBy();
 		name = "";
-		timestamp = backEnd.getCreatedAt();
+		timestamp = ZonedDateTime.ofInstant(backEnd.getCreatedAt().toInstant(), ZoneId.of("Z"));
 	}
 
 	public NoteSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
@@ -60,7 +61,7 @@ public class NoteSummary {
 		return new SerializedUserInformation(id, name);
 	}
 
-	public Date getTimestamp() {
+	public ZonedDateTime getTimestamp() {
 		return timestamp;
 	}
 }

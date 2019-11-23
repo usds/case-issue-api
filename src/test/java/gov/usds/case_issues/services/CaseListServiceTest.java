@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -83,6 +85,18 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
+	public void translatePath_improperCaseManagementSystemTag_validationError() {
+		expected.expect(ConstraintViolationException.class);
+		_service.translatePath("?", VALID_TYPE_TAG);
+	}
+
+	@Test
+	public void translatePath_improperCaseTypeTag_validationError() {
+		expected.expect(ConstraintViolationException.class);
+		_service.translatePath(VALID_SYS_TAG, "hello\nthere");
+	}
+
+	@Test
 	public void translatePath_invalidCaseType_notFoundError() {
 		String badId = "NOBODY-LOVES-YOU";
 		_dataService.ensureCaseManagementSystemInitialized(VALID_SYS_TAG, "Totes Real", "A genuine record in the DB!");
@@ -107,8 +121,28 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals(0, cases.size());
 	}
 
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_invalidSystemTag_exception() {
+		_service.getCases("hello\nworld", VALID_TYPE_TAG, "Woof");
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_invalidTypeTag_exception() {
+		_service.getCases(VALID_SYS_TAG, "hello\nworld", "Woof");
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSummaryInfo_invalidSystemTag_exception() {
+		_service.getSummaryInfo("hello\nworld", VALID_TYPE_TAG);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSummaryInfo_invalidTypeTag_exception() {
+		_service.getSummaryInfo(VALID_SYS_TAG, "hello\nworld");
+	}
+
 	@Test
-	public void getCases_exactReceipetNumber_returnsCaseWithQueriedReceipetNumber() {
+	public void getCases_exactReceiptNumber_returnsCaseWithQueriedReceiptNumber() {
 		String receiptNumber = "ABC1234567";
 
 		CaseGroupInfo translated = _service.translatePath(VALID_SYS_TAG, VALID_TYPE_TAG);
@@ -129,6 +163,102 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 		assertEquals(1, cases.size());
 		assertEquals(receiptNumber, cases.get(0).getReceiptNumber());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_invalidSystemTag_exception() {
+		_service.getActiveCases("hello\nworld", VALID_TYPE_TAG, null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_invalidTypeTag_exception() {
+		_service.getActiveCases(VALID_SYS_TAG, "hello\nworld", null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_invalidReceipt_exception() {
+		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_excessivePageSize_exception() {
+		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_excessivePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
+	}
+
+	@Test
+	public void getActiveCases_zeroPageSize_emptyList() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_negativePageSize_exception() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -10).size());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_negativePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -10).size());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_invalidSystemTag_exception() {
+		_service.getSnoozedCases("hello\nworld", VALID_TYPE_TAG, null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_invalidTypeTag_exception() {
+		_service.getSnoozedCases(VALID_SYS_TAG, "hello\nworld", null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_invalidReceipt_exception() {
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_excessivePageSize_exception() {
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_excessivePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_negativePageSize_exception() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_negativePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -1);
+	}
+
+	@Test
+	public void getSnoozedCases_zeroPageSize_emptyList() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		assertEquals(0, _service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
 	}
 
 	@Test
@@ -346,9 +476,10 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_service.getUploadFormat("INVALID DATE FORMAT");
 	}
 
+	// if this test breaks during a re-build of the paging feature, delete it and re-implement it in CaseListPagingFilteringTest
 	@Test
 	@SuppressWarnings("checkstyle:MagicNumber")
-	public void getActiveCases_addedNewestFirest_paginatedCorrectly() {
+	public void getActiveCases_addedNewestFirst_paginatedCorrectly() {
 		String oldestReceiptNumber = "FKE7487700";
 		TroubleCase a = _dataService.initCase(_system, "FKE3742810", _type, ZonedDateTime.parse("2018-08-29T00:00:00-04:00"));
 		TroubleCase b = _dataService.initCase(_system, "FKE7209266", _type, ZonedDateTime.parse("2017-08-29T00:00:00-04:00"));

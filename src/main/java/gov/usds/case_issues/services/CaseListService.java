@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.config.WebConfigurationProperties;
@@ -39,6 +40,7 @@ import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.NoteSummary;
+import gov.usds.case_issues.validators.TagFragment;
 
 /**
  * Service object for fetching paged lists of cases (and information about case counts)
@@ -46,6 +48,7 @@ import gov.usds.case_issues.model.NoteSummary;
  */
 @Service
 @Transactional(readOnly=true)
+@Validated
 public class CaseListService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseListService.class);
@@ -72,10 +75,13 @@ public class CaseListService {
 	@Autowired
 	private WebConfigurationProperties _webProperties;
 
-	public List<TroubleCase> getCases(String caseManagementSystemTag, String caseTypeTag, String query) {
+	public List<TroubleCase> getCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			String query) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 
-		if (query == null) {
+		if (query == null || query.isEmpty()) {
 			return new ArrayList<>();
 		}
 
@@ -87,14 +93,14 @@ public class CaseListService {
 	}
 
 	public List<CaseSummary> getActiveCases(
-		String caseManagementSystemTag,
-		String caseTypeTag,
-		String receiptNumber,
-		Integer size
+		@TagFragment String caseManagementSystemTag,
+		@TagFragment String caseTypeTag,
+		@TagFragment String receiptNumber, // wrong validator!
+		int size
 	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug(
-			"Request for active cases after case with systemTag: {} and reciptNumber: {}",
+			"Request for active cases after case with systemTag: {} and receiptNumber: {}",
 			caseManagementSystemTag,
 			receiptNumber
 		);
@@ -125,14 +131,14 @@ public class CaseListService {
 	}
 
 	public List<CaseSummary> getSnoozedCases(
-			String caseManagementSystemTag,
-			String caseTypeTag,
-			String receiptNumber,
-			Integer size
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			@TagFragment String receiptNumber, // wrong validation tag!
+			int size
 	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug(
-			"Request for snoozed cases after case with systemTag: {} and reciptNumber: {}",
+			"Request for snoozed cases after case with systemTag: {} and receiptNumber: {}",
 			caseManagementSystemTag,
 			receiptNumber
 		);
@@ -154,16 +160,22 @@ public class CaseListService {
 		TroubleCase troubleCase = lastCase.get();
 		try {
 			CaseSnooze lastSnoozeEnd = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase).get();
-			return rewrap(
-				_bulkRepo.getSnoozedCasesAfter(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					lastSnoozeEnd.getSnoozeEnd(),
-					troubleCase.getCaseCreation(),
-					troubleCase.getInternalId(),
-					size
-				)
-			);
+			// in theory, reversing this and using isBefore would work nicely, only this might produce a 1-millisecond
+			// race condition in tests
+			if (lastSnoozeEnd.getSnoozeEnd().isAfter(ZonedDateTime.now())) {
+				return rewrap(
+					_bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd.getSnoozeEnd(),
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						size
+					)
+				);
+			} else {
+				throw new IllegalArgumentException("Snooze was ended for this case before page request was sent.");
+			}
 		} catch (NoSuchElementException _exception) {
 			throw new IllegalArgumentException(
 				"Receipt number given does not correspond to a snoozed case"
@@ -172,7 +184,7 @@ public class CaseListService {
 
 	}
 
-	public Map<String, Object> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
+	public Map<String, Object> getSummaryInfo(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		Map<String, Object> caseCounts = _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
 				.stream()
@@ -185,7 +197,8 @@ public class CaseListService {
 		return caseCounts;
 	}
 
-	public CaseGroupInfo translatePath(String caseManagementSystemTag, String caseTypeTag) {
+	public CaseGroupInfo translatePath(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag) {
+		LOG.debug("Looking up path information for {}/{}", caseManagementSystemTag, caseTypeTag);
 		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByExternalId(caseManagementSystemTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
 		CaseType caseType = _caseTypeRepo.findByExternalId(caseTypeTag)
