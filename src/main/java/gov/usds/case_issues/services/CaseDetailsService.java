@@ -21,6 +21,7 @@ import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
+import gov.usds.case_issues.db.repositories.UserRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
@@ -40,6 +41,8 @@ public class CaseDetailsService {
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
 	@Autowired
 	private TroubleCaseRepository _caseRepo;
+	@Autowired
+	private UserRepository _userRepo;
 	@Autowired
 	private CaseSnoozeRepository _snoozeRepo;
 	@Autowired
@@ -69,8 +72,18 @@ public class CaseDetailsService {
 	public CaseDetails findCaseDetails(String caseManagementSystemTag, String receiptNumber) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Collection<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase);
-		Collection<CaseSnoozeSummary> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase);
-		List<NoteSummary> notes = _attachmentService.findNotesForCase(mainCase).stream().map(NoteSummary::new).collect(Collectors.toList());
+		List<CaseSnoozeSummaryFacade> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase).stream()
+													.map(row -> new CaseSnoozeSummaryFacade(
+														row,
+														_userRepo.findByUserId(row.getCreatedBy())
+													))
+													.collect(Collectors.toList());
+		List<NoteSummary> notes = _attachmentService.findNotesForCase(mainCase).stream()
+													.map(row -> new NoteSummary(
+														row,
+														 _userRepo.findByUserId(row.getCreatedBy())
+													))
+													.collect(Collectors.toList());
 		return new CaseDetails(mainCase, issues, snoozes, notes);
 	}
 

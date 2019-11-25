@@ -14,5 +14,4 @@ public interface CaseIssueSummary {
 	ZonedDateTime getIssueCreated();
 
 	ZonedDateTime getIssueClosed();
-
 }

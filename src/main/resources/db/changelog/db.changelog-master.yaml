@@ -353,3 +353,48 @@ databaseChangeLog:
                   name: closed_issue_count
                   type: bigint
                   remarks: The number of existing issues closed by this request (if it was successfully processed at all).
+  - changeSet:
+      id: users-table
+      author: tim.best@usds.dhs.gov
+      comment: information about the users of the case-issue-api
+      changes:
+        - createTable:
+            tableName: user_information
+            remarks: Data about the users that login to the api.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: print_name
+                  type: *string
+                  remarks: The human-readable name of this user (may contain spaces and punctuation).
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: *string
+                  remarks: The external unique identifier for this user
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_seen
+                  type: DATETIME
+                  remarks: the last time this user has logged into the application
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: back-populate-users-table
+      author: ben.warfield@usds.dhs.gov
+      comment: Back-populate the user_information table with users whose names we had stored before, and normalize the created_by/updated_by fields.
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            path: prepopulate-user-information.sql
+            relativeToChangelogFile: true
+        - sqlFile:
+            dbms: postgresql
+            path: repair-createdby-updatedby.sql
+            relativeToChangelogFile: true

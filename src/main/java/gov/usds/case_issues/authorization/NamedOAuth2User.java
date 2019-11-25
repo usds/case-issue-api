@@ -22,25 +22,14 @@ public class NamedOAuth2User implements OAuth2User {
 	private Map<String, Object> attributes;
 
 	public NamedOAuth2User(String name, OAuth2User wrapped) {
-		this(name, wrapped.getAuthorities(), wrapped.getAttributes());
-	}
-
-	public NamedOAuth2User(String name,
-			Collection<? extends GrantedAuthority> authorities,
-			Map<String, Object> attributes) {
 		this.name = name;
-		this.authorities = authorities;
-		this.attributes = attributes;
+		this.authorities =  wrapped.getAuthorities();
+		this.attributes = wrapped.getAttributes();
 	}
 
 	@Override
 	public String getName() {
-		Object attributeName = attributes.get("name");
-		if (attributeName != null) {
-			return name + ";" + attributeName;
-		} else {
-			return name;
-		}
+		return name;
 	}
 
 	@Override
@@ -54,6 +43,6 @@ public class NamedOAuth2User implements OAuth2User {
 	}
 
 	public String toString() {
-		return getName();
+		return name;
 	}
 }

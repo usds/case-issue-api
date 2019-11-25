@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.authorization.NamedOAuth2User;
+import gov.usds.case_issues.services.UserService;
 import gov.usds.case_issues.utils.HashUtils;
 
 /**
@@ -55,6 +56,8 @@ public class OAuthMappingConfig {
 	private static final Logger LOG = LoggerFactory.getLogger(OAuthMappingConfig.class);
 
 	@Autowired
+	private UserService _userService;
+	@Autowired
 	private OAuth2CustomizationProperties mappedConfig;
 	@Autowired(required=false) //  this is a sneaky way of making the bean conditional: being less sneaky would be better
 	private OAuth2ClientProperties clientConfig;
@@ -66,15 +69,15 @@ public class OAuthMappingConfig {
 			return null; // see above "sneaky" remark
 		}
 		final GrantedAuthoritiesMapper mapper = oauthAuthorityMapper(mappedConfig.getAuthorityPaths());
-		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService =
-				createDelegatingUserService(new DefaultOAuth2UserService(), mappedConfig.getNamePath());
+		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService = createDelegatingUserService(
+				new DefaultOAuth2UserService(), mappedConfig.getNamePath(), _userService);
 		return http -> {
 			LOG.info("Configuring OAuth user info service");
 			OAuth2LoginConfigurer<HttpSecurity> oauth2Login = http.oauth2Login();
 			if (userService != null) {
 				oauth2Login.userInfoEndpoint().userService(userService);
 			} else {
-				LOG.info("No custom username mapping provided: using fallback service");
+				LOG.warn("No custom username mapping provided: using fallback service");
 			}
 			if (mapper != null) {
 				oauth2Login.userInfoEndpoint().userAuthoritiesMapper(mapper);
@@ -83,19 +86,24 @@ public class OAuthMappingConfig {
 	}
 
 	protected static OAuth2UserService<OAuth2UserRequest, OAuth2User> createDelegatingUserService(
-			final OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate, List<String> inputPath) {
+			final OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate, List<String> inputPath,
+			UserService u) {
 		if (inputPath == null || inputPath.isEmpty()) {
 			return null;
 		}
 		final List<String> safePath = Collections.unmodifiableList(new ArrayList<>(inputPath));
 		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService = r -> {
 			OAuth2User wrapped = delegate.loadUser(r);
-			Optional<String> nameAttr = HashUtils.descend(wrapped.getAttributes(), safePath)
+			Map<String, Object> attributes = wrapped.getAttributes();
+			Optional<String> nameAttr = HashUtils.descend(attributes, safePath)
 					.filter(v -> v instanceof String)
 					.map(String.class::cast)
 					;
 			if (nameAttr.isPresent()) {
-				return new NamedOAuth2User(nameAttr.get(), wrapped);
+				String name = nameAttr.get();
+				NamedOAuth2User user = new NamedOAuth2User(name, wrapped);
+				u.createUserOrUpdateLastSeen(name, attributes.get("name").toString());
+				return user;
 			} else {
 				// AuthenticationException or AccessDeniedException might be better, but probably still
 				// produce an infinite redirect loop
