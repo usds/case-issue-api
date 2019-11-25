@@ -162,7 +162,7 @@ public class CaseListService {
 			@TagFragment String receiptNumber, // wrong validation tag!
 			int size
 	) {
-		return getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, size);
+		return getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, Optional.empty(), size);
 	}
 
 	public List<CaseSummary> getSnoozedCases(
@@ -170,6 +170,7 @@ public class CaseListService {
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber, // wrong validation tag!
 			DateRange caseCreationRange,
+			Optional<String> snoozeReason,
 			int size
 	) {
 		LOG.debug(
@@ -181,19 +182,39 @@ public class CaseListService {
 		List<Object[]> foundCases;
 		if (translated.isFirstPage()) {
 			if (caseCreationRange == null) {
-				foundCases = _bulkRepo.getSnoozedCases(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					size
-				);
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCases(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCases(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						size
+					);
+				}
 			} else {
-				foundCases = _bulkRepo.getSnoozedCases(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					caseCreationRange.getStartDate(),
-					caseCreationRange.getEndDate(),
-					size
-				);
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCases(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCases(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						size
+					);
+				}
 			}
 		} else {
 			TroubleCase troubleCase = translated.getCase();
@@ -210,25 +231,51 @@ public class CaseListService {
 				throw new IllegalArgumentException("Snooze was ended for this case before page request was sent.");
 			}
 			if (caseCreationRange == null) {
-				foundCases = _bulkRepo.getSnoozedCasesAfter(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					lastSnoozeEnd,
-					troubleCase.getCaseCreation(),
-					troubleCase.getInternalId(),
-					size
-				);
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						size
+					);
+				}
 			} else {
-				foundCases = _bulkRepo.getSnoozedCasesAfter(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					lastSnoozeEnd,
-					troubleCase.getCaseCreation(),
-					troubleCase.getInternalId(),
-					caseCreationRange.getStartDate(),
-					caseCreationRange.getEndDate(),
-					size
-				);
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						size
+					);
+				}
 			}
 		}
 		return rewrap(foundCases);

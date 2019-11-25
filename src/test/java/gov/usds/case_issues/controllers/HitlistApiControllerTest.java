@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +42,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		private static final String MAIN = "mainFilter";
 		private static final String CREATION_START = "caseCreationRangeBegin";
 		private static final String CREATION_END = "caseCreationRangeEnd";
+		private static final String SNOOZE_REASON = "snoozeReason";
 	}
 
 	private CaseManagementSystem _system;
@@ -247,7 +247,6 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 				.param(Filters.CREATION_END, DATE_STAMP_2018)
 			   )
 			.andExpect(status().isBadRequest())
-			.andDo(print())
 			.andExpect(content().json("{\"message\": \"Range end must be after beginning\"}"))
 			;
 		perform(doGetCases()
@@ -255,6 +254,34 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 				.param(Filters.CREATION_END, "2021-01-01T12:00:00Z")
 			   )
 			.andExpect(status().isBadRequest())
+			// it would be nice if we controlled the error output here, but we don't
+			;
+	}
+
+	@Test
+	public void getCases_badFilterCombination_badRequest() throws Exception {
+		String expectedErrorJson =
+			"{\"message\": \"Snooze reason cannot be specified for cases that are not snoozed\"}";
+		perform(doGetCases()
+				.param(Filters.MAIN, "ACTIVE")
+				.param(Filters.SNOOZE_REASON, "anything")
+			   )
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(expectedErrorJson))
+			;
+		perform(doGetCases()
+				.param(Filters.MAIN, "ALARMED")
+				.param(Filters.SNOOZE_REASON, "anything")
+			   )
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(expectedErrorJson))
+			;
+		perform(doGetCases()
+				.param(Filters.MAIN, "UNCHECKED")
+				.param(Filters.SNOOZE_REASON, "anything")
+			   )
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(expectedErrorJson))
 			;
 	}
 
@@ -291,6 +318,12 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 				.param(Filters.MAIN, "SNOOZED")
 				.param(Filters.CREATION_START, DATE_STAMP_2018)
 				.param(Filters.CREATION_END, DATE_STAMP_2019))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "SNOOZED")
+				.param(Filters.SNOOZE_REASON, "sleepy"))
 			.andExpect(status().isOk())
 			.andExpect(content().json("[]", true))
 		;

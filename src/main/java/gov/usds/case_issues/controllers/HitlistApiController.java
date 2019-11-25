@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,7 @@ public class HitlistApiController {
 			@RequestParam(required=false) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime caseCreationRangeBegin,
 			@RequestParam(required=false) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime caseCreationRangeEnd,
 			@RequestParam(required=false) String pageReference,
+			@RequestParam Optional<String> snoozeReason,
 			@RequestParam(defaultValue = "20") @Range(max=BulkCaseRepository.MAX_PAGE_SIZE) int size
 			) {
 		DateRange caseCreationFilterRange = null;
@@ -77,18 +79,27 @@ public class HitlistApiController {
 		}
 		switch(mainFilter) {
 			case ACTIVE:
+				assertNoSnoozeReasonPresent(snoozeReason);
 				return _listService.getActiveCases(caseManagementSystemTag, caseTypeTag,
 					pageReference, caseCreationFilterRange, size);
 			case ALARMED:
+				assertNoSnoozeReasonPresent(snoozeReason);
 				return _listService.getPreviouslySnoozedCases(caseManagementSystemTag, caseTypeTag,
 					pageReference, caseCreationFilterRange, size);
 			case SNOOZED:
 				return _listService.getSnoozedCases(caseManagementSystemTag, caseTypeTag,
-					pageReference, caseCreationFilterRange, size);
+					pageReference, caseCreationFilterRange, snoozeReason, size);
 			case UNCHECKED:
+				assertNoSnoozeReasonPresent(snoozeReason); /* and fall through */
 			default:
 				throw new IllegalArgumentException(
 					"Filter parameter must currently be one of 'ACTIVE','ALARMED' or 'SNOOZED'");
+		}
+	}
+
+	private void assertNoSnoozeReasonPresent(Optional<String> snoozeReason) {
+		if (snoozeReason.isPresent()) {
+			throw new IllegalArgumentException("Snooze reason cannot be specified for cases that are not snoozed");
 		}
 	}
 

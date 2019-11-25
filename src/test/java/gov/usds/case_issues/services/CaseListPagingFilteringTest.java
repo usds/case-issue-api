@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,6 +31,7 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 	private static final String CASE_TYPE = "McFAKEFAKE";
 	private static final String ISSUE_TYPE = "PAGING";
 	private static final String DEFAULT_SNOOZE_REASON = "TIREDNOW";
+	private static final String ALTERNATE_SNOOZE_REASON = "NOCOFFEE";
 	private static final ZonedDateTime START_DATE = ZonedDateTime.of(2000, 5, 21, 12, 0, 0, 0, ZoneId.of("GMT"));
 
 	/** The date range from 1 to 6 days after our start time */
@@ -65,11 +67,11 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		/** See {@link #ACTIVE02} */
 		ACTIVE03(START_DATE.plusDays(3)), // intentional creation date collision
 		/** A snoozed case that was created later but snoozed for a shorter time than {@link #SNOOZED01} */
-		SNOOZED02(START_DATE, DEFAULT_SNOOZE_REASON, 5, false),
+		SNOOZED02(START_DATE, ALTERNATE_SNOOZE_REASON, 5, false),
 		/** A desnoozed case that was created earlier but entered into the system later than {@link #DESNOOZED01} */
-		DESNOOZED02(START_DATE.plusDays(1), DEFAULT_SNOOZE_REASON, 10, true),
+		DESNOOZED02(START_DATE.plusDays(1), ALTERNATE_SNOOZE_REASON, 10, true),
 		/** A snoozed case that is snoozed for a reasonably long time. */
-		SNOOZED03(START_DATE.plusDays(3).plusSeconds(1), DEFAULT_SNOOZE_REASON, 20, false),
+		SNOOZED03(START_DATE.plusDays(3).plusSeconds(1), ALTERNATE_SNOOZE_REASON, 20, false),
 		/** A snoozed case with a somewhat recent creation date and a moderate snooze length */
 		SNOOZED04(START_DATE.plusDays(5), DEFAULT_SNOOZE_REASON, 15, false),
 		/** A snoozed case with a much more recent creation date and a short snooze length */
@@ -286,32 +288,101 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getSnoozedCases_firstPageEmptyDateRange_noCases() {
-		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_BEFORE_TIME, PAGE_SIZE);
+		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_BEFORE_TIME, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases);
 	}
 
 	@Test
 	public void getSnoozedCases_firstPageEarlyDateRange_twoCasesFound() {
-		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_EARLY, PAGE_SIZE);
+		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_EARLY, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
 	}
 
 	@Test
 	public void getSnoozedCases_secondPageEarlyDateRange_noCasesFound() {
-		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(), RANGE_EARLY, PAGE_SIZE);
+		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(), RANGE_EARLY, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases);
 	}
 
 	@Test
-	public void getSnoozedCases_firstPageMiddleDateRange_noCasesFound() {
-		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_MIDDLE, PAGE_SIZE);
+	public void getSnoozedCases_firstPageMiddleDateRange_correctCasesFound() {
+		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_MIDDLE, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED01, FixtureCase.SNOOZED04, FixtureCase.SNOOZED03);
 	}
 
 	@Test
 	public void getSnoozedCases_laterPageMiddleDateRange_caseFound() {
-		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED04.name(), RANGE_MIDDLE, PAGE_SIZE);
+		List<CaseSummary> foundCases = _service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED04.name(), RANGE_MIDDLE, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED03);
+	}
+
+	@Test
+	public void getSnoozedCases_firstPageDefaultReason_correctCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, null,
+					null, Optional.of(DEFAULT_SNOOZE_REASON), PAGE_SIZE),
+			FixtureCase.SNOOZED05, FixtureCase.SNOOZED01, FixtureCase.SNOOZED04
+		);
+	}
+	@Test
+	public void getSnoozedCases_firstPageAlternateReason_correctCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, null,
+					null, Optional.of(ALTERNATE_SNOOZE_REASON), PAGE_SIZE),
+			FixtureCase.SNOOZED02, FixtureCase.SNOOZED03
+		);
+	}
+
+	@Test
+	public void getSnoozedCases_firstPageBogusReason_noCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, null,
+					null, Optional.of("NOPE"), PAGE_SIZE)
+		);
+	}
+
+	@Test
+	public void getSnoozedCases_laterPageDefaultReason_correctCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(),
+					null, Optional.of(DEFAULT_SNOOZE_REASON), PAGE_SIZE),
+			FixtureCase.SNOOZED04
+		);
+	}
+
+	@Test
+	public void getSnoozedCases_laterPageAlternateReason_correctCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED02.name(),
+					null, Optional.of(ALTERNATE_SNOOZE_REASON), PAGE_SIZE),
+			FixtureCase.SNOOZED03
+		);
+	}
+
+	@Test
+	public void getSnoozedCases_laterPageBogusReason_noCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED02.name(),
+					null, Optional.of("NOPE"), PAGE_SIZE)
+		);
+	}
+
+	@Test
+	public void getSnoozedCases_firstPageDefaultReasonMiddleRange_correctCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, null,
+					RANGE_MIDDLE, Optional.of(DEFAULT_SNOOZE_REASON), PAGE_SIZE),
+			FixtureCase.SNOOZED01, FixtureCase.SNOOZED04
+		);
+	}
+
+	@Test
+	public void getSnoozedCases_laterPageDefaultReasonMiddleRange_correctCasesFound() {
+		assertCaseOrder(
+			_service.getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(),
+					RANGE_MIDDLE, Optional.of(DEFAULT_SNOOZE_REASON), PAGE_SIZE),
+			FixtureCase.SNOOZED04
+		);
 	}
 
 	@Test

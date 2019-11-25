@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RestResource;
@@ -34,6 +35,26 @@ public interface BulkCaseRepository {
 			@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
 		    @Range(max=MAX_PAGE_SIZE) int size);
 
+	@Query(name="snoozeReasonFirstPage")
+	@RestResource(exported=false)
+	public List<Object[]> getSnoozedCases(
+		long caseManagementSystemId,
+		long caseTypeId,
+		@NotNull @Length(min=1) String snoozeReason,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
+	@Query(name="snoozeReasonFirstPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getSnoozedCases(
+		long caseManagementSystemId,
+		long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
+		@NotNull @Length(min=1) String snoozeReason,
+	    @Range(max=MAX_PAGE_SIZE) int size
+    );
+
 	@Query(name="snoozedLaterPage")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCasesAfter(
@@ -44,6 +65,19 @@ public interface BulkCaseRepository {
 		Long internalId,
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
+
+	@Query(name="snoozeReasonLaterPage")
+	@RestResource(exported=false)
+	public List<Object[]> getSnoozedCasesAfter(
+		long caseManagementSystemId,
+		long caseTypeId,
+		ZonedDateTime lastSnoozeEnd,
+		ZonedDateTime caseCreation,
+		long internalId,
+		@NotNull @Length(min=1) String snoozeReason,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
 	@Query(name="snoozedLaterPageDateFilter")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozedCasesAfter(
@@ -56,6 +90,21 @@ public interface BulkCaseRepository {
 		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
+
+	@Query(name="snoozeReasonLaterPageDateFilter")
+	@RestResource(exported=false)
+	public List<Object[]> getSnoozedCasesAfter(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		ZonedDateTime lastSnoozeEnd,
+		ZonedDateTime caseCreation,
+		Long internalId,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseCreationWindowEnd,
+		@NotNull @Length(min=1) String snoozeReason,
+		@Range(max=MAX_PAGE_SIZE) int size
+	);
+
 	@Query(name="notCurrentlySnoozedFirstPage")
 	@RestResource(exported=false)
 	public List<Object[]> getActiveCases(
