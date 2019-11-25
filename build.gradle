@@ -4,6 +4,7 @@ plugins {
 	id 'checkstyle'
 	id 'jacoco'
 	id 'org.sonarqube'  version '2.7.1'
+	id "com.gorylenko.gradle-git-properties" version "2.2.0"
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -85,7 +86,6 @@ configurations {
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
 
-task copyDeps(type: Copy) {
-	from configurations.runtimeClasspath
-	into "${project.buildDir}/libs/"
+springBoot {
+	buildInfo()
 }

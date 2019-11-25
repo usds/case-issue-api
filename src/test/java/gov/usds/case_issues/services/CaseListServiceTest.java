@@ -19,20 +19,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.db.model.CaseIssue;
+import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
@@ -42,6 +45,7 @@ import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
+@SuppressWarnings("checkstyle:MagicNumber")
 public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 	private static final String VALID_TYPE_TAG = "1040E-Z";
@@ -81,6 +85,18 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@Test
+	public void translatePath_improperCaseManagementSystemTag_validationError() {
+		expected.expect(ConstraintViolationException.class);
+		_service.translatePath("?", VALID_TYPE_TAG);
+	}
+
+	@Test
+	public void translatePath_improperCaseTypeTag_validationError() {
+		expected.expect(ConstraintViolationException.class);
+		_service.translatePath(VALID_SYS_TAG, "hello\nthere");
+	}
+
+	@Test
 	public void translatePath_invalidCaseType_notFoundError() {
 		String badId = "NOBODY-LOVES-YOU";
 		_dataService.ensureCaseManagementSystemInitialized(VALID_SYS_TAG, "Totes Real", "A genuine record in the DB!");
@@ -105,8 +121,28 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals(0, cases.size());
 	}
 
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_invalidSystemTag_exception() {
+		_service.getCases("hello\nworld", VALID_TYPE_TAG, "Woof");
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_invalidTypeTag_exception() {
+		_service.getCases(VALID_SYS_TAG, "hello\nworld", "Woof");
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSummaryInfo_invalidSystemTag_exception() {
+		_service.getSummaryInfo("hello\nworld", VALID_TYPE_TAG);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSummaryInfo_invalidTypeTag_exception() {
+		_service.getSummaryInfo(VALID_SYS_TAG, "hello\nworld");
+	}
+
 	@Test
-	public void getCases_exactReceipetNumber_returnsCaseWithQueriedReceipetNumber() {
+	public void getCases_exactReceiptNumber_returnsCaseWithQueriedReceiptNumber() {
 		String receiptNumber = "ABC1234567";
 
 		CaseGroupInfo translated = _service.translatePath(VALID_SYS_TAG, VALID_TYPE_TAG);
@@ -129,10 +165,106 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals(receiptNumber, cases.get(0).getReceiptNumber());
 	}
 
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_invalidSystemTag_exception() {
+		_service.getActiveCases("hello\nworld", VALID_TYPE_TAG, null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_invalidTypeTag_exception() {
+		_service.getActiveCases(VALID_SYS_TAG, "hello\nworld", null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_invalidReceipt_exception() {
+		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_excessivePageSize_exception() {
+		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_excessivePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
+	}
+
+	@Test
+	public void getActiveCases_zeroPageSize_emptyList() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_negativePageSize_exception() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -10).size());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_negativePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.initCase(_system, receipt, _type, _now);
+		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -10).size());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_invalidSystemTag_exception() {
+		_service.getSnoozedCases("hello\nworld", VALID_TYPE_TAG, null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_invalidTypeTag_exception() {
+		_service.getSnoozedCases(VALID_SYS_TAG, "hello\nworld", null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_invalidReceipt_exception() {
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_excessivePageSize_exception() {
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_excessivePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_negativePageSize_exception() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getSnoozedCases_negativePageSizeSecondPage_exception() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -1);
+	}
+
+	@Test
+	public void getSnoozedCases_zeroPageSize_emptyList() {
+		String receipt = "ABCDE";
+		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
+		assertEquals(0, _service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
+	}
+
 	@Test
 	@WithMockUser(authorities="UPDATE_ISSUES")
 	public void putIssueList_noIssuesNoInput_nothingTerribleHappens() {
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "SUPER-OLD", Collections.emptyList(), _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "SUPER-OLD", Collections.emptyList(), _now);
 	}
 
 	@Test
@@ -142,7 +274,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		newIssueCases.add(new CaseRequestImpl("A123"));
 		newIssueCases.add(new CaseRequestImpl("A124"));
 		String issueType = "SUPER-OLD";
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueType, newIssueCases, _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueType, newIssueCases, _now);
 
 		Map<String, TroubleCase> allCases = new HashMap<>();
 		_caseRepo.findAll().forEach(tc -> allCases.put(tc.getReceiptNumber(), tc));
@@ -166,7 +298,11 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		List<String> issueReceipts = Arrays.asList("A1","A2","A3");
 		List<CaseRequest> newIssueCases = issueReceipts.stream()
 				.map(CaseRequestImpl::new).collect(Collectors.toList());
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueType, newIssueCases, _now.minusDays(1));
+		CaseIssueUpload uploadInfo = wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueType, newIssueCases, _now.minusDays(1));
+		assertEquals(3, uploadInfo.getUploadedRecordCount());
+		assertEquals(Long.valueOf(3), uploadInfo.getNewIssueCount());
+		assertEquals(Long.valueOf(0), uploadInfo.getClosedIssueCount());
+		assertEquals(UploadStatus.SUCCESSFUL, uploadInfo.getUploadStatus());
 		for (String receipt : issueReceipts) {
 			Optional<TroubleCase> mainCase = _caseRepo.findByCaseManagementSystemAndReceiptNumber(_system, receipt);
 			List<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase.get());
@@ -185,7 +321,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		String myIssueType = "BADNESS";
 		_dataService.initOpenIssue(_dataService.initCase(_system, "A1", _type, then), myIssueType);
 		_dataService.initOpenIssue(_dataService.initCase(_system, "A2", _type, then), myIssueType);
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, myIssueType, Collections.emptyList(), _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, myIssueType, Collections.emptyList(), _now);
 		_issueRepo.findAll().forEach(i -> assertEquals(_now, i.getIssueClosed()));
 		_caseRepo.findAll().forEach(c -> assertTrue(c.getOpenIssues().isEmpty()));
 	}
@@ -206,7 +342,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		newA2Data.put("state", "updated");
 
 		List<CaseRequest> newIssues = Arrays.asList(new CaseRequestImpl("A1", newA1Data), new CaseRequestImpl("A2", newA2Data));
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, myIssueType, newIssues, _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, myIssueType, newIssues, _now);
 		Map<String, Object> foundData = _caseRepo.findByCaseManagementSystemAndReceiptNumber(_system, "A1").get().getExtraData();
 		assertEquals("old", foundData.get("ignored"));
 		assertEquals("updated", foundData.get("state"));
@@ -234,7 +370,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		Map<String, Object> newB2Data = new HashMap<>();
 		newB2Data.put("state", "updated");
 		List<CaseRequest> newIssues = Arrays.asList(new CaseRequestImpl("B1", newB1Data), new CaseRequestImpl("B2", newB2Data));
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, myIssueType, newIssues, _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, myIssueType, newIssues, _now);
 
 		Map<String, Object> foundData = _caseRepo.findByCaseManagementSystemAndReceiptNumber(_system, "B1").get().getExtraData();
 		assertEquals("old", foundData.get("ignored"));
@@ -251,13 +387,13 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	@Test(expected=AccessDeniedException.class)
 	@WithMockUser
 	public void putIssueList_unauthorizedUser_exception() {
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
 	}
 
 	@Test(expected=AccessDeniedException.class)
 	@WithMockUser(authorities="UPDATE_CASES")
 	public void putIssueList_insufficientlyAuthorizedUser_exception() {
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
 	}
 
 	@Test
@@ -279,13 +415,13 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals("no active cases in " + VALID_SYS_TAG + " at start", 0, activeCases.size());
 		activeCases = fetchCasesForSystem(otherSystem);
 		assertEquals("no active cases in " + otherSystem + " at start", 0, activeCases.size());
-		_service.putIssueList(otherSystem, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a,b,c), _now.minusHours(1));
+		wrappedPutIssueList(otherSystem, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a,b,c), _now.minusHours(1));
 		assertEquals("No active cases for " + VALID_SYS_TAG, 0, fetchCasesForSystem(VALID_SYS_TAG).size());
 		assertEquals("3 active cases for " + otherSystem, 3, fetchCasesForSystem(otherSystem).size());
 
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a, b), _now.minusDays(3));
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeB, Arrays.asList(b, c), _now.minusDays(2));
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeC, Arrays.asList(b, c), _now.minusDays(1));
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a, b), _now.minusDays(3));
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeB, Arrays.asList(b, c), _now.minusDays(2));
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeC, Arrays.asList(b, c), _now.minusDays(1));
 		assertEquals("3 active cases for " + VALID_SYS_TAG, 3, fetchCasesForSystem(VALID_SYS_TAG).size());
 
 		// spot check
@@ -294,7 +430,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		assertEquals("three issues for C2", 3, issues.size());
 		issues.forEach(i -> assertNull("Issue not closed for C2: " + i.getIssueType(), i.getIssueClosed()));
 
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Collections.singletonList(b), _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Collections.singletonList(b), _now);
 		List<CaseSummary> nowActive = fetchCasesForSystem(VALID_SYS_TAG);
 		assertEquals("One case is gone", 2, nowActive.size());
 		Set<String> activeReceipts = nowActive.stream().map(ac -> ac.getReceiptNumber()).collect(Collectors.toSet());
@@ -304,9 +440,9 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(foundCase);
 		assertEquals("issue type", issueTypeA, issues.get(0).getIssueType());
 		assertEquals("issue closed date", _now, issues.get(0).getIssueClosed());
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeB, Collections.emptyList(), _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeB, Collections.emptyList(), _now);
 		assertEquals("Still two cases", 2, fetchCasesForSystem(VALID_SYS_TAG).size());
-		_service.putIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeC, Collections.emptyList(), _now);
+		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeC, Collections.emptyList(), _now);
 		activeCases = fetchCasesForSystem(VALID_SYS_TAG);
 		assertEquals("Just one active case", 1, activeCases.size());
 		assertEquals("C2", activeCases.get(0).getReceiptNumber());
@@ -340,9 +476,34 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_service.getUploadFormat("INVALID DATE FORMAT");
 	}
 
+	// if this test breaks during a re-build of the paging feature, delete it and re-implement it in CaseListPagingFilteringTest
+	@Test
+	@SuppressWarnings("checkstyle:MagicNumber")
+	public void getActiveCases_addedNewestFirst_paginatedCorrectly() {
+		String oldestReceiptNumber = "FKE7487700";
+		TroubleCase a = _dataService.initCase(_system, "FKE3742810", _type, ZonedDateTime.parse("2018-08-29T00:00:00-04:00"));
+		TroubleCase b = _dataService.initCase(_system, "FKE7209266", _type, ZonedDateTime.parse("2017-08-29T00:00:00-04:00"));
+		TroubleCase c = _dataService.initCase(_system, oldestReceiptNumber, _type, ZonedDateTime.parse("2016-08-29T00:00:00-04:00"));
+		ZonedDateTime lastMonth = ZonedDateTime.now().minusMonths(1);
+		_dataService.initIssue(a, "FOOBAR", lastMonth, null);
+		_dataService.initIssue(b, "FOOBAR", lastMonth, null);
+		_dataService.initIssue(c, "FOOBAR", lastMonth, null);
+
+		List<CaseSummary> activeCases = _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, oldestReceiptNumber, 20);
+		assertEquals("The two newer cases should be returned", 2, activeCases.size());
+	}
+
+	private CaseIssueUpload wrappedPutIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
+			List<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
+		CaseGroupInfo translated = _service.translatePath(systemTag, caseTypeTag);
+		CaseIssueUpload uploadInfo = new CaseIssueUpload(translated.getCaseManagementSystem(),
+		    translated.getCaseType(), issueTypeTag, eventDate, newIssueCases.size());
+		return _service.putIssueList(uploadInfo, newIssueCases);
+	}
+
 	@SuppressWarnings("checkstyle:MagicNumber")
 	private List<CaseSummary> fetchCasesForSystem(String systemTag) {
-		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, PageRequest.of(0, 100));
+		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, null, 20);
 	}
 
 	private class CaseRequestImpl implements CaseRequest {

@@ -4,11 +4,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import gov.usds.case_issues.db.model.UserInformation;
+import gov.usds.case_issues.db.repositories.UserRepository;
 
 /**
  * Consolidated tests for the controllers that have one handler each and are too annoying.
@@ -16,8 +21,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @ActiveProfiles("auth-testing")
 public class OneShotControllersTest extends ControllerTestBase {
 
+	@Autowired
+	private UserRepository _userRepo;
+
+	@Before
+	public void resetDb() {
+		truncateDb();
+	}
+
 	private static MockHttpServletRequestBuilder getUser() {
-		return get(UserDetailsApiController.USER_INFO_ENDPOINT);
+		return get(UserInformationApiController.USER_INFO_ENDPOINT);
 	}
 
 	private static MockHttpServletRequestBuilder getCsrf() {
@@ -33,6 +46,7 @@ public class OneShotControllersTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(username="Freddie Fixer", authorities={"RESPECT", "FIGURE"})
 	public void getUser_loggedInUser_expectedResult() throws Exception {
+		createMockDatabaseUser("Freddie Fixer");
 		perform(getUser())
 			.andExpect(status().isOk())
 			.andExpect(content().json("{\"name\": \"Freddie Fixer\"}"))
@@ -42,6 +56,7 @@ public class OneShotControllersTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(username="Freddie Fixer", authorities={"RESPECT", "FIGURE"})
 	public void getUser_loggedInUserOkOrigin_okResult() throws Exception {
+		createMockDatabaseUser("Freddie Fixer");
 		perform(getUser().header("Origin", ORIGIN_HTTPS_OK))
 			.andExpect(status().isOk())
 			;
@@ -75,5 +90,22 @@ public class OneShotControllersTest extends ControllerTestBase {
 	@Test
 	public void getCsrf_badOrigin_forbidden() throws Exception {
 		perform(getCsrf().header("Origin", ORIGIN_NOT_OK)).andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithAnonymousUser
+	public void getHealth_anonymous_okResult() throws Exception {
+		perform(get("/health")).andExpect(status().isOk()).andExpect(content().string(""));
+	}
+
+	@Test
+	@WithMockUser
+	public void getHealth_loggedInUser_okResult() throws Exception {
+		perform(get("/health")).andExpect(status().isOk()).andExpect(content().string(""));
+	}
+
+	private void createMockDatabaseUser(String name) {
+		UserInformation user = new UserInformation(name, name);
+		_userRepo.save(user);
 	}
 }

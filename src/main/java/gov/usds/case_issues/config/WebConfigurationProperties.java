@@ -47,18 +47,28 @@ public class WebConfigurationProperties {
 
 	public static class UserDefinition {
 		private String _name;
+		private String _printName;
 		private List<CaseIssuePermission> _grants = new ArrayList<>();
 
 		public String getName() {
 			return _name;
 		}
+
 		public void setName(String _name) {
 			this._name = _name;
+		}
+
+		public String getPrintName() {
+			return _printName;
+		}
+		public void setPrintName(String _printName) {
+			this._printName = _printName;
 		}
 
 		public List<CaseIssuePermission> getGrants() {
 			return _grants;
 		}
+
 		public void setGrants(List<CaseIssuePermission> _grants) {
 			this._grants = _grants;
 		}

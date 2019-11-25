@@ -31,7 +31,7 @@ public class CaseAttachmentService {
 	private AttachmentAssociationRepository _associationRepository;
 	@Autowired
 	private CaseAttachmentRepository _noteRepository;
- 
+
 	@Transactional(readOnly=false)
 	public CaseAttachmentAssociation attachNote(AttachmentRequest request, CaseSnooze snooze) {
 		AttachmentSubtype subType = null;
@@ -39,8 +39,9 @@ public class CaseAttachmentService {
 
 		LOG.debug("Attempting to attach note {} {} {}", request.getNoteType(), request.getSubtype(), request.getContent());
 		if (null != request.getSubtype()) {
-			subType = _subtypeRepository.findByExternalId(request.getSubtype())
-				.orElseThrow(IllegalArgumentException::new);
+			subType = _subtypeRepository
+				.findByExternalId(request.getSubtype())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid subtype"));
 		}
 		Optional<CaseAttachment> noteSearch = _noteRepository.findByAttachmentTypeAndAttachmentSubtypeAndContent(request.getNoteType(), subType, request.getContent());
 		if (noteSearch.isPresent()) {

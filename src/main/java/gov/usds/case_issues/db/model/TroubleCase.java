@@ -38,30 +38,34 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @TypeDef(name="json", typeClass=JsonStringType.class)
 @NamedNativeQueries({
 	@NamedNativeQuery(
-		name = "snoozed",
-		query = "SELECT * from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP "
-			  + "ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC",
+		name = "snoozedFirstPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
-		name = "unSnoozed",
-		query = "SELECT * from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP "
-			  + "ORDER BY case_creation ASC, internal_id ASC",
+		name = "snoozedLaterPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.SNOOZED_PAGE_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
-		name = "snoozed.count",
-		query = "SELECT count(1) as entity_count from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end >= CURRENT_TIMESTAMP ",
-		resultSetMapping = "rowCount"
+		name = "notCurrentlySnoozedFirstPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
-		name = "unSnoozed.count",
-		query = "SELECT count(1) as entity_count from " + TroubleCase.CASE_DTO_CTE
-			  + "WHERE last_snooze_end is null or last_snooze_end < CURRENT_TIMESTAMP ",
-		resultSetMapping = "rowCount"
+		name = "notCurrentlySnoozedLaterPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
 		name = "summary",
@@ -75,10 +79,6 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		name="snoozeCaseMapping",
 		entities=@EntityResult(entityClass=TroubleCase.class),
 		columns=@ColumnResult(name="last_snooze_end", type=ZonedDateTime.class)
-	),
-	@SqlResultSetMapping(
-		name="rowCount",
-		columns=@ColumnResult(name="entity_count", type=Long.class)
 	),
 })
 public class TroubleCase extends UpdatableEntity {
@@ -99,7 +99,22 @@ public class TroubleCase extends UpdatableEntity {
 			+ "where c.internal_id=openissues1_.issue_case_internal_id "
 			+ "and ( openissues1_.issue_closed is null)"
 		+ ")";
+	public static final String NOT_SNOOZED_NOW_CONSTRAINT = " (last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP) ";
+	public static final String SNOOZED_NOW_CONSTRAINT = " last_snooze_end >= CURRENT_TIMESTAMP ";
+	public static final String NOT_SNOOZED_NOW_PAGE_CONSTRAINT =
+			"  AND case_creation >= :caseCreation "
+			+ "AND internal_id != :internalId ";
+	public static final String SNOOZED_PAGE_CONSTRAINT =
+			"  AND last_snooze_end >= :lastSnoozeEnd "
+			+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT;
+	public static final String NOT_SNOOZED_NOW_POSTAMBLE =
+		"  ORDER BY case_creation ASC, internal_id ASC "
+		+ "LIMIT :size";
+	public static final String SNOOZED_NOW_POSTAMBLE =
+		"  ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
+		+ "LIMIT :size";
 	public static final String CASE_DTO_CTE = "(" + CASE_DTO_QUERY + ") as trouble_case_dto ";
+	public static final String CASE_SELECT_STEM = "SELECT * FROM" + CASE_DTO_CTE + " WHERE ";
 
 	@NaturalId
 	@ManyToOne(optional=false)

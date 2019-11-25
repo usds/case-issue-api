@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,20 +14,24 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.model.CaseIssue;
+import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
+import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
+import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
@@ -34,6 +40,7 @@ import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.NoteSummary;
+import gov.usds.case_issues.validators.TagFragment;
 
 /**
  * Service object for fetching paged lists of cases (and information about case counts)
@@ -41,6 +48,7 @@ import gov.usds.case_issues.model.NoteSummary;
  */
 @Service
 @Transactional(readOnly=true)
+@Validated
 public class CaseListService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseListService.class);
@@ -61,12 +69,19 @@ public class CaseListService {
 	@Autowired
 	private CaseAttachmentService _attachmentService;
 	@Autowired
+	private UploadStatusService _uploadStatusService; // we should not have this and the repo injected in the same class!
+	@Autowired
+	private CaseIssueUploadRepository _uploadRepo;
+	@Autowired
 	private WebConfigurationProperties _webProperties;
 
-	public List<TroubleCase> getCases(String caseManagementSystemTag, String caseTypeTag, String query) {
+	public List<TroubleCase> getCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			String query) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 
-		if (query == null) {
+		if (query == null || query.isEmpty()) {
 			return new ArrayList<>();
 		}
 
@@ -77,40 +92,113 @@ public class CaseListService {
 		);
 	}
 
-	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
+	public List<CaseSummary> getActiveCases(
+		@TagFragment String caseManagementSystemTag,
+		@TagFragment String caseTypeTag,
+		@TagFragment String receiptNumber, // wrong validator!
+		int size
+	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug("Paged request for active cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
+		LOG.debug(
+			"Request for active cases after case with systemTag: {} and receiptNumber: {}",
+			caseManagementSystemTag,
+			receiptNumber
+		);
+		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
+			translated.getCaseManagementSystem(),
+			receiptNumber
+		);
+		if (!lastCase.isPresent()) {
+			return rewrap(
+				_bulkRepo.getActiveCases(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					size
+				)
+			);
+		}
+		TroubleCase troubleCase = lastCase.get();
+
 		return rewrap(
-			_bulkRepo.getActiveCases(
+			_bulkRepo.getActiveCasesAfter(
 				translated.getCaseManagementSystemId(),
 				translated.getCaseTypeId(),
-				pageRequest
-			).getContent(),
-			false
+				troubleCase.getCaseCreation(),
+				troubleCase.getInternalId(),
+				size
+			)
 		);
 	}
 
-	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, Pageable pageRequest) {
+	public List<CaseSummary> getSnoozedCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			@TagFragment String receiptNumber, // wrong validation tag!
+			int size
+	) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		LOG.debug("Paged request for snoozed cases: {} {}", pageRequest.getPageSize(), pageRequest.getPageNumber());
-		return rewrap(
-			_bulkRepo.getSnoozedCases(
-				translated.getCaseManagementSystemId(),
-				translated.getCaseTypeId(),
-				pageRequest
-			).getContent(),
-			false
+		LOG.debug(
+			"Request for snoozed cases after case with systemTag: {} and receiptNumber: {}",
+			caseManagementSystemTag,
+			receiptNumber
 		);
+		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
+			translated.getCaseManagementSystem(),
+			receiptNumber
+		);
+
+		if (!lastCase.isPresent()) {
+			return rewrap(
+				_bulkRepo.getSnoozedCases(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					size
+				)
+			);
+		}
+
+		TroubleCase troubleCase = lastCase.get();
+		try {
+			CaseSnooze lastSnoozeEnd = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase).get();
+			// in theory, reversing this and using isBefore would work nicely, only this might produce a 1-millisecond
+			// race condition in tests
+			if (lastSnoozeEnd.getSnoozeEnd().isAfter(ZonedDateTime.now())) {
+				return rewrap(
+					_bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd.getSnoozeEnd(),
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						size
+					)
+				);
+			} else {
+				throw new IllegalArgumentException("Snooze was ended for this case before page request was sent.");
+			}
+		} catch (NoSuchElementException _exception) {
+			throw new IllegalArgumentException(
+				"Receipt number given does not correspond to a snoozed case"
+			);
+		}
+
 	}
 
-	public Map<String, Number> getSummaryInfo(String caseManagementSystemTag, String caseTypeTag) {
+	public Map<String, Object> getSummaryInfo(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		return _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
+		Map<String, Object> caseCounts = _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
 				.stream()
 				.collect(Collectors.toMap(a->((String) a[0]).trim(), a->(Number) a[1]));
+		CaseIssueUpload lastSuccess = _uploadStatusService.getLastUpload(
+			translated.getCaseManagementSystem(), translated.getCaseType(), UploadStatus.SUCCESSFUL);
+		if (lastSuccess != null) {
+			caseCounts.put("lastUpdated", lastSuccess.getEffectiveDate());
+		}
+		return caseCounts;
 	}
 
-	public CaseGroupInfo translatePath(String caseManagementSystemTag, String caseTypeTag) {
+	public CaseGroupInfo translatePath(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag) {
+		LOG.debug("Looking up path information for {}/{}", caseManagementSystemTag, caseTypeTag);
 		CaseManagementSystem caseManagementSystem = _caseManagementSystemRepo.findByExternalId(caseManagementSystemTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Management System", caseManagementSystemTag));
 		CaseType caseType = _caseTypeRepo.findByExternalId(caseTypeTag)
@@ -137,13 +225,16 @@ public class CaseListService {
 	 *    values that are set by this method).
 	 * @throws ApiModelNotFoundException if the {@link CaseManagementSystem} or {@link CaseType} could not be found.
 	 */
+
 	@Transactional(readOnly=false)
 	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
-	public void putIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
-			Iterable<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
-		CaseGroupInfo translated = translatePath(systemTag, caseTypeTag);
+	public CaseIssueUpload putIssueList(CaseIssueUpload translated, List<CaseRequest> newIssueCases) {
+		// convenience aliases to local variables, for use in closures
+		final ZonedDateTime eventDate = translated.getEffectiveDate();
+		final String issueTypeTag = translated.getIssueType();
+
 		List<CaseIssue> currentIssues = _issueRepo.findActiveIssues(translated.getCaseManagementSystem(), translated.getCaseType(),
-				issueTypeTag);
+				translated.getIssueType());
 		Map<String, CaseIssue> currentMap = currentIssues.stream().collect(Collectors.toMap(i->i.getIssueCase().getReceiptNumber(), i->i));
 
 		// build a list containing only CaseSummary objects with no existing CaseIssue
@@ -164,6 +255,8 @@ public class CaseListService {
 		// terminate all the remaining issues in the current collection
 		// this could also be done directly in the database, which might not be a bad idea?
 		currentMap.values().forEach(i -> i.setIssueClosed(eventDate));
+		LOG.info("Closing {} issues", currentMap.size());
+		translated.setClosedIssueCount(currentMap.size());
 
 		// get or create cases
 		HashSet<String> newReceipts = requestedNewIssues.stream().map(CaseRequest::getReceiptNumber)
@@ -203,6 +296,10 @@ public class CaseListService {
 				newIssues.stream()
 			).collect(Collectors.toSet())
 		);
+		translated.setNewIssueCount(existingCases.size() + newIssues.size());
+		translated.setUploadStatus(UploadStatus.SUCCESSFUL);
+		_uploadRepo.save(translated);
+		return translated;
 	}
 
 	public DataFormatSpec getUploadFormat(String uploadFormatId) {
@@ -216,17 +313,15 @@ public class CaseListService {
 		return spec;
 	}
 
-	private List<CaseSummary> rewrap(List<Object[]> queryResult, boolean includeNotes) {
+	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
 		LOG.info("Finding snoozed case from {}.", _snoozeRepo);
 		LOG.info("Finding attachment from {}.", _attachmentService);
 		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
-			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null : _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			List<NoteSummary> notes = null;
-			if(includeNotes) {
-				notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
-			}
+			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
+					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
+			List<NoteSummary> notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
 			return new CaseSummary(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());

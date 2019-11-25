@@ -1,9 +1,11 @@
 package gov.usds.case_issues.model;
 
-import java.util.Date;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
+import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.AttachmentType;
 
 public class NoteSummary {
@@ -12,8 +14,9 @@ public class NoteSummary {
 	private AttachmentType type;
 	private String subType;
 	private String href;
-	private String userId;
-	private Date timestamp;
+	private String id;
+	private String name;
+	private ZonedDateTime timestamp;
 
 	public NoteSummary(CaseAttachmentAssociation backEnd) {
 		CaseAttachment note = backEnd.getAttachment();
@@ -30,8 +33,15 @@ public class NoteSummary {
 				href = urlTemplate + content;
 			}
 		}
-		userId = backEnd.getCreatedBy();
-		timestamp = backEnd.getCreatedAt();
+		id = backEnd.getCreatedBy();
+		name = "";
+		timestamp = ZonedDateTime.ofInstant(backEnd.getCreatedAt().toInstant(), ZoneId.of("Z"));
+	}
+
+	public NoteSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
+		this(backEnd);
+		id = user != null ? user.getId() : backEnd.getCreatedBy();
+		name = user != null ? user.getPrintName() : "";
 	}
 
 	public String getContent() {
@@ -47,11 +57,11 @@ public class NoteSummary {
 		return href;
 	}
 
-	public String getUserId() {
-		return userId;
+	public SerializedUserInformation getUser() {
+		return new SerializedUserInformation(id, name);
 	}
 
-	public Date getTimestamp() {
+	public ZonedDateTime getTimestamp() {
 		return timestamp;
 	}
 }

@@ -34,6 +34,11 @@ public class ApiNavigatorPermissionsTest extends ControllerTestBase {
 	}
 
 	@Test
+	public void getFavicon_anonymous_ok() throws Exception {
+		perform(get("/favicon.ico")).andExpect(status().isOk());
+	}
+
+	@Test
 	public void getSwaggerUi_anonymous_ok() throws Exception {
 		perform(get("/swagger-ui.html")).andExpect(status().isOk());
 	}

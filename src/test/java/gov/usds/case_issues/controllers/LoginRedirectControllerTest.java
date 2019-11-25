@@ -16,8 +16,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.util.NestedServletException;
 
 import gov.usds.case_issues.config.WebConfigurationProperties;
+import gov.usds.case_issues.test_util.MockConfig;
 
-@ActiveProfiles("mock-properties")
+@ActiveProfiles(MockConfig.MOCK_PROPERTIES_PROFILE)
 public class LoginRedirectControllerTest extends ControllerTestBase {
 
 	private static final String[] ALLOWED_ORIGINS = {
