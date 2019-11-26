@@ -398,3 +398,12 @@ databaseChangeLog:
             dbms: postgresql
             path: repair-createdby-updatedby.sql
             relativeToChangelogFile: true
+  - changeSet:
+      id: add-unique-user-constraint
+      author: ben.warfield@usds.dhs.gov
+      comment: Add unique constraint for the external user ID in user_information.
+      changes:
+        - addUniqueConstraint:
+            tableName: user_information
+            constraint_name: uk__user_information
+            columnNames: user_id
