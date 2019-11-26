@@ -40,3 +40,5 @@ out/
 
 ### postgres ###
 postgres-data
+
+test-reports
