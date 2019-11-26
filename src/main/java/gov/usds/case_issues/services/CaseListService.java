@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,6 +38,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
+import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.model.NoteSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
@@ -93,41 +93,67 @@ public class CaseListService {
 	}
 
 	public List<CaseSummary> getActiveCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			@TagFragment String receiptNumber, // wrong validator!
+			int size
+		) {
+		return getActiveCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, size);
+	}
+
+	public List<CaseSummary> getActiveCases(
 		@TagFragment String caseManagementSystemTag,
 		@TagFragment String caseTypeTag,
 		@TagFragment String receiptNumber, // wrong validator!
+		DateRange caseCreationRange,
 		int size
 	) {
-		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
 		LOG.debug(
 			"Request for active cases after case with systemTag: {} and receiptNumber: {}",
 			caseManagementSystemTag,
 			receiptNumber
 		);
-		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
-			translated.getCaseManagementSystem(),
-			receiptNumber
-		);
-		if (!lastCase.isPresent()) {
-			return rewrap(
-				_bulkRepo.getActiveCases(
+		CasePageInfo translated = translatePath(caseManagementSystemTag, caseTypeTag, receiptNumber);
+		List<Object[]> foundCases;
+		if (translated.isFirstPage()) {
+			if (caseCreationRange == null) {
+				foundCases = _bulkRepo.getActiveCases(
 					translated.getCaseManagementSystemId(),
 					translated.getCaseTypeId(),
 					size
-				)
-			);
-		}
-		TroubleCase troubleCase = lastCase.get();
+				);
+			} else {
+				foundCases = _bulkRepo.getActiveCases(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					caseCreationRange.getStartDate(),
+					caseCreationRange.getEndDate(),
+					size
+				);
+			}
+		} else {
+			if (caseCreationRange == null) {
+				foundCases = _bulkRepo.getActiveCasesAfter(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					translated.getCaseCreationDate(),
+					translated.getCaseId(),
+					size
+				);
+			} else {
+				foundCases = _bulkRepo.getActiveCasesAfter(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					translated.getCaseCreationDate(),
+					translated.getCaseId(),
+					caseCreationRange.getStartDate(),
+					caseCreationRange.getEndDate(),
+					size
+				);
 
-		return rewrap(
-			_bulkRepo.getActiveCasesAfter(
-				translated.getCaseManagementSystemId(),
-				translated.getCaseTypeId(),
-				troubleCase.getCaseCreation(),
-				troubleCase.getInternalId(),
-				size
-			)
-		);
+			}
+		}
+		return rewrap(foundCases);
 	}
 
 	public List<CaseSummary> getSnoozedCases(
@@ -136,52 +162,179 @@ public class CaseListService {
 			@TagFragment String receiptNumber, // wrong validation tag!
 			int size
 	) {
-		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
+		return getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, Optional.empty(), size);
+	}
+
+	public List<CaseSummary> getSnoozedCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			@TagFragment String receiptNumber, // wrong validation tag!
+			DateRange caseCreationRange,
+			Optional<String> snoozeReason,
+			int size
+	) {
 		LOG.debug(
 			"Request for snoozed cases after case with systemTag: {} and receiptNumber: {}",
 			caseManagementSystemTag,
 			receiptNumber
 		);
-		Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
-			translated.getCaseManagementSystem(),
-			receiptNumber
-		);
-
-		if (!lastCase.isPresent()) {
-			return rewrap(
-				_bulkRepo.getSnoozedCases(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					size
-				)
-			);
-		}
-
-		TroubleCase troubleCase = lastCase.get();
-		try {
-			CaseSnooze lastSnoozeEnd = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase).get();
-			// in theory, reversing this and using isBefore would work nicely, only this might produce a 1-millisecond
-			// race condition in tests
-			if (lastSnoozeEnd.getSnoozeEnd().isAfter(ZonedDateTime.now())) {
-				return rewrap(
-					_bulkRepo.getSnoozedCasesAfter(
+		CasePageInfo translated = translatePath(caseManagementSystemTag, caseTypeTag, receiptNumber);
+		List<Object[]> foundCases;
+		if (translated.isFirstPage()) {
+			if (caseCreationRange == null) {
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCases(
 						translated.getCaseManagementSystemId(),
 						translated.getCaseTypeId(),
-						lastSnoozeEnd.getSnoozeEnd(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCases(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						size
+					);
+				}
+			} else {
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCases(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCases(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						size
+					);
+				}
+			}
+		} else {
+			TroubleCase troubleCase = translated.getCase();
+			Optional<CaseSnooze> lastSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase);
+			if (!lastSnooze.isPresent()) {
+				throw new IllegalArgumentException(
+					"Receipt number given does not correspond to a snoozed case"
+				);
+			}
+			ZonedDateTime lastSnoozeEnd = lastSnooze.get().getSnoozeEnd();
+			// in theory, reversing this and using isBefore would work nicely, only this might produce a 1-millisecond
+			// race condition in tests
+			if (!lastSnoozeEnd.isAfter(ZonedDateTime.now())) {
+				throw new IllegalArgumentException("Snooze was ended for this case before page request was sent.");
+			}
+			if (caseCreationRange == null) {
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
 						troubleCase.getCaseCreation(),
 						troubleCase.getInternalId(),
 						size
-					)
+					);
+				}
+			} else {
+				if (snoozeReason.isPresent()) {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						snoozeReason.get(),
+						size
+					);
+				} else {
+					foundCases = _bulkRepo.getSnoozedCasesAfter(
+						translated.getCaseManagementSystemId(),
+						translated.getCaseTypeId(),
+						lastSnoozeEnd,
+						troubleCase.getCaseCreation(),
+						troubleCase.getInternalId(),
+						caseCreationRange.getStartDate(),
+						caseCreationRange.getEndDate(),
+						size
+					);
+				}
+			}
+		}
+		return rewrap(foundCases);
+	}
+
+	public List<CaseSummary> getPreviouslySnoozedCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			@TagFragment String receiptNumber,
+			int size) {
+		return getPreviouslySnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, size);
+	}
+
+	public List<CaseSummary> getPreviouslySnoozedCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			@TagFragment String receiptNumber,
+			DateRange caseCreationRange,
+			int size) {
+		CasePageInfo translated = translatePath(caseManagementSystemTag, caseTypeTag, receiptNumber);
+		List<Object[]> foundCases;
+		if (translated.isFirstPage()) {
+			if (caseCreationRange == null) {
+				foundCases = _bulkRepo.getPreviouslySnoozedCases(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					size
 				);
 			} else {
-				throw new IllegalArgumentException("Snooze was ended for this case before page request was sent.");
+				foundCases = _bulkRepo.getPreviouslySnoozedCases(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					caseCreationRange.getStartDate(),
+					caseCreationRange.getEndDate(),
+					size
+				);
 			}
-		} catch (NoSuchElementException _exception) {
-			throw new IllegalArgumentException(
-				"Receipt number given does not correspond to a snoozed case"
-			);
+		} else {
+			if (caseCreationRange == null) {
+				foundCases = _bulkRepo.getPreviouslySnoozedCasesAfter(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					translated.getCaseCreationDate(),
+					translated.getCaseId(),
+					size
+				);
+			} else {
+				foundCases = _bulkRepo.getPreviouslySnoozedCasesAfter(
+					translated.getCaseManagementSystemId(),
+					translated.getCaseTypeId(),
+					translated.getCaseCreationDate(),
+					translated.getCaseId(),
+					caseCreationRange.getStartDate(),
+					caseCreationRange.getEndDate(),
+					size
+				);
+			}
 		}
-
+		return rewrap(foundCases);
 	}
 
 	public Map<String, Object> getSummaryInfo(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag) {
@@ -204,6 +357,21 @@ public class CaseListService {
 		CaseType caseType = _caseTypeRepo.findByExternalId(caseTypeTag)
 				.orElseThrow(()->new ApiModelNotFoundException("Case Type", caseTypeTag));
 		return new CaseGroupInfo(caseManagementSystem, caseType);
+	}
+
+	public CasePageInfo translatePath(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag, @TagFragment String receipt) {
+		CaseGroupInfo group = translatePath(caseManagementSystemTag, caseTypeTag);
+		if (receipt != null) {
+			Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
+				group.getCaseManagementSystem(),
+				receipt
+			);
+			if (lastCase.isPresent()) {
+				return new CasePageInfo(group, lastCase.get());
+			}
+			// I would argue that if it isn't we should throw IllegalArgumentException, but that's a breaking change
+		}
+		return new CasePageInfo(group, null);
 	}
 
 	/**
@@ -352,6 +520,45 @@ public class CaseListService {
 
 		public CaseType getCaseType() {
 			return _type;
+		}
+	}
+
+	public static class CasePageInfo extends CaseGroupInfo {
+
+		private TroubleCase _case;
+
+		public CasePageInfo(CaseGroupInfo group, TroubleCase c) {
+			this(group.getCaseManagementSystem(), group.getCaseType(), c);
+		}
+
+		public CasePageInfo(CaseManagementSystem system, CaseType type, TroubleCase c) {
+			super(system, type);
+			_case = c;
+		}
+
+		public boolean isFirstPage() {
+			return _case == null;
+		}
+
+		public TroubleCase getCase() {
+			assertCase();
+			return _case;
+		}
+
+		public Long getCaseId() {
+			assertCase();
+			return _case.getInternalId();
+		}
+
+		public ZonedDateTime getCaseCreationDate() {
+			assertCase();
+			return _case.getCaseCreation();
+		}
+
+		private void assertCase() {
+			if (null == _case) {
+				throw new IllegalArgumentException("No case was included in this page request");
+			}
 		}
 	}
 }
