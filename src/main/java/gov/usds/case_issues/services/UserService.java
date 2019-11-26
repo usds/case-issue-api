@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import gov.usds.case_issues.db.model.UserInformation;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.model.SerializedUserInformation;
 
 @Service
@@ -14,7 +14,7 @@ import gov.usds.case_issues.model.SerializedUserInformation;
 public class UserService {
 
 	@Autowired
-	private UserRepository _userRepo;
+	private UserInformationRepository _userRepo;
 
 	public SerializedUserInformation getCurrentUser(Authentication auth) {
 		String id = auth.getName();

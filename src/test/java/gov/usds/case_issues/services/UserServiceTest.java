@@ -10,13 +10,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import gov.usds.case_issues.db.model.UserInformation;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
 public class UserServiceTest extends CaseIssueApiTestBase {
 
 	@Autowired
-	private UserRepository _userRepo;
+	private UserInformationRepository _userRepo;
 	@Autowired
 	private UserService _service;
 

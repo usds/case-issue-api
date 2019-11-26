@@ -21,7 +21,7 @@ import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
@@ -42,7 +42,7 @@ public class CaseDetailsService {
 	@Autowired
 	private TroubleCaseRepository _caseRepo;
 	@Autowired
-	private UserRepository _userRepo;
+	private UserInformationRepository _userRepo;
 	@Autowired
 	private CaseSnoozeRepository _snoozeRepo;
 	@Autowired
