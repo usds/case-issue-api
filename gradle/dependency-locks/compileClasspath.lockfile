@@ -89,6 +89,7 @@ org.springframework.data:spring-data-rest-webmvc:3.1.10.RELEASE
 org.springframework.hateoas:spring-hateoas:0.25.2.RELEASE
 org.springframework.plugin:spring-plugin-core:1.2.0.RELEASE
 org.springframework.plugin:spring-plugin-metadata:1.2.0.RELEASE
+org.springframework.retry:spring-retry:1.2.4.RELEASE
 org.springframework.security:spring-security-config:5.1.6.RELEASE
 org.springframework.security:spring-security-core:5.1.6.RELEASE
 org.springframework.security:spring-security-oauth2-client:5.1.6.RELEASE

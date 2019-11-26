@@ -27,6 +27,7 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
+	implementation 'org.springframework.retry:spring-retry'
 
 	// access logging:
 	implementation 'net.rakugakibox.spring.boot:logback-access-spring-boot-starter:2.7.1'
