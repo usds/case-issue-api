@@ -12,15 +12,37 @@ an HTTP/JSON API that can be consumed by other clients if needed.
 
 ## Basic set-up
 
+```bash
+docker-compose build
+docker-compose up
+docker build -f setup.Dockerfile -t setup . && docker run -i -t setup
+```
+
 This project uses the [gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) to avoid build tool versioning issues. Setting it up is as simple as typing `./gradlew build` in the project directory. Alternatively, you can set it up as a new Gradle project in Eclipse/Spring Tool Suite, or as a new Java project in your IDE of choice. (If you find yourself frequently typing `gradle test` instead of `./gradlew test`, you may wish to `alias gradle=./gradlew` to save yourself some aggravation.)
 
 ## Tests and checks
 
-You can run unit tests as a group using `./gradlew test`, or run all checks using `./gradlew check`. This will:
+You can run unit tests as a group using:
 
-* run `checkstyle` on both main and test classes
-* run all tests
-* run JaCoCo to check for adequate test coverage
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+open ./test-reports/tests/test/index.html
+```
+
+or run all checks using:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.check.yml build
+docker-compose -f docker-compose.yml -f docker-compose.check.yml up --exit-code-from api
+open ./test-reports/tests/test/index.html
+```
+
+Check will:
+
+- run `checkstyle` on both main and test classes
+- run all tests
+- run JaCoCo to check for adequate test coverage
 
 To configure your IDE to report style violations, use the checkstyle configuration in [config/checkstyle/checkstyle.xml].
 
@@ -28,11 +50,14 @@ To configure your IDE to report style violations, use the checkstyle configurati
 
 1. Using the command line
 
-     SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
+    ```bash
+    docker-compose build
+    docker-compose up
+    ```
 
-1. Using Spring Tool Suite (Eclipse)
-   * Run as: Spring Boot Application
-   * Edit the Run Configuration to set the profile to `dev`
+2. Using Spring Tool Suite (Eclipse)
+   - Run as: Spring Boot Application
+   - Edit the Run Configuration to set the profile to `dev`
 
 ## Configuring the application
 
@@ -54,19 +79,21 @@ The main files to be aware of are:
 
 Several custom sections can be added to the application properties:
 
-* `sample-data` contains configuration for loading fake data into your development environment
-* `web-customization` customizes the server configuration
-    * `cors-origins` is a list of allowed origins for cross-origin resource sharing
-    * `users` is a list of test users (for use in development environments), for testing with various
+- `web-customization` customizes the server configuration
+  - `cors-origins` is a list of allowed origins for cross-origin resource sharing
+  - `users` is a list of test users (for use in development environments), for testing with various
     authorization levels
-* `oauth-user-config` customizes the way that OAuth2/OIDC user ID tokens are translated into local
+- `oauth-user-config` customizes the way that OAuth2/OIDC user ID tokens are translated into local
   users (with local permissions).
-    * `name-path` (optionally) provides a path to the value in the user's `attributes` map where we can find
+  - `name-path` (optionally) provides a path to the value in the user's `attributes` map where we can find
     the actual durable user ID (if the IDP's notion of durable user ID does not map to the application's).
-    * `authority-paths` (optionally in some sense, but likely necessarily) configures how to translate the
+  - `authority-paths` (optionally in some sense, but likely necessarily) configures how to translate the
     user's `attributes` to internal authorities for this application.
 
 ## Loading Sample Data
+
+- `setup.py` contains configuration for loading fake data into your development environment
+
 If you have successfully started the application with the `dev` profile and don't want to mess
 with the profiles and restart just to see some data, this command should get you started:
 
