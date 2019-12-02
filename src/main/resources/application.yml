@@ -7,19 +7,12 @@ spring:
   jpa:
     database: POSTGRESQL
     hibernate.ddl-auto: validate
-    # properties:
-    #   hibernate:
-    #     default_schema: casedb
-    #     generate_statistics: off
-  datasource:
-    username: postgres
-    password: postgres
-    platform: postgres
-    url: jdbc:postgresql://db:5432/postgres
-    driver-class-name: org.postgresql.Driver
-  # liquibase:
-  #   user: postgres
-  #   default-schema: ${spring.jpa.properties.hibernate.default_schema}
+    properties:
+      hibernate:
+        generate_statistics: off
+  liquibase:
+    enabled: false
+    default-schema: ${spring.jpa.properties.hibernate.default_schema}
 logback:
   access:
     enabled: true
