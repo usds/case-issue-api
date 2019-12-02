@@ -28,6 +28,12 @@ jobs:
       - run:
           name: Run all checks
           command: |
-            docker-compose -f docker-compose.yml -f docker-compose.test.yml up check --exit-code-from check
+            docker-compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from check check
       - store_test_results:
-          path: build/docker-test-reports
+          path: docker-build/test-results
+      - store_artifacts:
+          path: docker-build/reports/jacoco/test/html
+          destination: coverage
+      - store_artifacts:
+          path: docker-build/reports/checkstyle
+          destination: checkstyle

@@ -17,15 +17,21 @@ services:
     image: case-issue-api-build
     container_name: "api-test"
     command: test
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://test-db:5432/case_issues
     depends_on:
       - test-db
     volumes:
-      - ./docker-test-reports:/home/gradle/src/build/reports/
+      - ./docker-build/reports:/home/gradle/src/build/reports/
+      - ./docker-build/test-results:/home/gradle/src/build/test-results/
   check:
     image: case-issue-api-build
     container_name: "api-check"
     command: check
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://test-db:5432/case_issues
     depends_on:
       - test-db
     volumes:
-      - ./docker-test-reports:/home/gradle/src/build/reports/
+      - ./docker-build/reports:/home/gradle/src/build/reports/
+      - ./docker-build/test-results:/home/gradle/src/build/test-results/
