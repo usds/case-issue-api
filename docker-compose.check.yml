@@ -1,9 +1,0 @@
-version: "3"
-services:
-  api:
-    build:
-      context: .
-      dockerfile: check.Dockerfile
-    container_name: "api"
-    volumes:
-      - ./test-reports:/home/gradle/src/build/reports/

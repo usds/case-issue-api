@@ -1,24 +1,30 @@
-version: "3"
+version: "3.2"
 services:
   db:
     image: "postgres"
-    container_name: "caseIssuesDB"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
-      - POSTGRES_PORT=5432
+    container_name: "case-issues-dev-db"
     ports:
-      - "5432:5432"
-#   Set a volume some that database is not lost after shutting down the container.
-#   I used the name postgres-data but you can changed it to something else.
+      - "${CASEISSUES_DB_PORT:-5432}:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      # Create/use a named volume so that the database is not wiped if we recreate the container
+      - type: volume
+        source: dev-db-data
+        target: /var/lib/postgresql/data
+      # Mount init scripts for first-run user/schema creation
+      - type: bind
+        source: ./db-setup.sh
+        target: /docker-entrypoint-initdb.d/01-user-schema-creation.sh
   api:
     build:
       context: .
-      dockerfile: api.Dockerfile
+    image:  case-issue-api-build
     container_name: "api"
+    command: bootRun
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,db-postgresql
+      SPRING_LIQUIBASE_ENABLED: true
     ports:
-      # This is externalPort:internalPort, for the record
-      - "8080:8080"
+      # map CASEISSUES_API_PORT on localhost to the API server in the container
+      - "${CASEISSUES_API_PORT:-8080}:8080"
+volumes:
+  case-issues-dev-db-data:

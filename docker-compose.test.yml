@@ -1,9 +1,31 @@
-version: "3"
+version: "3.2"
 services:
-  api:
-    build:
-      context: .
-      dockerfile: test.Dockerfile
-    container_name: "api"
+  test-db:
+    image: "postgres"
+    container_name: "case-issues-test-db"
+    ports:
+      - "${CASEISSUES_TEST_DB_PORT:-5400}:5432"
     volumes:
-      - ./test-reports:/home/gradle/src/build/reports/
+      # Mount a tmpfs volume so that we wipe the DB entirely every restart
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+      # Mount init scripts for first-run user/schema creation
+      - type: bind
+        source: ./db-setup.sh
+        target: /docker-entrypoint-initdb.d/01-user-schema-creation.sh
+  test:
+    image: case-issue-api-build
+    container_name: "api-test"
+    command: test
+    depends_on:
+      - test-db
+    volumes:
+      - ./docker-test-reports:/home/gradle/src/build/reports/
+  check:
+    image: case-issue-api-build
+    container_name: "api-check"
+    command: check
+    depends_on:
+      - test-db
+    volumes:
+      - ./docker-test-reports:/home/gradle/src/build/reports/
