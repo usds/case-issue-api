@@ -6,6 +6,8 @@ logging:
       gov.usds.case_issues: DEBUG
       org.springframework.security.access: DEBUG
 spring:
+  profiles:
+    include: autotest-local
   datasource:
     username: case_issue_api
     url: jdbc:postgresql://localhost:${CASEISSUES_TEST_DB_PORT:5432}/case_issues
