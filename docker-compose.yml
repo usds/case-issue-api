@@ -21,7 +21,7 @@ services:
     container_name: "api"
     command: bootRun
     environment:
-      SPRING_PROFILES_ACTIVE: dev,db-postgresql
+      SPRING_PROFILES_ACTIVE: dev,db-dockerized
       SPRING_LIQUIBASE_ENABLED: "true"
     ports:
       # map CASEISSUES_API_PORT on localhost to the API server in the container
