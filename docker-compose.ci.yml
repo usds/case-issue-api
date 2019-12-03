@@ -1,0 +1,19 @@
+version: "3.2"
+services:
+  ci-db:
+    build:
+      context: ./db-setup
+    image: "postgres-with-init"
+    container_name: "case-issues-ci-db"
+    volumes:
+      # Mount a tmpfs volume so that we wipe the DB entirely every restart
+      - type: tmpfs
+        target: /var/lib/postgresql/data
+  check:
+    image: case-issue-api-build
+    container_name: "api-check"
+    command: check
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ci-db/case_issues
+    depends_on:
+      - ci-db

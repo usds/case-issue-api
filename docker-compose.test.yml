@@ -11,7 +11,7 @@ services:
         target: /var/lib/postgresql/data
       # Mount init scripts for first-run user/schema creation
       - type: bind
-        source: ./db-setup.sh
+        source: ./db-setup/create-db.sh
         target: /docker-entrypoint-initdb.d/01-user-schema-creation.sh
   test:
     image: case-issue-api-build

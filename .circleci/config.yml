@@ -18,16 +18,8 @@ jobs:
       - run:
           name: Build test image
           command: |
-            docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+            docker-compose -f docker-compose.yml -f docker-compose.ci.yml build
       - run:
           name: Run all checks
           command: |
-            docker-compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from check check
-      - store_test_results:
-          path: docker-build/test-results
-      - store_artifacts:
-          path: docker-build/reports/jacoco/test/html
-          destination: coverage
-      - store_artifacts:
-          path: docker-build/reports/checkstyle
-          destination: checkstyle
+            docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from check check
