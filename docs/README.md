@@ -159,14 +159,21 @@ Several custom sections can be added to the application properties:
 
 ## Loading Sample Data
 
-- `setup.py` contains configuration for loading fake data into your development environment
+With an empty database, the application is fairly uninteresting. You can load data using the `/resources`
+API as an admin user, but assuming you do not have infinite time, you may wish to get a quick start
+by using the `setup.py` script, which will load all the necessary pieces of fake data into the database
+for you to be able to use the basic features of the API. (If you are not using the dockerized build, this
+may require some tweaking.)
 
-If you have successfully started the application with the `dev` profile and don't want to mess
-with the profiles and restart just to see some data, this command should get you started:
+If you have loaded basic data but want to modify the list of cases, the bones of what you need are
+in the following command:
 
    curl -i -X PUT -u service:service -HContent-type:text/csv --data-binary '@sample_data/cases.csv' localhost:8080/api/cases/OTHER/WEIRD/SILLY
 
-If the data uses a non-default key for the receipt number or case creation date, or a non-standard
+In particular, if you wish to see what happens when cases are added or removed, you can do so by
+editing [./sample_data/cases.csv] and re-running the above command.
+
+If the data you are uploading uses a non-default key for the receipt number or case creation date, or a non-standard
 format for the creation date, you can save upload configurations as a dictionary in the application
 properties under `web-customization.data-formats` like this:
 
