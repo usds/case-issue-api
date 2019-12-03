@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Profile;
@@ -23,10 +25,13 @@ import org.springframework.stereotype.Component;
 @Profile("db-dockerized")
 public class RetryableDataSourceBeanPostProcessor implements BeanPostProcessor {
 
+	private static final Logger LOG = LoggerFactory.getLogger(RetryableDataSourceBeanPostProcessor.class);
+
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName)
 			throws BeansException {
 		if (bean instanceof DataSource) {
+			LOG.info("Wrapping {} in a RetryableDataSource", bean);
 			bean = new RetryableDataSource((DataSource)bean);
 		}
 		return bean;
