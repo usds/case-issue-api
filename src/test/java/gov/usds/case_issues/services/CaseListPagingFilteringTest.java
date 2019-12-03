@@ -62,10 +62,11 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		DESNOOZED01(START_DATE.plusDays(2), DEFAULT_SNOOZE_REASON, 10, true),
 		/** A case that was opened, snoozed, and closed without the snooze ending */
 		CLOSED02(START_DATE.plusDays(2).plusSeconds(1), START_DATE.plusDays(3), DEFAULT_SNOOZE_REASON, 100, false),
-		/** An active case that is functionally identical to another active case ({@link #ACTIVE03}) */
-		ACTIVE02(START_DATE.plusDays(3)), // going to explore a paging issue with these
+		// The following two case are reversed to create a conflict between alphabetical and insert-order sorting
 		/** See {@link #ACTIVE02} */
 		ACTIVE03(START_DATE.plusDays(3)), // intentional creation date collision
+		/** An active case that is functionally identical to another active case ({@link #ACTIVE03}) */
+		ACTIVE02(START_DATE.plusDays(3)), // going to explore a paging issue with these
 		/** A snoozed case that was created later but snoozed for a shorter time than {@link #SNOOZED01} */
 		SNOOZED02(START_DATE, ALTERNATE_SNOOZE_REASON, 5, false),
 		/** A desnoozed case that was created earlier but entered into the system later than {@link #DESNOOZED01} */
@@ -155,7 +156,7 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 	}
 
 	// exhaustively test paged requests for stability
-	@Test(expected=java.lang.AssertionError.class) // this fails because of the issue documented by the next test
+	@Test
 	public void getActiveCases_walkThroughCaseList_correctResults() {
 		int includeAllCases = FixtureCase.values().length;
 		List<FixtureCase> allFixtures = new ArrayList<>(Arrays.asList(
@@ -174,18 +175,6 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 			assertCaseOrder(message, allFixtures,
 				_service.getActiveCases(SYSTEM, CASE_TYPE, firstReceipt, includeAllCases));
 		}
-	}
-
-	/** This test validates and documents a behavior of active-case sorting that we probably do not want to maintain
-	 * in the long run */
-	@Test
-	public void getActiveCases_interStitialPage_weirdBehaviorIsStable() {
-		List<CaseSummary> foundCases = _service.getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.ACTIVE02.name(), PAGE_SIZE);
-		assertEquals(PAGE_SIZE, foundCases.size());
-		assertCaseOrder(foundCases, FixtureCase.ACTIVE03, FixtureCase.DESNOOZED03, FixtureCase.ACTIVE05);
-		foundCases = _service.getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.ACTIVE03.name(), PAGE_SIZE);
-		assertEquals(PAGE_SIZE, foundCases.size());
-		assertCaseOrder(foundCases, FixtureCase.ACTIVE02, FixtureCase.DESNOOZED03, FixtureCase.ACTIVE05);
 	}
 
 	@Test
