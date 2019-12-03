@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.datasource.AbstractDataSource;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
+@Profile("db-dockerized")
 public class RetryableDataSourceBeanPostProcessor implements BeanPostProcessor {
 
 	@Override
