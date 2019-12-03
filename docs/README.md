@@ -88,8 +88,8 @@ The `check` task will:
    or run all checks using
 
     ```bash
-    docker-compose -f docker-compose.yml -f docker-compose.check.yml build
-    docker-compose -f docker-compose.yml -f docker-compose.check.yml up --exit-code-from check check
+    docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+    docker-compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from check check
     open ./test-reports/tests/test/index.html
     ```
 2. Using Gradle
