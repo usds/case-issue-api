@@ -7,6 +7,7 @@ RUN gradle --info dependencies
 COPY --chown=gradle:gradle ./.git ./.git
 COPY --chown=gradle:gradle ./config ./config
 COPY --chown=gradle:gradle ./src ./src
+RUN echo "spring.profiles.include: db-dockerized" >> src/main/resources/application-autotest-local.yml
 RUN gradle classes testClasses assemble
 
 ENV SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/case_issues
