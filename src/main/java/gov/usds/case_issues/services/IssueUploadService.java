@@ -6,9 +6,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import gov.usds.case_issues.authorization.RequireUploadPermission;
 import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
@@ -24,7 +24,7 @@ public class IssueUploadService {
 	private CaseListService _listService;
 
 	@SuppressWarnings("checkstyle:IllegalCatch")
-	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
+	@RequireUploadPermission
 	public CaseIssueUpload putIssueList(CaseGroupInfo pathInfo, String issueTypeTag, List<CaseRequest> newIssueCases,
 			ZonedDateTime eventDate) {
 		CaseIssueUpload uploadStatus = _statusService.commenceUpload(
