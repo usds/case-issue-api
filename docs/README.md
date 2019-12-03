@@ -40,9 +40,9 @@ open ./test-reports/tests/test/index.html
 
 Check will:
 
-- run `checkstyle` on both main and test classes
-- run all tests
-- run JaCoCo to check for adequate test coverage
+* run `checkstyle` on both main and test classes
+* run all tests
+* run JaCoCo to check for adequate test coverage
 
 To configure your IDE to report style violations, use the checkstyle configuration in [config/checkstyle/checkstyle.xml].
 
@@ -79,15 +79,15 @@ The main files to be aware of are:
 
 Several custom sections can be added to the application properties:
 
-- `web-customization` customizes the server configuration
-  - `cors-origins` is a list of allowed origins for cross-origin resource sharing
-  - `users` is a list of test users (for use in development environments), for testing with various
+* `web-customization` customizes the server configuration
+    * `cors-origins` is a list of allowed origins for cross-origin resource sharing
+    * `users` is a list of test users (for use in development environments), for testing with various
     authorization levels
-- `oauth-user-config` customizes the way that OAuth2/OIDC user ID tokens are translated into local
+* `oauth-user-config` customizes the way that OAuth2/OIDC user ID tokens are translated into local
   users (with local permissions).
-  - `name-path` (optionally) provides a path to the value in the user's `attributes` map where we can find
+    * `name-path` (optionally) provides a path to the value in the user's `attributes` map where we can find
     the actual durable user ID (if the IDP's notion of durable user ID does not map to the application's).
-  - `authority-paths` (optionally in some sense, but likely necessarily) configures how to translate the
+    * `authority-paths` (optionally in some sense, but likely necessarily) configures how to translate the
     user's `attributes` to internal authorities for this application.
 
 ## Loading Sample Data
