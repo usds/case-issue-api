@@ -6,6 +6,9 @@ spring:
       basePath: /resources
   jpa:
     database: POSTGRESQL
+    # we do not want Hibernate to start making DB calls during Jackson rendering: much better to have that
+    # throw an exception so we know we have to update the persistence configuration.
+    open-in-view: false
     hibernate.ddl-auto: validate
     properties:
       hibernate:
