@@ -4,13 +4,39 @@
 
 import requests
 import json
+import argparse
+import logging
 
-api = "http://host.docker.internal:8080"
+def parse_args():
+    parser = argparse.ArgumentParser(
+      description='Create sample data on a development instance of the API')
+    parser.add_argument("--verbose", "-v", action="store_true", help="Turn on debug logging")
+    parser.add_argument("--quiet", "-q", action="store_true", help="Turn off logging")
 
+    parser.add_argument("--docker", action="store_const", dest="base_url",
+      const="http://host.docker.internal:8080")
+    parser.add_argument("--local",  action="store_const", dest="base_url",
+      const="http://localhost:8080")
+    parser.add_argument("--base-url",  action="store", dest="base_url")
+    return parser.parse_args()
+
+args = parse_args()
+api = args.base_url
+
+if args.verbose:
+  if args.quiet:
+    print("Incompatible options: --verbose and --quiet")
+    exit(1)
+  logging.basicConfig(level="DEBUG")
+elif args.quiet:
+  pass
+else:
+  logging.basicConfig(level="INFO")
+
+logging.info("API is located at %s", api)
 
 # setup session
 browser = requests.session()
-browser.verify = False
 browser.allow_redirects = False
 
 def login(user):
