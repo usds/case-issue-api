@@ -221,7 +221,7 @@ public class TroubleCase extends UpdatableEntity {
 
 	private static final String CREATION_TO_RECEIPT_FALLBACK =
 		" case_creation = :caseCreation AND receipt_number > "
-		+ " (select receipt_number from trouble_case where internal_id = :internalId)";
+		+ " (select receipt_number from {h-schema}trouble_case where internal_id = :internalId)";
 	public static final String NOT_SNOOZED_NOW_PAGE_CONSTRAINT =
 		" AND (case_creation > :caseCreation OR "
 		+ CREATION_TO_RECEIPT_FALLBACK
