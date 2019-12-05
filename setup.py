@@ -33,7 +33,11 @@ elif args.quiet:
 else:
   logging.basicConfig(level="INFO")
 
-logging.info("API is located at %s", api)
+if api is None:
+  logging.error("No API location found")
+  exit(1)
+else:
+  logging.info("API is located at %s", api)
 
 # setup session
 browser = requests.session()
