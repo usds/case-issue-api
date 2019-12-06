@@ -42,6 +42,6 @@ out/
 .DS_Store
 
 ### postgres ###
-postgres-data
+postgres-data/
 
-test-reports
+test-reports/
