@@ -28,7 +28,7 @@ jobs:
           command: |
             image_id=$(docker-compose -f docker-compose.yml -f docker-compose.ci.yml ps -q check);
             echo "Found ${image_id}"
-            docker cp ${image_id}/home/gradle/case-issue-api/build/test-results docker-test-results;
+            docker cp ${image_id}:/home/gradle/case-issue-api/build/test-results docker-test-results;
             docker cp ${image_id}:/home/gradle/case-issue-api/build/reports docker-reports;
       - store_test_results:
           path: docker-test-results
