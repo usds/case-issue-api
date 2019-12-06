@@ -12,6 +12,7 @@ spring:
     hibernate.ddl-auto: validate
     properties:
       hibernate:
+        format_sql: false
         generate_statistics: off
   liquibase:
     enabled: false
