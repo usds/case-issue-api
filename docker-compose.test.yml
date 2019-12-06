@@ -22,8 +22,8 @@ services:
     depends_on:
       - test-db
     volumes:
-      - ./docker-build/reports:/home/gradle/src/build/reports/
-      - ./docker-build/test-results:/home/gradle/src/build/test-results/
+      - ./docker-build/reports:/home/gradle/case-issue-api/build/reports/
+      - ./docker-build/test-results:/home/gradle/case-issue-api/build/test-results/
   check:
     image: case-issue-api-build
     container_name: "api-check"
