@@ -13,11 +13,11 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import gov.usds.case_issues.authorization.RequireUploadPermission;
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.model.CaseIssue;
@@ -395,7 +395,7 @@ public class CaseListService {
 	 */
 
 	@Transactional(readOnly=false)
-	@PreAuthorize("hasAuthority(T(gov.usds.case_issues.authorization.CaseIssuePermission).UPDATE_ISSUES.name())")
+	@RequireUploadPermission
 	public CaseIssueUpload putIssueList(CaseIssueUpload translated, List<CaseRequest> newIssueCases) {
 		// convenience aliases to local variables, for use in closures
 		final ZonedDateTime eventDate = translated.getEffectiveDate();

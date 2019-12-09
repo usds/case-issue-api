@@ -218,18 +218,24 @@ public class TroubleCase extends UpdatableEntity {
 	public static final String CASE_CREATION_DATE_CONSTRAINT =
 		" AND case_creation BETWEEN :caseCreationWindowStart and :caseCreationWindowEnd "; // BETWEEN treats the endpoint values as included in the range.
 
+
+	private static final String CREATION_TO_RECEIPT_FALLBACK =
+		" case_creation = :caseCreation AND receipt_number > "
+		+ " (select receipt_number from {h-schema}trouble_case where internal_id = :internalId)";
 	public static final String NOT_SNOOZED_NOW_PAGE_CONSTRAINT =
-		"  AND case_creation >= :caseCreation "
-		+ "AND internal_id != :internalId ";
+		" AND (case_creation > :caseCreation OR "
+		+ CREATION_TO_RECEIPT_FALLBACK
+		+") ";
 	public static final String SNOOZED_PAGE_CONSTRAINT =
 		"  AND (last_snooze_end > :lastSnoozeEnd"
-		+ "     OR (last_snooze_end = :lastSnoozeEnd AND case_creation >= :caseCreation) ) "
-		+ "AND internal_id != :internalId ";
+		+ " OR (last_snooze_end = :lastSnoozeEnd AND case_creation > :caseCreation) "
+		+ " OR (last_snooze_end = :lastSnoozeEnd AND " + CREATION_TO_RECEIPT_FALLBACK + ")"
+		+ ")";
 	public static final String NOT_SNOOZED_NOW_POSTAMBLE =
-		"  ORDER BY case_creation ASC, internal_id ASC "
+		"  ORDER BY case_creation ASC, receipt_number ASC "
 		+ "LIMIT :size";
 	public static final String SNOOZED_NOW_POSTAMBLE =
-		"  ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
+		"  ORDER BY last_snooze_end ASC, case_creation ASC, receipt_number ASC "
 		+ "LIMIT :size";
 
 	public static final String CASE_DTO_CTE = "(" + CASE_DTO_QUERY + ") as trouble_case_dto ";
