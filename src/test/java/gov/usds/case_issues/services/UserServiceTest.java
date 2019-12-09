@@ -1,9 +1,11 @@
 package gov.usds.case_issues.services;
 
 import static gov.usds.case_issues.test_util.Assert.assertInstantOrder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,28 +17,50 @@ import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
 public class UserServiceTest extends CaseIssueApiTestBase {
 
+	private static final String SAMPLE_ID = "cbc1b10b-fe73-4367-806f-027d30d27f84";
 	@Autowired
 	private UserInformationRepository _userRepo;
 	@Autowired
 	private UserService _service;
 
+	private ZonedDateTime _testStart;
+
 	@Before
 	public void clear() {
 		truncateDb();
+		_testStart = ZonedDateTime.now();
 	}
 
 	@Test
 	public void createUserOrUpdateLastSeen_newUser_userCreated() {
-		_service.createUserOrUpdateLastSeen("cbc1b10b-fe73-4367-806f-027d30d27f84", "Tim");
-		assertNotNull(_userRepo.findByUserId("cbc1b10b-fe73-4367-806f-027d30d27f84"));
+		String myName = "Tim";
+		_service.createUserOrUpdateLastSeen(SAMPLE_ID, myName);
+		UserInformation found = _userRepo.findByUserId(SAMPLE_ID);
+		assertNotNull(found);
+		assertEquals(SAMPLE_ID, found.getId());
+		assertEquals(myName, found.getPrintName());
 	}
 
 	@Test
 	public void createUserOrUpdateLastSeen_existingUser_lastSeenUpdated() {
-		ZonedDateTime start = ZonedDateTime.now();
-		_userRepo.save(new UserInformation("cbc1b10b-fe73-4367-806f-027d30d27f84", "Tim"));
-		_service.createUserOrUpdateLastSeen("cbc1b10b-fe73-4367-806f-027d30d27f84", "Tim");
-		UserInformation user = _userRepo.findByUserId("cbc1b10b-fe73-4367-806f-027d30d27f84");
-		assertInstantOrder(start.toInstant(), user.getLastSeen().toInstant(), false);
+		assertEquals(0, _userRepo.count());
+		Date firstSeen = _userRepo.save(new UserInformation(SAMPLE_ID, "Tim")).getLastSeen();
+		_service.createUserOrUpdateLastSeen(SAMPLE_ID, "Tim");
+		UserInformation user = _userRepo.findByUserId(SAMPLE_ID);
+		assertInstantOrder(_testStart.toInstant(), user.getLastSeen().toInstant(), false);
+		assertInstantOrder(firstSeen.toInstant(), user.getLastSeen().toInstant(), false);
+	}
+
+	@Test
+	public void createUserOrUpdateLastSeen_existingUserNewName_nameUpdated() {
+		assertEquals(0, _userRepo.count());
+		_service.createUserOrUpdateLastSeen(SAMPLE_ID, "Tim");
+		UserInformation found = _userRepo.findByUserId(SAMPLE_ID);
+		assertEquals("Tim", found.getPrintName());
+		assertEquals(1, _userRepo.count());
+		_service.createUserOrUpdateLastSeen(SAMPLE_ID, "Timothy");
+		found = _userRepo.findByUserId(SAMPLE_ID);
+		assertEquals("Timothy", found.getPrintName());
+		assertEquals(1, _userRepo.count());
 	}
 }
