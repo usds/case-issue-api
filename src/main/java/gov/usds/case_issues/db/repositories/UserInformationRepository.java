@@ -19,17 +19,19 @@ import gov.usds.case_issues.db.model.UserInformation;;
 )
 public interface UserInformationRepository extends CrudRepository<UserInformation, Long> {
 
+	public static final String USER_ID_CACHE = "byUserId";
+
 	@Override
-	@CachePut(value="byUserId", key="#entity.getId()")
+	@CachePut(value=USER_ID_CACHE, key="#entity.getId()")
 	@RestResource(exported=false)
 	<S extends UserInformation> S save(S entity);
 
 	@Override
-	@CacheEvict(value="byUserId", key="#entity.getId()")
+	@CacheEvict(value=USER_ID_CACHE, key="#entity.getId()")
 	@RestResource(exported=false)
 	void delete(UserInformation entity);
 
-	@Cacheable(value="byUserId", key="#userId")
+	@Cacheable(value=USER_ID_CACHE, key="#userId")
 	@RestResource(exported=false)
 	public UserInformation findByUserId(String userId);
 }
