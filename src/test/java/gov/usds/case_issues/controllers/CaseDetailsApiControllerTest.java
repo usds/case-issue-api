@@ -30,7 +30,7 @@ import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
 
 @WithMockUser(username = "d15f7835-7fe7-438d-b889-90a5f5974ec2", authorities = {"READ_CASES", "UPDATE_CASES"})
@@ -44,7 +44,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	@Autowired
 	private AttachmentSubtypeRepository _subtypeRepository;
 	@Autowired
-	private UserRepository _userRepo;
+	private UserInformationRepository _userRepo;
 
 	@Before
 	public void resetDb() {

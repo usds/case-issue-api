@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.UserInformation;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
 
 /**
  * Consolidated tests for the controllers that have one handler each and are too annoying.
@@ -22,7 +22,7 @@ import gov.usds.case_issues.db.repositories.UserRepository;
 public class OneShotControllersTest extends ControllerTestBase {
 
 	@Autowired
-	private UserRepository _userRepo;
+	private UserInformationRepository _userRepo;
 
 	@Before
 	public void resetDb() {

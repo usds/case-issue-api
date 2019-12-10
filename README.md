@@ -2,6 +2,7 @@
 
 Search Party case tracker is an open source, API-enabled web table for aggregating, triaging and tracking exceptions within a case processing system. Search party is built using [React](https://reactjs.org/), [Spring Boot](https://spring.io/projects/spring-boot), and the [US Web Design System](https://designsystem.digital.gov/).
 
+[![CircleCI](https://circleci.com/gh/usds/case-issue-api.svg?style=svg)](https://circleci.com/gh/usds/case-issue-api)
 
 
 **This project is being actively maintained.**
