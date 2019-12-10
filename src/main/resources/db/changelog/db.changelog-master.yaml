@@ -392,6 +392,7 @@ databaseChangeLog:
       dbms: postgresql
       validCheckSum:
         - 8:9e470a2ba921eabc38016359d0cfeaef
+        - 8:a1297187517147856b9712c2afb5b918
       changes:
         - sql:
             sql: SET search_path=${database.defaultSchemaName};
