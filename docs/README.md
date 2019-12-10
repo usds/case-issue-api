@@ -68,6 +68,18 @@ them in the application configuration: this should be done in `application-local
 the application, and `application-autotest-local.yml` (or `application-autotest.properties` if
 you dislike YAML) for running tests.
 
+By default, the development instance (run using `gradle bootRun`) looks for a postgresql
+server listening on port 5432. To override this, export the correct port as the environment
+variable `CASEISSUES_DB_PORT` (this value will be checked by both docker-compose and
+Spring Boot).
+
+By default, we expect to run tests against a different database, which (by default) should
+be listening on port 5400. The port can be overridden using the environment variable
+`CASEISSUES_TEST_DB_PORT` (which will be checked by both the tests and by docker-compose).
+To use a dockerized database for tests, run
+
+    docker-compose -f docker-compose.test.yml up -d test-db
+
 ## Tests and checks
 
 Gradle has tasks for `test` and `check`. The `test` task simply runs all tests in the project.
@@ -96,7 +108,13 @@ The `check` task will:
 
 Run tests and checks using `./gradlew test` and `./gradlew check`, respectively.
 
+See the Database section above for instructions on configuring the database for tests,
+if you have not already.
+
 3. Using your IDE
+
+See the Database section above for instructions on configuring the database for tests,
+if you have not already.
 
 IDE configuration for running tests is beyond the scope of this document.
 
@@ -111,9 +129,15 @@ To configure your IDE to report style violations, use the checkstyle configurati
     docker-compose up
     ```
 
+This will start the application and database in a docker network, with the application listening
+on port 8080. To override this port, you can export the desired port in the environment variable
+`CASEISSUES_API_PORT`.
+
 2. Using gradle
 
     SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
+
+If using the dockerized database, you should instead set `SPRING_PROFILES_ACTIVE=dev,db-dockerized`.
 
 3. Using Spring Tool Suite (Eclipse)
    - Run as: Spring Boot Application
