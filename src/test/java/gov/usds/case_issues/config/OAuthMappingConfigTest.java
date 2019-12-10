@@ -29,7 +29,7 @@ import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.db.model.UserInformation;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.services.UserService;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
@@ -39,7 +39,7 @@ public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
 	@Autowired
 	private UserService _userService;
 	@Autowired
-	private UserRepository _userRepo;
+	private UserInformationRepository _userRepo;
 
 	private static final List<String> NEVER_FOUND = Arrays.asList("no_such_attribute","nopenopenope");
 

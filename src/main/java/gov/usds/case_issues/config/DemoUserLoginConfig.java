@@ -16,8 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import gov.usds.case_issues.controllers.UserInformationApiController;
-import gov.usds.case_issues.db.model.UserInformation;
-import gov.usds.case_issues.db.repositories.UserRepository;
+import gov.usds.case_issues.services.UserService;
 import springfox.documentation.service.ApiInfo;
 
 @Configuration
@@ -29,7 +28,7 @@ public class DemoUserLoginConfig {
 	@Autowired
 	private WebConfigurationProperties _webProperties;
 	@Autowired
-	UserRepository _userRepo;
+	private UserService _userInformationService;
 	@Autowired
 	private ApiInfo _apiInfo;
 
@@ -56,9 +55,7 @@ public class DemoUserLoginConfig {
 		LOG.info("Configuring demo users from {}.", _webProperties);
 		List<UserDetails> users = _webProperties.getUsers().stream()
 				.map(u -> {
-
-					UserInformation user = new UserInformation(u.getName(), u.getPrintName());
-					_userRepo.save(user);
+					_userInformationService.createUserOrUpdateLastSeen(u.getName(), u.getPrintName());
 
 					return User
 					.withUsername(u.getName())
