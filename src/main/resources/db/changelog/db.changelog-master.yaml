@@ -412,3 +412,10 @@ databaseChangeLog:
             tableName: user_information
             constraint_name: uk__user_information
             columnNames: user_id
+  - changeSet:
+      id: tag-release-0.1.0
+      author: ben.warfield@usds.dhs.gov
+      comment: Tag the schema when we moved fully to postgresql, and away from HSQLDB.
+      changes:
+        - tagDatabase:
+            tag: version_0.1.0

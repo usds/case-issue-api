@@ -11,7 +11,7 @@ apply plugin: 'io.spring.dependency-management'
 
 ext{ springFoxVersion = '2.9.2'}
 group = 'gov.usds'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
