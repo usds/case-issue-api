@@ -11,7 +11,7 @@ apply plugin: 'io.spring.dependency-management'
 
 ext{ springFoxVersion = '2.9.2'}
 group = 'gov.usds'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -27,6 +27,7 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
+	implementation 'org.springframework.retry:spring-retry'
 
 	// access logging:
 	implementation 'net.rakugakibox.spring.boot:logback-access-spring-boot-starter:2.7.1'
@@ -46,7 +47,6 @@ dependencies {
 	implementation "com.vladmihalcea:hibernate-types-52:2.5.0"
 	implementation "org.liquibase:liquibase-core"
 
-	runtimeOnly 'org.hsqldb:hsqldb'
 	runtimeOnly 'org.postgresql:postgresql'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

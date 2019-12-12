@@ -1,0 +1,30 @@
+version: "3.2"
+services:
+  db:
+    image: "postgres"
+    container_name: "case-issues-dev-db"
+    ports:
+      - "${CASEISSUES_DB_PORT:-5432}:5432"
+    volumes:
+      # Create/use a named volume so that the database is not wiped if we recreate the container
+      - type: volume
+        source: case-issues-dev-db-data
+        target: /var/lib/postgresql/data
+      # Mount init scripts for first-run user/schema creation
+      - type: bind
+        source: ./db-setup/create-db.sh
+        target: /docker-entrypoint-initdb.d/01-user-schema-creation.sh
+  api:
+    build:
+      context: .
+    image:  case-issue-api-build
+    container_name: "api"
+    command: bootRun
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,db-dockerized
+      SPRING_LIQUIBASE_ENABLED: "true"
+    ports:
+      # map CASEISSUES_API_PORT on localhost to the API server in the container
+      - "${CASEISSUES_API_PORT:-8080}:8080"
+volumes:
+  case-issues-dev-db-data:
