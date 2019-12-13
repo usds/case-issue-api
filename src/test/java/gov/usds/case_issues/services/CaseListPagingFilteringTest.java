@@ -2,8 +2,6 @@ package gov.usds.case_issues.services;
 
 import static org.junit.Assert.assertEquals;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,26 +11,22 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import gov.usds.case_issues.db.model.CaseManagementSystem;
-import gov.usds.case_issues.db.model.CaseType;
-import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
+import gov.usds.case_issues.test_util.CaseListFixtureService;
+import gov.usds.case_issues.test_util.CaseListFixtureService.FixtureCase;
+
+import static gov.usds.case_issues.test_util.CaseListFixtureService.SYSTEM;
+import static gov.usds.case_issues.test_util.CaseListFixtureService.CASE_TYPE;
+import static gov.usds.case_issues.test_util.CaseListFixtureService.START_DATE;
+import static gov.usds.case_issues.test_util.CaseListFixtureService.DEFAULT_SNOOZE_REASON;
+import static gov.usds.case_issues.test_util.CaseListFixtureService.ALTERNATE_SNOOZE_REASON;
 
 @SuppressWarnings("checkstyle:MagicNumber")
 public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
-
-	private static final String SYSTEM = "FAKEY";
-	private static final String CASE_TYPE = "McFAKEFAKE";
-	private static final String ISSUE_TYPE = "PAGING";
-	private static final String DEFAULT_SNOOZE_REASON = "TIREDNOW";
-	private static final String ALTERNATE_SNOOZE_REASON = "NOCOFFEE";
-	private static final ZonedDateTime START_DATE = ZonedDateTime.of(2000, 5, 21, 12, 0, 0, 0, ZoneId.of("GMT"));
 
 	/** The date range from 1 to 6 days after our start time */
 	private static final DateRange RANGE_MIDDLE = new DateRange(START_DATE.plusDays(1), START_DATE.plusDays(6));
@@ -43,102 +37,14 @@ public class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	private static final int PAGE_SIZE = 3;
 
-	private static final Logger LOG = LoggerFactory.getLogger(CaseListPagingFilteringTest.class);
-
 	@Autowired
 	private CaseListService _service;
-
-	private CaseManagementSystem _sys;
-	private CaseType _typ;
-
-	public enum FixtureCase {
-		/** An active case */
-		ACTIVE01(START_DATE),
-		/** A case that was opened and closed in the past */
-		CLOSED01(START_DATE.plusHours(24), START_DATE.plusHours(36)),
-		/** A case that is currently open and snoozed */
-		SNOOZED01(START_DATE.plusDays(1), DEFAULT_SNOOZE_REASON, 10, false),
-		/** A case that is currently open and was previously snoozed but is now active */
-		DESNOOZED01(START_DATE.plusDays(2), DEFAULT_SNOOZE_REASON, 10, true),
-		/** A case that was opened, snoozed, and closed without the snooze ending */
-		CLOSED02(START_DATE.plusDays(2).plusSeconds(1), START_DATE.plusDays(3), DEFAULT_SNOOZE_REASON, 100, false),
-		// The following two case are reversed to create a conflict between alphabetical and insert-order sorting
-		/** See {@link #ACTIVE02} */
-		ACTIVE03(START_DATE.plusDays(3)), // intentional creation date collision
-		/** An active case that is functionally identical to another active case ({@link #ACTIVE03}) */
-		ACTIVE02(START_DATE.plusDays(3)), // going to explore a paging issue with these
-		/** A snoozed case that was created later but snoozed for a shorter time than {@link #SNOOZED01} */
-		SNOOZED02(START_DATE, ALTERNATE_SNOOZE_REASON, 5, false),
-		/** A desnoozed case that was created earlier but entered into the system later than {@link #DESNOOZED01} */
-		DESNOOZED02(START_DATE.plusDays(1), ALTERNATE_SNOOZE_REASON, 10, true),
-		/** A snoozed case that is snoozed for a reasonably long time. */
-		SNOOZED03(START_DATE.plusDays(3).plusSeconds(1), ALTERNATE_SNOOZE_REASON, 20, false),
-		/** A snoozed case with a somewhat recent creation date and a moderate snooze length */
-		SNOOZED04(START_DATE.plusDays(5), DEFAULT_SNOOZE_REASON, 15, false),
-		/** A snoozed case with a much more recent creation date and a short snooze length */
-		SNOOZED05(START_DATE.plusDays(180), DEFAULT_SNOOZE_REASON, 1, false),
-		DESNOOZED03(START_DATE.plusDays(3).plusSeconds(2), DEFAULT_SNOOZE_REASON, 5, true),
-		DESNOOZED04(START_DATE.plusDays(10), DEFAULT_SNOOZE_REASON, 5, true),
-		ACTIVE04(START_DATE.plusDays(2).plusSeconds(2)),
-		ACTIVE05(START_DATE.plusDays(6)),
-		;
-
-		final ZonedDateTime startDate;
-		final ZonedDateTime endDate;
-		final String[] keyValues;
-		final String snoozeReason;
-		final int snoozeDays;
-		final boolean terminateSnooze;
-
-		private FixtureCase(ZonedDateTime startDate, String... keyValues) {
-			this(startDate, null, keyValues);
-		}
-
-		private FixtureCase(ZonedDateTime startDate, ZonedDateTime endDate, String... keyValues) {
-			this(startDate, endDate, null, 0, false, keyValues);
-		}
-
-		private FixtureCase(ZonedDateTime startDate, String snoozeReason, int snoozeDays, boolean cancelSnooze, String... keyValues) {
-			this(startDate, null, snoozeReason, snoozeDays, cancelSnooze, keyValues);
-		}
-
-		private FixtureCase(ZonedDateTime startDate, ZonedDateTime endDate, String snoozeReason, int snoozeDays, boolean cancelSnooze, String... keyValues) {
-			this.startDate = startDate;
-			this.keyValues = keyValues;
-			this.endDate = endDate;
-			this.snoozeReason = snoozeReason;
-			this.snoozeDays = snoozeDays;
-			this.terminateSnooze = cancelSnooze;
-		}
-	}
+	@Autowired
+	private CaseListFixtureService _fixtureService;
 
 	@Before
 	public void initPageableData() {
-		if (_dataService.checkForCaseManagementSystem(SYSTEM)) {
-			return;
-		}
-		LOG.info("Clearing DB, and initializing system and type");
-		this.truncateDb();
-		_sys = _dataService.ensureCaseManagementSystemInitialized(SYSTEM, "Fake Case Management System for paging/filtering test");
-		_typ = _dataService.ensureCaseTypeInitialized(CASE_TYPE, "Fake Case Type for paging/filtering test");
-		LOG.info("Initializing cases, issues and snoozes");
-		Stream.of(FixtureCase.values()).forEach(this::enumeratedCase);
-	}
-
-	private TroubleCase enumeratedCase(FixtureCase template) {
-		LOG.info("Initializing {} as a {} case", template, template.snoozeDays >  0 ? "snoozed" : "unsnoozed");
-		TroubleCase tc = _dataService.initCaseAndIssue(_sys,
-			template.name(),
-			_typ,
-			template.startDate,
-			ISSUE_TYPE,
-			template.endDate,
-			template.keyValues
-		);
-		if (template.snoozeReason != null) {
-			_dataService.snoozeCase(tc, template.snoozeReason, template.snoozeDays, template.terminateSnooze);
-		}
-		return tc;
+		_fixtureService.initFixtures();
 	}
 
 	@Test
