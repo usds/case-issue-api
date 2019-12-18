@@ -1,5 +1,6 @@
 package gov.usds.case_issues.test_util;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.function.Consumer;
@@ -34,36 +35,58 @@ public class CaseListFixtureService {
 	public static final String CASE_TYPE = "McFAKEFAKE";
 	public static final String SYSTEM = "FAKEY";
 
+	public static class Keywords {
+		public static final String PARITY = "parity";
+		private static final String EVEN = "even";
+		public static final String ODD = "odd";
+	}
+
 	public enum FixtureCase {
 		/** An active case */
-		ACTIVE01(CaseListFixtureService.START_DATE),
+		ACTIVE01(CaseListFixtureService.START_DATE,
+				Keywords.PARITY, Keywords.ODD),
 		/** A case that was opened and closed in the past */
-		CLOSED01(CaseListFixtureService.START_DATE.plusHours(24), CaseListFixtureService.START_DATE.plusHours(36)),
+		CLOSED01(CaseListFixtureService.START_DATE.plusHours(24), CaseListFixtureService.START_DATE.plusHours(36),
+				Keywords.PARITY, Keywords.EVEN),
 		/** A case that is currently open and snoozed */
-		SNOOZED01(CaseListFixtureService.START_DATE.plusDays(1), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 10, false),
+		SNOOZED01(CaseListFixtureService.START_DATE.plusDays(1), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 10, false,
+				Keywords.PARITY, Keywords.ODD),
 		/** A case that is currently open and was previously snoozed but is now active */
-		DESNOOZED01(CaseListFixtureService.START_DATE.plusDays(2), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 10, true),
+		DESNOOZED01(CaseListFixtureService.START_DATE.plusDays(2), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 10, true,
+				Keywords.PARITY, Keywords.EVEN),
 		/** A case that was opened, snoozed, and closed without the snooze ending */
-		CLOSED02(CaseListFixtureService.START_DATE.plusDays(2).plusSeconds(1), CaseListFixtureService.START_DATE.plusDays(3), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 100, false),
+		CLOSED02(CaseListFixtureService.START_DATE.plusDays(2).plusSeconds(1), CaseListFixtureService.START_DATE.plusDays(3), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 100, false,
+				Keywords.PARITY, Keywords.ODD),
 		// The following two case are reversed to create a conflict between alphabetical and insert-order sorting
 		/** See {@link #ACTIVE02} */
-		ACTIVE03(CaseListFixtureService.START_DATE.plusDays(3)), // intentional creation date collision
+		ACTIVE03(CaseListFixtureService.START_DATE.plusDays(3),
+				Keywords.PARITY, Keywords.EVEN), // intentional creation date collision
 		/** An active case that is functionally identical to another active case ({@link #ACTIVE03}) */
-		ACTIVE02(CaseListFixtureService.START_DATE.plusDays(3)), // going to explore a paging issue with these
+		ACTIVE02(CaseListFixtureService.START_DATE.plusDays(3),
+				Keywords.PARITY, Keywords.ODD), // going to explore a paging issue with these
 		/** A snoozed case that was created later but snoozed for a shorter time than {@link #SNOOZED01} */
-		SNOOZED02(CaseListFixtureService.START_DATE, CaseListFixtureService.ALTERNATE_SNOOZE_REASON, 5, false),
+		SNOOZED02(CaseListFixtureService.START_DATE, CaseListFixtureService.ALTERNATE_SNOOZE_REASON, 5, false,
+				Keywords.PARITY, Keywords.EVEN),
 		/** A desnoozed case that was created earlier but entered into the system later than {@link #DESNOOZED01} */
-		DESNOOZED02(CaseListFixtureService.START_DATE.plusDays(1), CaseListFixtureService.ALTERNATE_SNOOZE_REASON, 10, true),
+		DESNOOZED02(CaseListFixtureService.START_DATE.plusDays(1), CaseListFixtureService.ALTERNATE_SNOOZE_REASON, 10, true,
+				Keywords.PARITY, Keywords.ODD),
 		/** A snoozed case that is snoozed for a reasonably long time. */
-		SNOOZED03(CaseListFixtureService.START_DATE.plusDays(3).plusSeconds(1), CaseListFixtureService.ALTERNATE_SNOOZE_REASON, 20, false),
+		SNOOZED03(CaseListFixtureService.START_DATE.plusDays(3).plusSeconds(1), CaseListFixtureService.ALTERNATE_SNOOZE_REASON, 20, false,
+				Keywords.PARITY, Keywords.EVEN),
 		/** A snoozed case with a somewhat recent creation date and a moderate snooze length */
-		SNOOZED04(CaseListFixtureService.START_DATE.plusDays(5), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 15, false),
+		SNOOZED04(CaseListFixtureService.START_DATE.plusDays(5), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 15, false,
+				Keywords.PARITY, Keywords.ODD),
 		/** A snoozed case with a much more recent creation date and a short snooze length */
-		SNOOZED05(CaseListFixtureService.START_DATE.plusDays(180), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 1, false),
-		DESNOOZED03(CaseListFixtureService.START_DATE.plusDays(3).plusSeconds(2), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 5, true),
-		DESNOOZED04(CaseListFixtureService.START_DATE.plusDays(10), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 5, true),
-		ACTIVE04(CaseListFixtureService.START_DATE.plusDays(2).plusSeconds(2)),
-		ACTIVE05(CaseListFixtureService.START_DATE.plusDays(6)),
+		SNOOZED05(CaseListFixtureService.START_DATE.plusDays(180), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 1, false,
+				Keywords.PARITY, Keywords.EVEN),
+		DESNOOZED03(CaseListFixtureService.START_DATE.plusDays(3).plusSeconds(2), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 5, true,
+				Keywords.PARITY, Keywords.ODD),
+		DESNOOZED04(CaseListFixtureService.START_DATE.plusDays(10), CaseListFixtureService.DEFAULT_SNOOZE_REASON, 5, true,
+				Keywords.PARITY, Keywords.EVEN),
+		ACTIVE04(CaseListFixtureService.START_DATE.plusDays(2).plusSeconds(2),
+				Keywords.PARITY, Keywords.ODD),
+		ACTIVE05(CaseListFixtureService.START_DATE.plusDays(6),
+				Keywords.PARITY, Keywords.EVEN),
 		;
 	
 		public final ZonedDateTime startDate;
@@ -97,7 +120,8 @@ public class CaseListFixtureService {
 
 	@Transactional(readOnly=false)
 	public void initFixtures() {
-		if (_dataService.checkForCaseManagementSystem(SYSTEM)) {
+		// wipe and re-initialize if the data was created more than 30 seconds ago
+		if (_dataService.checkForCaseManagementSystem(SYSTEM, Instant.now().minusSeconds(30))) {
 			return;
 		}
 		LOG.info("Clearing DB, and initializing system and type");
