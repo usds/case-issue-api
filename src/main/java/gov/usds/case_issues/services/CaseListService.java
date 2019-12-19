@@ -49,7 +49,7 @@ import gov.usds.case_issues.validators.TagFragment;
 @Service
 @Transactional(readOnly=true)
 @Validated
-public class CaseListService {
+public class CaseListService implements CasePagingService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseListService.class);
 
@@ -92,15 +92,9 @@ public class CaseListService {
 		);
 	}
 
-	public List<CaseSummary> getActiveCases(
-			@TagFragment String caseManagementSystemTag,
-			@TagFragment String caseTypeTag,
-			@TagFragment String receiptNumber, // wrong validator!
-			int size
-		) {
-		return getActiveCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, size);
-	}
-
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.services.CasePagingService#getActiveCases(java.lang.String, java.lang.String, java.lang.String, gov.usds.case_issues.model.DateRange, int)
+	 */
 	public List<CaseSummary> getActiveCases(
 		@TagFragment String caseManagementSystemTag,
 		@TagFragment String caseTypeTag,
@@ -156,15 +150,10 @@ public class CaseListService {
 		return rewrap(foundCases);
 	}
 
-	public List<CaseSummary> getSnoozedCases(
-			@TagFragment String caseManagementSystemTag,
-			@TagFragment String caseTypeTag,
-			@TagFragment String receiptNumber, // wrong validation tag!
-			int size
-	) {
-		return getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, Optional.empty(), size);
-	}
 
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.services.CasePagingService#getSnoozedCases(java.lang.String, java.lang.String, java.lang.String, gov.usds.case_issues.model.DateRange, java.util.Optional, int)
+	 */
 	public List<CaseSummary> getSnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
@@ -281,14 +270,10 @@ public class CaseListService {
 		return rewrap(foundCases);
 	}
 
-	public List<CaseSummary> getPreviouslySnoozedCases(
-			@TagFragment String caseManagementSystemTag,
-			@TagFragment String caseTypeTag,
-			@TagFragment String receiptNumber,
-			int size) {
-		return getPreviouslySnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, size);
-	}
 
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.services.CasePagingService#getPreviouslySnoozedCases(java.lang.String, java.lang.String, java.lang.String, gov.usds.case_issues.model.DateRange, int)
+	 */
 	public List<CaseSummary> getPreviouslySnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
