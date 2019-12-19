@@ -49,14 +49,14 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getActiveCases_firstPage_correctResult() {
-		List<CaseSummary> activeCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
+		List<? extends CaseSummary> activeCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
 		assertEquals(PAGE_SIZE, activeCases.size());
 		assertCaseOrder(activeCases, FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01);
 	}
 
 	@Test
 	public void getActiveCases_secondPage_correctResult() {
-		List<CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED01.name(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED01.name(), PAGE_SIZE);
 		assertEquals(PAGE_SIZE, foundCases.size());
 		assertCaseOrder(foundCases, FixtureCase.ACTIVE04, FixtureCase.ACTIVE02, FixtureCase.ACTIVE03);
 	}
@@ -85,7 +85,7 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getActiveCases_firstPageEmptyDateRange_noCases() {
-		List<CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null,
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null,
 			RANGE_BEFORE_TIME,
 			PAGE_SIZE);
 		assertEquals(0, foundCases.size());
@@ -93,21 +93,21 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getActiveCases_firstPageEarlyDateRange_twoCases() {
-		List<CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null,
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null,
 			RANGE_EARLY, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02);
 	}
 
 	@Test
 	public void getActiveCases_nextPageEarlyDateRange_noCases() {
-		List<CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED02.name(),
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED02.name(),
 			RANGE_EARLY, PAGE_SIZE);
 		assertCaseOrder(foundCases);
 	}
 
 	@Test
 	public void getActiveCases_firstPageMiddleDateRange_correctCases() {
-		List<CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null,
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null,
 			RANGE_MIDDLE, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01, FixtureCase.ACTIVE04);
 	}
@@ -116,21 +116,21 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getActiveCases_secondPageMiddleDateRange_correctCases() {
-		List<CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.ACTIVE04.name(),
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.ACTIVE04.name(),
 			RANGE_MIDDLE, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.ACTIVE02, FixtureCase.ACTIVE03, FixtureCase.DESNOOZED03);
 	}
 
 	@Test
 	public void getActiveCases_lastPageMiddleDateRange_correctCases() {
-		List<CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED03.name(),
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED03.name(),
 			RANGE_MIDDLE, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.ACTIVE05);
 	}
 
 	@Test
 	public void getSnoozedCases_fetchFirstPage_correctResult() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
 	}
 
@@ -166,50 +166,50 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getActiveCases_invalidPageInvalidReceipt_firstPageFirstPageReturned() {
-		List<CaseSummary> activeCases = getService().getActiveCases(SYSTEM, CASE_TYPE, "NOSUCHANIMAL", PAGE_SIZE);
+		List<? extends CaseSummary> activeCases = getService().getActiveCases(SYSTEM, CASE_TYPE, "NOSUCHANIMAL", PAGE_SIZE);
 		assertCaseOrder(activeCases, FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01);
 	}
 
 	@Test
 	public void getSnoozedCases_invalidPageInvalidReceipt_firstPageReturned() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, "NOSUCHANIMAL", PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, "NOSUCHANIMAL", PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
 
 	}
 
 	@Test
 	public void getSnoozedCases_fetchSecondPage_correctResult() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED04, FixtureCase.SNOOZED03);
 	}
 
 	@Test
 	public void getSnoozedCases_firstPageEmptyDateRange_noCases() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_BEFORE_TIME, Optional.empty(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_BEFORE_TIME, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases);
 	}
 
 	@Test
 	public void getSnoozedCases_firstPageEarlyDateRange_twoCasesFound() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_EARLY, Optional.empty(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_EARLY, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
 	}
 
 	@Test
 	public void getSnoozedCases_secondPageEarlyDateRange_noCasesFound() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(), RANGE_EARLY, Optional.empty(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED01.name(), RANGE_EARLY, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases);
 	}
 
 	@Test
 	public void getSnoozedCases_firstPageMiddleDateRange_correctCasesFound() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_MIDDLE, Optional.empty(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, RANGE_MIDDLE, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED01, FixtureCase.SNOOZED04, FixtureCase.SNOOZED03);
 	}
 
 	@Test
 	public void getSnoozedCases_laterPageMiddleDateRange_caseFound() {
-		List<CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED04.name(), RANGE_MIDDLE, Optional.empty(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.SNOOZED04.name(), RANGE_MIDDLE, Optional.empty(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED03);
 	}
 
@@ -284,13 +284,13 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void getPreviouslySnoozedCases_fetchFirstPage_correctResult() {
-		List<CaseSummary> foundCases = getService().getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01, FixtureCase.DESNOOZED03);
 	}
 
 	@Test
 	public void getPreviouslySnoozedCases_fetchSecondPage_correctResult() {
-		List<CaseSummary> foundCases = getService().getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED03.name(), PAGE_SIZE);
+		List<? extends CaseSummary> foundCases = getService().getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, FixtureCase.DESNOOZED03.name(), PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.DESNOOZED04);
 	}
 
@@ -342,13 +342,13 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		);
 	}
 
-	private static void assertCaseOrder(String message, List<FixtureCase> expected, List<CaseSummary> foundCases) {
+	private static void assertCaseOrder(String message, List<FixtureCase> expected, List<? extends CaseSummary> foundCases) {
 		List<String> foundReceipts = foundCases.stream().map(CaseSummary::getReceiptNumber).collect(Collectors.toList());
 		List<String> expectedReceipts = expected.stream().map(FixtureCase::name).collect(Collectors.toList());
 		assertEquals(message, expectedReceipts, foundReceipts);
 	}
 
-	private static void assertCaseOrder(List<CaseSummary> foundCases, FixtureCase... expected) {
+	private static void assertCaseOrder(List<? extends CaseSummary> foundCases, FixtureCase... expected) {
 		List<String> foundReceipts = foundCases.stream().map(CaseSummary::getReceiptNumber).collect(Collectors.toList());
 		List<String> expectedReceipts = Stream.of(expected).map(FixtureCase::name).collect(Collectors.toList());
 		assertEquals(expectedReceipts, foundReceipts);

@@ -12,7 +12,7 @@ import gov.usds.case_issues.validators.TagFragment;
  */
 public interface CasePagingService {
 
-	List<CaseSummary> getActiveCases(
+	List<? extends CaseSummary> getActiveCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -20,14 +20,14 @@ public interface CasePagingService {
 			int size
 	);
 
-	default List<CaseSummary> getActiveCases(
+	default List<? extends CaseSummary> getActiveCases(
 			@TagFragment String system,
 			@TagFragment String caseType,
 			@TagFragment String firstReceipt,
 			int size) {
 		return getActiveCases(system, caseType, firstReceipt, null, size);
 	}
-	List<CaseSummary> getSnoozedCases(
+	List<? extends CaseSummary> getSnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -36,7 +36,7 @@ public interface CasePagingService {
 			int size
 	);
 
-	default List<CaseSummary> getSnoozedCases(
+	default List<? extends CaseSummary> getSnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -44,7 +44,7 @@ public interface CasePagingService {
 		return getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, Optional.empty(), size);
 	}
 
-	List<CaseSummary> getPreviouslySnoozedCases(
+	List<? extends CaseSummary> getPreviouslySnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -52,7 +52,7 @@ public interface CasePagingService {
 			int size
 	);
 
-	default List<CaseSummary> getPreviouslySnoozedCases(
+	default List<? extends CaseSummary> getPreviouslySnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,

@@ -38,6 +38,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
+import gov.usds.case_issues.model.CaseSummaryImpl;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.model.NoteSummary;
 import gov.usds.case_issues.validators.TagFragment;
@@ -475,7 +476,7 @@ public class CaseListService implements CasePagingService {
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
 					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
 			List<NoteSummary> notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
-			return new CaseSummary(rootCase, summary, notes);
+			return new CaseSummaryImpl(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
 	}
