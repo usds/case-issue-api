@@ -175,6 +175,11 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 				+ "FROM " + TroubleCase.CASE_DTO_CTE
 				+ "GROUP BY " + TroubleCase.CASE_SNOOZE_DECODE
 	),
+	/* Resolved Cases */
+	@NamedNativeQuery(
+		name = "resolvedCount",
+		query = TroubleCase.RESOLVED_CASE_COUNT
+	),
 })
 @SqlResultSetMappings({
 	@SqlResultSetMapping(
@@ -184,6 +189,25 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 	),
 })
 public class TroubleCase extends UpdatableEntity {
+	public static final String RESOLVED_CASE_COUNT =
+		"SELECT COUNT(*) "
+		+ "FROM {h-schema}trouble_case c "
+		+ "WHERE case_management_system_internal_id = :caseManagementSystemId "
+		+ "AND case_type_internal_id = :caseTypeId "
+		// case has been closed
+		+ "AND EXISTS ("
+			+ "SELECT openissues1_.internal_id "
+			+ "FROM {h-schema}case_issue openissues1_ "
+			+ "WHERE c.internal_id=openissues1_.issue_case_internal_id "
+			+ "AND ( openissues1_.issue_closed IS NOT null) "
+			+ "AND openissues1_.issue_closed BETWEEN :caseClosedWindowStart and :caseClosedWindowEnd "
+		+ ") "
+		// case has been snoozed
+		+ "AND EXISTS ("
+			+ "	SELECT *"
+			+ " FROM {h-schema}case_snooze s "
+			+ " WHERE s.snooze_case_internal_id = c.internal_id "
+		+ ")";
 
 	public static final String CASE_SNOOZE_DECODE =
 		"case when last_snooze_end is null then 'NEVER_SNOOZED' "

@@ -185,6 +185,16 @@ public interface BulkCaseRepository {
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
+
+	@Query(name="resolvedCount")
+	@RestResource(exported=false)
+	public Integer getResolvedCaseCount(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
+	);
+
 	@Query(name="summary")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozeSummary(Long caseManagementSystemId, Long caseTypeId);
