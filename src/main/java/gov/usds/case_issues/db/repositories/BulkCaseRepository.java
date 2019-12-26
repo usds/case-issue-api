@@ -185,10 +185,18 @@ public interface BulkCaseRepository {
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
-
 	@Query(name="resolvedCount")
 	@RestResource(exported=false)
 	public Integer getResolvedCaseCount(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
+	);
+
+	@Query(name="averageDaysToResoluton")
+	@RestResource(exported=false)
+	public Integer getAverageDaysToResolution(
 		Long caseManagementSystemId,
 		Long caseTypeId,
 		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
