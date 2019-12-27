@@ -25,6 +25,7 @@ jobs:
             docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from check check
       - run:
           name: Retrieve test results and reports
+          when: always
           command: |
             image_id=$(docker-compose -f docker-compose.yml -f docker-compose.ci.yml ps -q check);
             echo "Found ${image_id}"
