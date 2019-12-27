@@ -50,7 +50,7 @@ import gov.usds.case_issues.validators.TagFragment;
 @Service
 @Transactional(readOnly=true)
 @Validated
-public class CaseListService implements CasePagingService {
+public class CaseListService implements CasePagingService, PageTranslationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseListService.class);
 
