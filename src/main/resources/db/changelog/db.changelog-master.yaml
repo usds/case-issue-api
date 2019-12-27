@@ -419,3 +419,32 @@ databaseChangeLog:
       changes:
         - tagDatabase:
             tag: version_0.1.0
+  - changeSet:
+      id: sneaky-view
+      author: ben.warfield@usds.dhs.gov
+      comment: This had better not make it directly into prod.
+      runOnChange: true
+      changes:
+        - sql:
+            sql: drop view if exists ${database.defaultSchemaName}.sneaky_view
+        - createView:
+            viewName: sneaky_view
+            selectQuery: |
+              SELECT c.*,
+                c.extra_data::jsonb as extra_data_binary,
+                s.internal_id as snooze_id, snooze_reason, snooze_start, snooze_end,
+                s.created_at snooze_created_at, s.created_by snooze_created_by,
+                s.updated_at as snooze_updated_at, s.updated_by as snooze_updated_by,
+                exists (
+                  select case_issue.internal_id 
+                  from ${database.defaultSchemaName}.case_issue 
+                  where c.internal_id=case_issue.issue_case_internal_id 
+                    and issue_closed is null
+                ) as has_open_issue
+              FROM ${database.defaultSchemaName}.trouble_case c
+              LEFT JOIN (
+                SELECT DISTINCT ON(snooze_case_internal_id) *
+                from ${database.defaultSchemaName}.case_snooze
+                order by snooze_case_internal_id, created_at desc
+              ) s on s.snooze_case_internal_id = c.internal_id
+        
