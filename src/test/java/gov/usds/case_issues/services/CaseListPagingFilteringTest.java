@@ -1,6 +1,8 @@
 package gov.usds.case_issues.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,12 +13,16 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
+import gov.usds.case_issues.model.NoteSummary;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 import gov.usds.case_issues.test_util.CaseListFixtureService;
+import gov.usds.case_issues.test_util.CaseListFixtureService.FixtureAttachment;
 import gov.usds.case_issues.test_util.CaseListFixtureService.FixtureCase;
 
 import static gov.usds.case_issues.test_util.CaseListFixtureService.SYSTEM;
@@ -37,6 +43,8 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 
 	private static final int PAGE_SIZE = 3;
 
+	private static final Logger LOG = LoggerFactory.getLogger(CaseListPagingFilteringTest.class);
+
 	@Autowired
 	private CaseListFixtureService _fixtureService;
 
@@ -52,6 +60,18 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		List<? extends CaseSummary> activeCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
 		assertEquals(PAGE_SIZE, activeCases.size());
 		assertCaseOrder(activeCases, FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01);
+	}
+	@Test
+	public void getActiveCases_firstPage_correctAttachments() {
+		List<? extends CaseSummary> foundCases = getService().getActiveCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
+		assertCaseOrder(foundCases, FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01);
+		assertEquals("Attachment count for ACTIVE01", 0, foundCases.get(0).getNotes().size());
+		assertEquals("Attachment count for DESNOOZED02", 1, foundCases.get(1).getNotes().size());
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.CORRELATION01, null);
+		assertEquals("Attachment count for DESNOOZED01", 3, foundCases.get(2).getNotes().size());
+		assertAttachmentPresent(foundCases.get(2), FixtureAttachment.CORRELATION01, null);
+		assertAttachmentPresent(foundCases.get(2), FixtureAttachment.LINK01, "https://trouble.gov/?ticket=LINK01");
+		assertAttachmentPresent(foundCases.get(2), FixtureAttachment.TAG_BLUE, null);
 	}
 
 	@Test
@@ -132,6 +152,23 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 	public void getSnoozedCases_fetchFirstPage_correctResult() {
 		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
+	}
+
+	@Test
+	public void getSnoozedCases_fetchFirstPage_correctAttachments() {
+		List<? extends CaseSummary> foundCases = getService().getSnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
+		assertCaseOrder(foundCases, FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01);
+		assertEquals(1, foundCases.get(0).getNotes().size());
+		assertAttachmentPresent(foundCases.get(0), FixtureAttachment.COMMENT2);
+		assertEquals(6, foundCases.get(1).getNotes().size());
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.TAG_ROUND);
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.CORRELATION01);
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.LINK01, "https://trouble.gov/?ticket=LINK01");
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.LINKEXT1, "https://example.com/articles/LINKEXT1/html");
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.TAG_BLUE);
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.COMMENT1);
+		assertEquals(1, foundCases.get(2).getNotes().size());
+		assertAttachmentPresent(foundCases.get(2), FixtureAttachment.CORRELATION01);
 	}
 
 	// exhaustively test paged requests for stability
@@ -287,6 +324,18 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		List<? extends CaseSummary> foundCases = getService().getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
 		assertCaseOrder(foundCases, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01, FixtureCase.DESNOOZED03);
 	}
+	@Test
+	public void getPreviouslySnoozedCases_fetchFirstPage_correctAttachments() {
+		List<? extends CaseSummary> foundCases = getService().getPreviouslySnoozedCases(SYSTEM, CASE_TYPE, null, PAGE_SIZE);
+		assertCaseOrder(foundCases, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01, FixtureCase.DESNOOZED03);
+		assertEquals(1, foundCases.get(0).getNotes().size());
+		assertAttachmentPresent(foundCases.get(0), FixtureAttachment.CORRELATION01);
+		assertEquals(3, foundCases.get(1).getNotes().size());
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.CORRELATION01);
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.LINK01, "https://trouble.gov/?ticket=LINK01");
+		assertAttachmentPresent(foundCases.get(1), FixtureAttachment.TAG_BLUE);
+		assertEquals(0, foundCases.get(2).getNotes().size());
+	}
 
 	@Test
 	public void getPreviouslySnoozedCases_fetchSecondPage_correctResult() {
@@ -352,5 +401,27 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		List<String> foundReceipts = foundCases.stream().map(CaseSummary::getReceiptNumber).collect(Collectors.toList());
 		List<String> expectedReceipts = Stream.of(expected).map(FixtureCase::name).collect(Collectors.toList());
 		assertEquals(expectedReceipts, foundReceipts);
+	}
+
+	private static void assertAttachmentPresent(CaseSummary summary, FixtureAttachment fixture) {
+		assertAttachmentPresent(summary, fixture, null);
+	}
+
+	private static void assertAttachmentPresent(CaseSummary summary, FixtureAttachment fixture, String href) {
+		String messageStem = String.format("attachment %s on case %s", fixture, summary.getReceiptNumber());
+		for (NoteSummary n : summary.getNotes()) {
+			LOG.debug("Testing attachment {}, type {}, subtype {}", n.getContent(), n.getType(), n.getSubType());
+			if (n.getType() == fixture.getType() && fixture.name().equals(n.getContent())) {
+				assertEquals("subtype of " + messageStem, fixture.getSubtype(), n.getSubType());
+				if (href != null) {
+					assertEquals("href of " + messageStem, href, n.getHref());
+				} else {
+					assertNull("no href for " + messageStem, n.getHref());
+				}
+				return;
+			}
+			LOG.debug("No match with {}", fixture);
+		}
+		fail(messageStem + " was not found");
 	}
 }
