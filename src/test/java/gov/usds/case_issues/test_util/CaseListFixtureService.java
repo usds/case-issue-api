@@ -3,6 +3,8 @@ package gov.usds.case_issues.test_util;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -13,9 +15,15 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
+import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
+import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
+import gov.usds.case_issues.model.AttachmentRequest;
+import gov.usds.case_issues.services.CaseAttachmentService;
 
 /**
  * This is an extraction from the paging/filtering tests, because having 36 test cases and all the
@@ -39,6 +47,12 @@ public class CaseListFixtureService {
 
 	@Autowired
 	private FixtureDataInitializationService _dataService;
+	@Autowired
+	private TroubleCaseRepository _caseRepo;
+	@Autowired
+	private CaseSnoozeRepository _snoozeRepo;
+	@Autowired
+	private CaseAttachmentService _attachmentService;
 	@Autowired
 	private DbTruncator _truncator;
 
@@ -133,6 +147,48 @@ public class CaseListFixtureService {
 		}
 	}
 
+	public enum FixtureAttachment {
+		CORRELATION01(AttachmentType.CORRELATION_ID, FixtureCase.SNOOZED01, FixtureCase.SNOOZED02, FixtureCase.DESNOOZED01, FixtureCase.DESNOOZED02),
+		LINK01(AttachmentType.LINK, "trouble", FixtureCase.CLOSED02, FixtureCase.SNOOZED02, FixtureCase.DESNOOZED01),
+		LINK02(AttachmentType.LINK, "trouble", FixtureCase.SNOOZED03, FixtureCase.SNOOZED04),
+		LINKEXT1(AttachmentType.LINK, "external", FixtureCase.SNOOZED02),
+		COMMENT1(AttachmentType.COMMENT, FixtureCase.SNOOZED02),
+		COMMENT2(AttachmentType.COMMENT, FixtureCase.SNOOZED05, FixtureCase.SNOOZED04),
+		TAG_GREEN(AttachmentType.TAG, "color", FixtureCase.DESNOOZED04),
+		TAG_BLUE(AttachmentType.TAG, "color", FixtureCase.SNOOZED02, FixtureCase.DESNOOZED01),
+		TAG_ROUND(AttachmentType.TAG, "shape", FixtureCase.SNOOZED02),
+		;
+
+		private AttachmentType _type;
+		private String _subtype;
+		private FixtureCase[] _cases;
+
+		private FixtureAttachment(AttachmentType t, FixtureCase... cases) {
+			this(t, null, cases);
+		}
+		private FixtureAttachment(AttachmentType t, String subtype, FixtureCase... cases) {
+			_type = t;
+			_subtype = subtype;
+			_cases = cases;
+		}
+
+		public AttachmentType getType() {
+			return _type;
+		}
+		public String getSubtype() {
+			return _subtype;
+		}
+
+		public AttachmentRequest asRequest() {
+			return new AttachmentRequest(_type, name(), _subtype);
+		}
+
+		public List<FixtureCase> getCases() {
+			return Arrays.asList(_cases);
+		}
+
+	}
+
 	@Transactional(readOnly=false)
 	public void initFixtures() {
 		// wipe and re-initialize if the data was created more than 30 seconds ago
@@ -141,12 +197,19 @@ public class CaseListFixtureService {
 		}
 		LOG.info("Clearing DB, and initializing system and type");
 		_truncator.truncateAll();
+		LOG.info("Initializing case management system and attachment subtypes");
+		final CaseManagementSystem sys = _dataService.ensureCaseManagementSystemInitialized(CaseListFixtureService.SYSTEM, "Fake Case Management System for paging/filtering test");
+		_dataService.ensureAttachmentSubtypeInitialized("trouble", "Trouble Ticket", AttachmentType.LINK, "https://trouble.gov/?ticket=");
+		_dataService.ensureAttachmentSubtypeInitialized("external", "External Link", AttachmentType.LINK, "https://example.com/articles/%s/html");
+		_dataService.ensureAttachmentSubtypeInitialized("color", "Object Color", AttachmentType.TAG, null);
+		_dataService.ensureAttachmentSubtypeInitialized("shape", "Object Shape", AttachmentType.TAG, null);
 		LOG.info("Initializing cases, issues and snoozes");
-		Stream.of(CaseListFixtureService.FixtureCase.values()).forEach(fixtureConsumer());
+		Stream.of(FixtureCase.values()).forEach(fixtureConsumer(sys));
+		LOG.info("Adding case attachments");
+		Stream.of(FixtureAttachment.values()).forEach(attachmentAssociator(sys));
 	}
 
-	private Consumer<FixtureCase> fixtureConsumer() {
-		final CaseManagementSystem sys = _dataService.ensureCaseManagementSystemInitialized(CaseListFixtureService.SYSTEM, "Fake Case Management System for paging/filtering test");
+	private Consumer<FixtureCase> fixtureConsumer(CaseManagementSystem sys) {
 		final CaseType typ = _dataService.ensureCaseTypeInitialized(CaseListFixtureService.CASE_TYPE, "Fake Case Type for paging/filtering test");
 		return template -> {
 			LOG.info("Initializing {} as a {} case", template, template.snoozeDays >  0 ? "snoozed" : "unsnoozed");
@@ -160,6 +223,18 @@ public class CaseListFixtureService {
 			);
 			if (template.snoozeReason != null) {
 				_dataService.snoozeCase(tc, template.snoozeReason, template.snoozeDays, template.terminateSnooze);
+			}
+		};
+	}
+
+	private Consumer<FixtureAttachment> attachmentAssociator(final CaseManagementSystem sys) {
+		return fixture -> {
+			AttachmentRequest req = fixture.asRequest();
+			for (FixtureCase c : fixture.getCases()) {
+				LOG.info("Looking up latest snooze for case {}", c.name());
+				TroubleCase mainCase = _caseRepo.findByCaseManagementSystemAndReceiptNumber(sys, c.name()).get();
+				CaseSnooze snooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase).get();
+				_attachmentService.attachToSnooze(req, snooze);
 			}
 		};
 	}
