@@ -12,4 +12,7 @@ public interface AttachmentAssociationRepository extends CrudRepository<CaseAtta
 
 	@EntityGraph(attributePaths="attachment")
 	public List<CaseAttachmentAssociation> findAllBySnoozeSnoozeCaseOrderByUpdatedAtAsc(TroubleCase rootCase);
+
+	@EntityGraph(attributePaths={"attachment", "snooze.snoozeCase"})
+	public List<CaseAttachmentAssociation> findAllBySnoozeSnoozeCaseInternalIdIn(List<Long> caseIds);
 }

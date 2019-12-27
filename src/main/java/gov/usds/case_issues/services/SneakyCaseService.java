@@ -2,6 +2,7 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +27,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.db.model.reporting.SneakyViewEntity;
+import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
 import gov.usds.case_issues.db.repositories.SneakyReportRepo;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
+import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.model.NoteSummary;
@@ -49,6 +55,10 @@ public class SneakyCaseService implements CasePagingService {
 	private PageTranslationService _translator;
 	@Autowired
 	private SneakyReportRepo _repo;
+	@Autowired
+	private AttachmentAssociationRepository _attachmentAssociationRepo;
+	@Autowired
+	private UserInformationRepository _userInformationRepo;
 
 	@Override
 	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, String receiptNumber,
@@ -89,7 +99,26 @@ public class SneakyCaseService implements CasePagingService {
 			LOG.debug("Starting fetch using {}/{}", mainSpec, pageInfo);
 			Slice<SneakyViewEntity> page = _repo.findAll(mainSpec, pageInfo);
 			LOG.debug("Finished fetch using {}/{}", mainSpec, pageInfo);
-			return page.getContent().stream().map(DelegatingSummary::new).collect(Collectors.toList());
+			List<SneakyViewEntity> cases = page.getContent();
+			List<Long> caseIds = cases.stream().map(SneakyViewEntity::getInternalId).collect(Collectors.toList());
+			List<CaseAttachmentAssociation> associations = _attachmentAssociationRepo.findAllBySnoozeSnoozeCaseInternalIdIn(caseIds);
+			Map<Long, List<NoteSummary>> attachments = new HashMap<>();
+			for (CaseAttachmentAssociation assoc : associations) {
+				Long caseId = assoc.getSnooze().getSnoozeCase().getInternalId();
+				List<NoteSummary> attachmentList = attachments.get(caseId);
+				if (attachmentList == null) {
+					attachmentList = new ArrayList<>();
+					attachments.put(caseId, attachmentList);
+				}
+				UserInformation userInfo = null;
+				if (assoc.getCreatedBy() != null) {
+					userInfo = _userInformationRepo.findByUserId(assoc.getCreatedBy());
+				}
+				attachmentList.add(new NoteSummary(assoc, userInfo));
+			}
+			return cases.stream()
+					.map(c -> new DelegatingSummary(c, attachments.get(c.getInternalId())))
+					.collect(Collectors.toList());
 		} catch (InvalidDataAccessApiUsageException e) {
 			if (e.getCause() instanceof IllegalArgumentException) {
 				throw (IllegalArgumentException) e.getCause();
@@ -186,8 +215,14 @@ public class SneakyCaseService implements CasePagingService {
 
 	private static class DelegatingSummary implements CaseSummary {
 		private SneakyViewEntity _root;
-		public DelegatingSummary(SneakyViewEntity r) {
+		private List<NoteSummary> _attachments;
+
+		public DelegatingSummary(SneakyViewEntity r, List<NoteSummary> attachments) {
 			_root = r;
+			_attachments = attachments;
+			if (attachments == null) {
+				_attachments = Collections.emptyList();
+			}
 		}
 		@Override
 		public String getReceiptNumber() {
@@ -231,7 +266,7 @@ public class SneakyCaseService implements CasePagingService {
 		}
 		@Override
 		public List<NoteSummary> getNotes() {
-			return null;
+			return _attachments;
 		}
 
 	}
