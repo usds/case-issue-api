@@ -21,6 +21,9 @@ import gov.usds.case_issues.db.model.TroubleCase;
 @Profile("autotest")
 public class CaseListFixtureService {
 
+	/** Number of seconds old the fixtures are allowed to get before being recreated */
+	private static final int FIXTURE_STALENESS_SECONDS = 30;
+
 	private static final Logger LOG = LoggerFactory.getLogger(CaseListFixtureService.class);
 
 	@Autowired
@@ -41,6 +44,7 @@ public class CaseListFixtureService {
 		public static final String ODD = "odd";
 	}
 
+	@SuppressWarnings("checkstyle:MagicNumber")
 	public enum FixtureCase {
 		/** An active case */
 		ACTIVE01(CaseListFixtureService.START_DATE,
@@ -121,7 +125,7 @@ public class CaseListFixtureService {
 	@Transactional(readOnly=false)
 	public void initFixtures() {
 		// wipe and re-initialize if the data was created more than 30 seconds ago
-		if (_dataService.checkForCaseManagementSystem(SYSTEM, Instant.now().minusSeconds(30))) {
+		if (_dataService.checkForCaseManagementSystem(SYSTEM, Instant.now().minusSeconds(FIXTURE_STALENESS_SECONDS))) {
 			return;
 		}
 		LOG.info("Clearing DB, and initializing system and type");

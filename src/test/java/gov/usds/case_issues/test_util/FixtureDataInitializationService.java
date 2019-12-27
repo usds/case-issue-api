@@ -3,7 +3,6 @@ package gov.usds.case_issues.test_util;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +53,7 @@ public class FixtureDataInitializationService {
 	}
 
 	public boolean checkForCaseManagementSystem(String tag, Instant expires) {
+		LOG.debug("Checking that {} was created not before {}", tag, expires);
 		Optional<CaseManagementSystem> found = _caseManagementSystemRepo.findByExternalId(tag);
 		return found.isPresent() && found.get().getCreatedAt().toInstant().isAfter(expires);
 	}
