@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static gov.usds.case_issues.test_util.CaseListFixtureService.CASE_TYPE;
 
+@SuppressWarnings("checkstyle:MagicNumber")
 public class CriteriaServicePagingTest extends CaseListPagingFilteringTest {
 
 	@Autowired
