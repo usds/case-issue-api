@@ -32,30 +32,30 @@ public class CriteriaServicePagingTest extends CaseListPagingFilteringTest {
 
 	@Test
 	public void getCases_uncheckedCasesFirstPage_correctResult() {
-		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.UNCHECKED, SYSTEM, CASE_TYPE, null, Optional.ofNullable(null), 3, Optional.ofNullable(null), 
-				Optional.ofNullable(null), Collections.emptyMap(), Optional.ofNullable(null));
+		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.UNCHECKED, SYSTEM, CASE_TYPE, null, Optional.empty(), 3, Optional.empty(),
+				Optional.empty(), Collections.emptyMap(), Optional.empty());
 		assertCaseOrder("active only!", Arrays.asList(FixtureCase.ACTIVE01, FixtureCase.ACTIVE04, FixtureCase.ACTIVE02), foundCases);
 	}
 
 	@Test
 	public void getCases_uncheckedCasesParityEven_correctResult() {
-		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.UNCHECKED, SYSTEM, CASE_TYPE, null, Optional.ofNullable(null), 3, Optional.ofNullable(null), 
-				Optional.ofNullable(null), Collections.singletonMap(CaseListFixtureService.Keywords.PARITY, CaseListFixtureService.Keywords.EVEN),
-				Optional.ofNullable(null));
+		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.UNCHECKED, SYSTEM, CASE_TYPE, null, Optional.empty(), 3, Optional.empty(),
+				Optional.empty(), Collections.singletonMap(CaseListFixtureService.Keywords.PARITY, CaseListFixtureService.Keywords.EVEN),
+				Optional.empty());
 		assertCaseOrder("active and even", Arrays.asList(FixtureCase.ACTIVE03, FixtureCase.ACTIVE05), foundCases);
 	}
 
 	@Test
 	public void getCases_snoozedCasesCorrelationIdAttached_correctResult() {
-		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.SNOOZED, SYSTEM, CASE_TYPE, null, Optional.ofNullable(null), 3, Optional.ofNullable(null), 
-			Optional.ofNullable(null), Collections.emptyMap(), Optional.of(FixtureAttachment.CORRELATION01.asRequest()));
+		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.SNOOZED, SYSTEM, CASE_TYPE, null, Optional.empty(), 3, Optional.empty(),
+			Optional.empty(), Collections.emptyMap(), Optional.of(FixtureAttachment.CORRELATION01.asRequest()));
 		assertCaseOrder("Snoozed with correlation ID", Arrays.asList(FixtureCase.SNOOZED02, FixtureCase.SNOOZED01), foundCases);
 	}
 
 	@Test
 	public void getCases_snoozedCasesAnyTroubleLink_correctResult() {
-		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.SNOOZED, SYSTEM, CASE_TYPE, null, Optional.ofNullable(null), 5, Optional.ofNullable(null), 
-				Optional.ofNullable(null), Collections.emptyMap(), Optional.of(new AttachmentRequest(AttachmentType.LINK, null, "trouble")));
+		List<CaseSummary> foundCases = _service.getCases(CaseSnoozeFilter.SNOOZED, SYSTEM, CASE_TYPE, null, Optional.empty(), 5, Optional.empty(),
+				Optional.empty(), Collections.emptyMap(), Optional.of(new AttachmentRequest(AttachmentType.LINK, null, "trouble")));
 		assertCaseOrder("Snoozed with a trouble link", Arrays.asList(FixtureCase.SNOOZED02, FixtureCase.SNOOZED03, FixtureCase.SNOOZED04), foundCases);
 	}
 }
