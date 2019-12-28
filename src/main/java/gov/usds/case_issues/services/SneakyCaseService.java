@@ -70,40 +70,30 @@ public class SneakyCaseService implements CasePagingService {
 	@Override
 	public List<CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag, String receiptNumber,
 			DateRange caseCreationRange, int size) {
-		Pageable sortOrder = activeCasePage(size);
-		Specification<SneakyViewEntity> pathSpec = commonSpec(caseManagementSystemTag, caseTypeTag,
-				sortOrder.getSort(),
-				Optional.ofNullable(receiptNumber), Optional.ofNullable(caseCreationRange));
-		Specification<SneakyViewEntity> notSnoozed = (root, query, cb) -> cb.or(
-			cb.lessThan(root.get("snoozeEnd"), ZonedDateTime.now()),
-			cb.isNull(root.get("snoozeEnd"))
-		);
-		return wrapFetched(
-			Specification.where(pathSpec.and(notSnoozed)),
-			sortOrder
-		);
+		return getCases(CaseSnoozeFilter.ACTIVE, caseManagementSystemTag, caseTypeTag, DEFAULT_SORT, Optional.ofNullable(receiptNumber), size, Optional.ofNullable(caseCreationRange),
+				Optional.empty(), Collections.emptyMap(), Optional.empty());
 	}
 
 	@Override
 	public List<CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag, String receiptNumber,
 			DateRange caseCreationRange, Optional<String> snoozeReason, int size) {
-		Pageable pageInfo = snoozedCasePage(size);
-		Specification<SneakyViewEntity> mainSpec = commonSpec(caseManagementSystemTag, caseTypeTag,
-				pageInfo.getSort(), Optional.ofNullable(receiptNumber), Optional.ofNullable(caseCreationRange));
-		Specification<SneakyViewEntity> snoozed = (root, query, cb) -> 
-			cb.greaterThanOrEqualTo(root.get("snoozeEnd"), ZonedDateTime.now());
-		mainSpec = mainSpec.and(snoozed);
-		if (snoozeReason.isPresent()) {
-			Specification<SneakyViewEntity> snoozeReasonSpec = (root, query, cb) ->
-				cb.equal(root.get("snoozeReason"), snoozeReason.get());
-			mainSpec = mainSpec.and(snoozeReasonSpec);
-		}
-		return wrapFetched(mainSpec, pageInfo);
+		return getCases(CaseSnoozeFilter.SNOOZED, caseManagementSystemTag, caseTypeTag, SNOOZE_SORT, Optional.ofNullable(receiptNumber), size,
+				Optional.ofNullable(caseCreationRange),
+				snoozeReason, Collections.emptyMap(), Optional.empty());
+	}
+
+	@Override
+	public List<CaseSummary> getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
+			String receiptNumber, DateRange caseCreationRange, int size) {
+		return getCases(CaseSnoozeFilter.ALARMED, caseManagementSystemTag, caseTypeTag, DEFAULT_SORT, Optional.ofNullable(receiptNumber), size,
+				Optional.ofNullable(caseCreationRange),
+				Optional.empty(), Collections.emptyMap(), Optional.empty());
 	}
 
 	public List<CaseSummary> getCases(CaseSnoozeFilter queryFilter, String caseManagementSystemTag, String caseTypeTag, 
 			Sort sortOrder, Optional<String> pageReference, int pageSize,
-			@NotNull Optional<DateRange> caseCreationRange, @NotNull Optional<String> snoozeReason,
+			@NotNull Optional<DateRange> caseCreationRange,
+			@NotNull Optional<String> snoozeReason,
 			@NotNull Map<String, Object> fieldFilter,
 			@NotNull Optional<AttachmentRequest> attachmentFilter
 			) {
@@ -114,6 +104,9 @@ public class SneakyCaseService implements CasePagingService {
 				pageReference, caseCreationRange);
 		if (queryFilter != null) {
 			mainSpec = mainSpec.and(caseCategorySpec(queryFilter));
+		}
+		if (snoozeReason.isPresent()) {
+			mainSpec = mainSpec.and((root, query, cb) -> cb.equal(root.get("snoozeReason"), snoozeReason.get()));
 		}
 		if (fieldFilter != null && fieldFilter.size() > 0) {
 			mainSpec = mainSpec.and(caseExtraDataSpec(fieldFilter));
@@ -206,17 +199,6 @@ public class SneakyCaseService implements CasePagingService {
 			attachmentList.add(new NoteSummary(assoc, userInfo));
 		}
 		return attachments;
-	}
-
-	@Override
-	public List<CaseSummary> getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, int size) {
-		Pageable pageInfo = activeCasePage(size);
-		Specification<SneakyViewEntity> pathSpec = commonSpec(caseManagementSystemTag, caseTypeTag,
-				pageInfo.getSort(), Optional.ofNullable(receiptNumber), Optional.ofNullable(caseCreationRange));
-		Specification<SneakyViewEntity> wasSnoozed = (root, query, cb) -> 
-			cb.lessThan(root.get("snoozeEnd"), ZonedDateTime.now());
-		return wrapFetched(Specification.where(pathSpec.and(wasSnoozed)), pageInfo);
 	}
 
 	private static Pageable activeCasePage(int size) {
