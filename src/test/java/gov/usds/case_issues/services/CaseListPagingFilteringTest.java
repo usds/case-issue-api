@@ -391,13 +391,13 @@ public abstract class CaseListPagingFilteringTest extends CaseIssueApiTestBase {
 		);
 	}
 
-	private static void assertCaseOrder(String message, List<FixtureCase> expected, List<? extends CaseSummary> foundCases) {
+	protected static void assertCaseOrder(String message, List<FixtureCase> expected, List<? extends CaseSummary> foundCases) {
 		List<String> foundReceipts = foundCases.stream().map(CaseSummary::getReceiptNumber).collect(Collectors.toList());
 		List<String> expectedReceipts = expected.stream().map(FixtureCase::name).collect(Collectors.toList());
 		assertEquals(message, expectedReceipts, foundReceipts);
 	}
 
-	private static void assertCaseOrder(List<? extends CaseSummary> foundCases, FixtureCase... expected) {
+	protected static void assertCaseOrder(List<? extends CaseSummary> foundCases, FixtureCase... expected) {
 		List<String> foundReceipts = foundCases.stream().map(CaseSummary::getReceiptNumber).collect(Collectors.toList());
 		List<String> expectedReceipts = Stream.of(expected).map(FixtureCase::name).collect(Collectors.toList());
 		assertEquals(expectedReceipts, foundReceipts);

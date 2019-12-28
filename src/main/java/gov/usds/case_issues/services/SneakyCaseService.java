@@ -13,7 +13,11 @@ import java.util.stream.Collectors;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import javax.validation.constraints.NotNull;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.usds.case_issues.db.JsonOperatorContributor;
+import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UserInformation;
@@ -35,6 +41,7 @@ import gov.usds.case_issues.db.model.reporting.SneakyViewEntity;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
 import gov.usds.case_issues.db.repositories.SneakyReportRepo;
 import gov.usds.case_issues.db.repositories.UserInformationRepository;
+import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
@@ -94,28 +101,81 @@ public class SneakyCaseService implements CasePagingService {
 		return wrapFetched(mainSpec, pageInfo);
 	}
 
+	public List<CaseSummary> getCases(CaseSnoozeFilter queryFilter, String caseManagementSystemTag, String caseTypeTag, 
+			Sort sortOrder, Optional<String> pageReference, int pageSize,
+			@NotNull Optional<DateRange> caseCreationRange, @NotNull Optional<String> snoozeReason,
+			@NotNull Map<String, Object> fieldFilter,
+			@NotNull Optional<AttachmentRequest> attachmentFilter
+			) {
+		if (sortOrder == null) {
+			sortOrder = DEFAULT_SORT;
+		}
+		Specification<SneakyViewEntity> mainSpec = commonSpec(caseManagementSystemTag, caseTypeTag, sortOrder,
+				pageReference, caseCreationRange);
+		if (queryFilter != null) {
+			mainSpec = mainSpec.and(caseCategorySpec(queryFilter));
+		}
+		if (fieldFilter != null && fieldFilter.size() > 0) {
+			mainSpec = mainSpec.and(caseExtraDataSpec(fieldFilter));
+		}
+		if (attachmentFilter.isPresent()) {
+			mainSpec = mainSpec.and(attachmentSpec(attachmentFilter.get()));
+		}
+		return wrapFetched(mainSpec, PageRequest.of(0, pageSize, sortOrder));
+	}
+
+	private Specification<SneakyViewEntity> attachmentSpec(AttachmentRequest attachmentRequest) {
+		return (root, query, cb) -> {
+			Subquery<CaseAttachmentAssociation> sq = query.subquery(CaseAttachmentAssociation.class);
+			List<Predicate> conjunction = new ArrayList<>();
+			Root<CaseAttachmentAssociation> aRoot = sq.from(CaseAttachmentAssociation.class);
+			sq.select(aRoot);
+			Path<CaseAttachment> aPath = aRoot.get("attachment");
+			conjunction.add(cb.equal(aPath.get("attachmentType"), cb.literal(attachmentRequest.getNoteType())));
+			if (attachmentRequest.getSubtype() != null) {
+				conjunction.add(cb.equal(aPath.get("attachmentSubtype").get("externalId"), cb.literal(attachmentRequest.getSubtype())));
+			}
+			if (attachmentRequest.getContent() != null) {
+				conjunction.add(cb.equal(aPath.get("content"), cb.literal(attachmentRequest.getContent())));
+
+			}
+			conjunction.add(cb.equal(aRoot.get("snooze").get("snoozeCase").get("internalId"), root.get("internalId")));
+			sq.where(conjunction.toArray(new Predicate[0]));
+			return cb.exists(sq);
+		};
+	}
+
+	private Specification<SneakyViewEntity> caseExtraDataSpec(Map<String, Object> fieldFilter) {
+		String jsonQuery = new JSONObject(fieldFilter).toString();
+		return (root, query, cb) -> cb.isTrue(
+				cb.function(JsonOperatorContributor.JSON_CONTAINS, Boolean.class, root.get("extraData"), cb.literal(jsonQuery)));
+	}
+
+	private Specification<SneakyViewEntity> caseCategorySpec(CaseSnoozeFilter queryFilter) {
+		switch (queryFilter) {
+			case ACTIVE:
+				return (root, query, cb) -> cb.or(
+						cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp()),
+						cb.isNull(root.get("snoozeEnd"))
+				);
+			case SNOOZED:
+				return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("snoozeEnd"), cb.currentTimestamp());
+			case ALARMED:
+				return (root, query, cb) -> cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp());
+			case UNCHECKED:
+				return (root, query, cb) -> cb.isNull(root.get("snoozeEnd"));
+			default:
+				throw new IllegalArgumentException();
+		}
+	}
+
 	private List<CaseSummary> wrapFetched(Specification<SneakyViewEntity> mainSpec, Pageable pageInfo) {
 		try {
 			LOG.debug("Starting fetch using {}/{}", mainSpec, pageInfo);
 			Slice<SneakyViewEntity> page = _repo.findAll(mainSpec, pageInfo);
 			LOG.debug("Finished fetch using {}/{}", mainSpec, pageInfo);
 			List<SneakyViewEntity> cases = page.getContent();
-			List<Long> caseIds = cases.stream().map(SneakyViewEntity::getInternalId).collect(Collectors.toList());
-			List<CaseAttachmentAssociation> associations = _attachmentAssociationRepo.findAllBySnoozeSnoozeCaseInternalIdIn(caseIds);
-			Map<Long, List<NoteSummary>> attachments = new HashMap<>();
-			for (CaseAttachmentAssociation assoc : associations) {
-				Long caseId = assoc.getSnooze().getSnoozeCase().getInternalId();
-				List<NoteSummary> attachmentList = attachments.get(caseId);
-				if (attachmentList == null) {
-					attachmentList = new ArrayList<>();
-					attachments.put(caseId, attachmentList);
-				}
-				UserInformation userInfo = null;
-				if (assoc.getCreatedBy() != null) {
-					userInfo = _userInformationRepo.findByUserId(assoc.getCreatedBy());
-				}
-				attachmentList.add(new NoteSummary(assoc, userInfo));
-			}
+			Map<Long, List<NoteSummary>> attachments = fetchAllAttachments(cases);
 			return cases.stream()
 					.map(c -> new DelegatingSummary(c, attachments.get(c.getInternalId())))
 					.collect(Collectors.toList());
@@ -126,6 +186,26 @@ public class SneakyCaseService implements CasePagingService {
 				throw e;
 			}
 		}
+	}
+
+	private Map<Long, List<NoteSummary>> fetchAllAttachments(List<SneakyViewEntity> cases) {
+		List<Long> caseIds = cases.stream().map(SneakyViewEntity::getInternalId).collect(Collectors.toList());
+		List<CaseAttachmentAssociation> associations = _attachmentAssociationRepo.findAllBySnoozeSnoozeCaseInternalIdIn(caseIds);
+		Map<Long, List<NoteSummary>> attachments = new HashMap<>();
+		for (CaseAttachmentAssociation assoc : associations) {
+			Long caseId = assoc.getSnooze().getSnoozeCase().getInternalId();
+			List<NoteSummary> attachmentList = attachments.get(caseId);
+			if (attachmentList == null) {
+				attachmentList = new ArrayList<>();
+				attachments.put(caseId, attachmentList);
+			}
+			UserInformation userInfo = null;
+			if (assoc.getCreatedBy() != null) {
+				userInfo = _userInformationRepo.findByUserId(assoc.getCreatedBy());
+			}
+			attachmentList.add(new NoteSummary(assoc, userInfo));
+		}
+		return attachments;
 	}
 
 	@Override
