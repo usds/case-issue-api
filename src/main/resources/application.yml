@@ -24,7 +24,7 @@ spring:
     store-type: jdbc
     jdbc:
       initialize-schema: never
-      table-name: user_session
+      table-name: ${spring.jpa.properties.hibernate.default_schema}.user_session
 logback:
   access:
     enabled: true
