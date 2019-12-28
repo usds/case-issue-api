@@ -79,7 +79,7 @@ configurations {
 		resolutionStrategy.activateDependencyLocking()
 	}
 	runtimeClasspath {
-                resolutionStrategy.activateDependencyLocking()
+		resolutionStrategy.activateDependencyLocking()
 	}
 }
 
