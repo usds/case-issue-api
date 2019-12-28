@@ -5,12 +5,14 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 
 /**
  * Metadata about the case issue data stored in this system
  */
 @Entity
+@DynamicUpdate
 public class UserInformation extends UpdatableEntity {
 
 	@NotNull
@@ -37,6 +39,10 @@ public class UserInformation extends UpdatableEntity {
 
 	public String getPrintName() {
 		return printName;
+	}
+
+	public void setPrintName(String newName) {
+		printName = newName;
 	}
 
 	public String getId() {

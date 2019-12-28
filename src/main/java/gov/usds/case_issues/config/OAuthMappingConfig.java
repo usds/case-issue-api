@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer;
@@ -51,6 +51,7 @@ import gov.usds.case_issues.utils.HashUtils;
  */
 @Configuration
 @ConditionalOnWebApplication
+@Conditional(OAuth2ClientRegistrationCondition.class)
 public class OAuthMappingConfig {
 
 	private static final Logger LOG = LoggerFactory.getLogger(OAuthMappingConfig.class);
@@ -59,15 +60,10 @@ public class OAuthMappingConfig {
 	private UserService _userService;
 	@Autowired
 	private OAuth2CustomizationProperties mappedConfig;
-	@Autowired(required=false) //  this is a sneaky way of making the bean conditional: being less sneaky would be better
-	private OAuth2ClientProperties clientConfig;
 
 	@Bean
 	public WebSecurityPlugin oauthConfigurer() {
 		LOG.info("Preparing custom OAuth2 user service configuration");
-		if (clientConfig == null || clientConfig.getRegistration().isEmpty()) {
-			return null; // see above "sneaky" remark
-		}
 		final GrantedAuthoritiesMapper mapper = oauthAuthorityMapper(mappedConfig.getAuthorityPaths());
 		final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService = createDelegatingUserService(
 				new DefaultOAuth2UserService(), mappedConfig.getNamePath(), _userService);

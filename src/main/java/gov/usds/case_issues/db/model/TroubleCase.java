@@ -37,10 +37,19 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @DynamicUpdate
 @TypeDef(name="json", typeClass=JsonStringType.class)
 @NamedNativeQueries({
+	/* ALL SNOOZED CASES */
 	@NamedNativeQuery(
 		name = "snoozedFirstPage",
 		query = TroubleCase.CASE_SELECT_STEM
 				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "snoozedFirstPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
 				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
 	),
@@ -53,6 +62,49 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
+		name = "snoozedLaterPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.SNOOZED_PAGE_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	/* SNOOZED WITH SPECIFIC REASON */
+	@NamedNativeQuery(
+		name = "snoozeReasonFirstPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_SPECIFIC_REASON_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "snoozeReasonFirstPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_SPECIFIC_REASON_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "snoozeReasonLaterPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_SPECIFIC_REASON_CONSTRAINT
+				+ TroubleCase.SNOOZED_PAGE_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "snoozeReasonLaterPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_NOW_SPECIFIC_REASON_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.SNOOZED_PAGE_CONSTRAINT
+				+ TroubleCase.SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	/* ALL NON-SNOOZED CASES */
+	@NamedNativeQuery(
 		name = "notCurrentlySnoozedFirstPage",
 		query = TroubleCase.CASE_SELECT_STEM
 				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
@@ -60,9 +112,59 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		resultSetMapping="snoozeCaseMapping"
 	),
 	@NamedNativeQuery(
+		name = "notCurrentlySnoozedFirstPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
 		name = "notCurrentlySnoozedLaterPage",
 		query = TroubleCase.CASE_SELECT_STEM
 				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "notCurrentlySnoozedLaterPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.NOT_SNOOZED_NOW_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	/* PREVIOUSLY BUT NOT CURRENTLY SNOOZED CASES */
+	@NamedNativeQuery(
+		name = "previouslySnoozedFirstPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "previouslySnoozedFirstPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "previouslySnoozedLaterPage",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
+				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
+		resultSetMapping="snoozeCaseMapping"
+	),
+	@NamedNativeQuery(
+		name = "previouslySnoozedLaterPageDateFilter",
+		query = TroubleCase.CASE_SELECT_STEM
+				+ TroubleCase.SNOOZED_PREVIOUSLY_CONSTRAINT
+				+ TroubleCase.CASE_CREATION_DATE_CONSTRAINT
 				+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT
 				+ TroubleCase.NOT_SNOOZED_NOW_POSTAMBLE,
 		resultSetMapping="snoozeCaseMapping"
@@ -87,6 +189,7 @@ public class TroubleCase extends UpdatableEntity {
 		"case when last_snooze_end is null then 'NEVER_SNOOZED' "
 		+ "when last_snooze_end < CURRENT_TIMESTAMP then 'PREVIOUSLY_SNOOZED' "
 		+ "else 'CURRENTLY_SNOOZED' end";
+
 	public static final String CASE_DTO_QUERY =
 		"SELECT c.*, "
 		+ "(SELECT MAX(snooze_end) FROM {h-schema}case_snooze s where s.snooze_case_internal_id = c.internal_id) last_snooze_end "
@@ -99,20 +202,42 @@ public class TroubleCase extends UpdatableEntity {
 			+ "where c.internal_id=openissues1_.issue_case_internal_id "
 			+ "and ( openissues1_.issue_closed is null)"
 		+ ")";
+
 	public static final String NOT_SNOOZED_NOW_CONSTRAINT = " (last_snooze_end IS NULL OR last_snooze_end < CURRENT_TIMESTAMP) ";
 	public static final String SNOOZED_NOW_CONSTRAINT = " last_snooze_end >= CURRENT_TIMESTAMP ";
+	public static final String SNOOZED_PREVIOUSLY_CONSTRAINT = " last_snooze_end < CURRENT_TIMESTAMP ";
+	public static final String SNOOZED_NOW_SPECIFIC_REASON_CONSTRAINT =
+			" exists ("
+			+ "	SELECT *"
+			+ " FROM {h-schema}case_snooze s "
+			+ " WHERE s.snooze_case_internal_id = trouble_case_dto.internal_id "
+			+ " AND s.snooze_reason = :snoozeReason "
+			+ " AND s.snooze_end >= CURRENT_TIMESTAMP "
+			+ ") ";
+
+	public static final String CASE_CREATION_DATE_CONSTRAINT =
+		" AND case_creation BETWEEN :caseCreationWindowStart and :caseCreationWindowEnd "; // BETWEEN treats the endpoint values as included in the range.
+
+
+	private static final String CREATION_TO_RECEIPT_FALLBACK =
+		" case_creation = :caseCreation AND receipt_number > "
+		+ " (select receipt_number from {h-schema}trouble_case where internal_id = :internalId)";
 	public static final String NOT_SNOOZED_NOW_PAGE_CONSTRAINT =
-			"  AND case_creation >= :caseCreation "
-			+ "AND internal_id != :internalId ";
+		" AND (case_creation > :caseCreation OR "
+		+ CREATION_TO_RECEIPT_FALLBACK
+		+") ";
 	public static final String SNOOZED_PAGE_CONSTRAINT =
-			"  AND last_snooze_end >= :lastSnoozeEnd "
-			+ TroubleCase.NOT_SNOOZED_NOW_PAGE_CONSTRAINT;
+		"  AND (last_snooze_end > :lastSnoozeEnd"
+		+ " OR (last_snooze_end = :lastSnoozeEnd AND case_creation > :caseCreation) "
+		+ " OR (last_snooze_end = :lastSnoozeEnd AND " + CREATION_TO_RECEIPT_FALLBACK + ")"
+		+ ")";
 	public static final String NOT_SNOOZED_NOW_POSTAMBLE =
-		"  ORDER BY case_creation ASC, internal_id ASC "
+		"  ORDER BY case_creation ASC, receipt_number ASC "
 		+ "LIMIT :size";
 	public static final String SNOOZED_NOW_POSTAMBLE =
-		"  ORDER BY last_snooze_end ASC, case_creation ASC, internal_id ASC "
+		"  ORDER BY last_snooze_end ASC, case_creation ASC, receipt_number ASC "
 		+ "LIMIT :size";
+
 	public static final String CASE_DTO_CTE = "(" + CASE_DTO_QUERY + ") as trouble_case_dto ";
 	public static final String CASE_SELECT_STEM = "SELECT * FROM" + CASE_DTO_CTE + " WHERE ";
 

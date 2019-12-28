@@ -28,6 +28,8 @@ import gov.usds.case_issues.services.UploadStatusService;
 @WithMockUser(username = "default_hitlist_user", authorities = "READ_CASES")
 public class HitlistApiControllerTest extends ControllerTestBase {
 
+	private static final String DATE_STAMP_2018 = "2018-01-01T12:00:00Z";
+	private static final String DATE_STAMP_2019 = "2019-01-01T12:00:00Z";
 	private static final String VALUE_ISSUE_TYPE = "WONKY";
 	private static final String VALID_CASE_TYPE = "C1";
 	private static final String VALID_CASE_MGT_SYS = "F1";
@@ -35,6 +37,13 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	private static final String ISSUE_UPLOAD_PATH = API_PATH + "{issueTag}";
 	private static final String CASE_TYPE_NOPE = "Case Type 'NOPE' was not found";
 	private static final String CASE_MANAGEMENT_SYSTEM_NOPE = "Case Management System 'NOPE' was not found";
+
+	private static class Filters {
+		private static final String MAIN = "mainFilter";
+		private static final String CREATION_START = "caseCreationRangeBegin";
+		private static final String CREATION_END = "caseCreationRangeEnd";
+		private static final String SNOOZE_REASON = "snoozeReason";
+	}
 
 	private CaseManagementSystem _system;
 	private CaseType _type;
@@ -216,6 +225,126 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isBadRequest())
 		;
 	}
+
+	@Test
+	public void getCases_badFilterArguments_badRequest() throws Exception {
+		perform(doGetCases())
+			.andExpect(status().isBadRequest());
+		perform(doGetCases().param(Filters.MAIN, "FAKE"))
+			.andExpect(status().isBadRequest());
+		perform(doGetCases().param(Filters.MAIN, "UNCHECKED"))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void getCases_badDateRangeArguments_badRequest() throws Exception {
+		perform(doGetCases().param(Filters.CREATION_START, "3/5/1995"))
+			.andExpect(status().isBadRequest())
+			;
+		perform(doGetCases()
+				.param(Filters.MAIN, "ACTIVE") // has to get past initial required-argument filter
+				.param(Filters.CREATION_START, DATE_STAMP_2019)
+				.param(Filters.CREATION_END, DATE_STAMP_2018)
+			   )
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json("{\"message\": \"Range end must be after beginning\"}"))
+			;
+		perform(doGetCases()
+				.param(Filters.CREATION_START, DATE_STAMP_2019)
+				.param(Filters.CREATION_END, "2021-01-01T12:00:00Z")
+			   )
+			.andExpect(status().isBadRequest())
+			// it would be nice if we controlled the error output here, but we don't
+			;
+	}
+
+	@Test
+	public void getCases_badFilterCombination_badRequest() throws Exception {
+		String expectedErrorJson =
+			"{\"message\": \"Snooze reason cannot be specified for cases that are not snoozed\"}";
+		perform(doGetCases()
+				.param(Filters.MAIN, "ACTIVE")
+				.param(Filters.SNOOZE_REASON, "anything")
+			   )
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(expectedErrorJson))
+			;
+		perform(doGetCases()
+				.param(Filters.MAIN, "ALARMED")
+				.param(Filters.SNOOZE_REASON, "anything")
+			   )
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(expectedErrorJson))
+			;
+		perform(doGetCases()
+				.param(Filters.MAIN, "UNCHECKED")
+				.param(Filters.SNOOZE_REASON, "anything")
+			   )
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(expectedErrorJson))
+			;
+	}
+
+	@Test
+	public void getCases_smokeTest_emptyResponses() throws Exception {
+		perform(doGetCases().param(Filters.MAIN, "ACTIVE"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "ACTIVE")
+				.param(Filters.CREATION_START, DATE_STAMP_2018))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "ACTIVE")
+				.param(Filters.CREATION_START, DATE_STAMP_2018)
+				.param(Filters.CREATION_END, DATE_STAMP_2019))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases().param(Filters.MAIN, "SNOOZED"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "SNOOZED")
+				.param(Filters.CREATION_START, DATE_STAMP_2018))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "SNOOZED")
+				.param(Filters.CREATION_START, DATE_STAMP_2018)
+				.param(Filters.CREATION_END, DATE_STAMP_2019))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "SNOOZED")
+				.param(Filters.SNOOZE_REASON, "sleepy"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases().param(Filters.MAIN, "ALARMED"))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "ALARMED")
+				.param(Filters.CREATION_START, DATE_STAMP_2018))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+		perform(doGetCases()
+				.param(Filters.MAIN, "ALARMED")
+				.param(Filters.CREATION_START, DATE_STAMP_2018)
+				.param(Filters.CREATION_END, DATE_STAMP_2019))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[]", true))
+		;
+	}
 	/**
 	 * Create some data on our default case type!
 	 *
@@ -238,6 +367,10 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		assertEquals(newIssues, uploadInfo.getNewIssueCount().intValue());
 		assertEquals(closedIssues, uploadInfo.getClosedIssueCount().intValue());
 		assertEquals(recordCount, uploadInfo.getUploadedRecordCount());
+	}
+
+	private static MockHttpServletRequestBuilder doGetCases() {
+		return get(API_PATH, VALID_CASE_MGT_SYS, VALID_CASE_TYPE);
 	}
 
 	private static MockHttpServletRequestBuilder doSearch(String cmsTag, String ctTag, String queryString) {

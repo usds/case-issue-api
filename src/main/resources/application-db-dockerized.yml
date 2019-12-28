@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    username: case_issue_api
+    url: jdbc:postgresql://localhost:${CASEISSUES_DB_PORT:5432}/case_issues
+  jpa:
+    properties:
+      hibernate:
+        default_schema: case_issue_main
+  liquibase:
+    user: case_issue_migrations

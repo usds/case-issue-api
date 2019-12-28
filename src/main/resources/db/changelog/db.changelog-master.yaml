@@ -405,15 +405,36 @@ databaseChangeLog:
       id: back-populate-users-table
       author: ben.warfield@usds.dhs.gov
       comment: Back-populate the user_information table with users whose names we had stored before, and normalize the created_by/updated_by fields.
+      dbms: postgresql
+      validCheckSum:
+        - 8:9e470a2ba921eabc38016359d0cfeaef
+        - 8:a1297187517147856b9712c2afb5b918
       changes:
+        - sql:
+            sql: SET search_path=${database.defaultSchemaName};
+            comment: Force liquibase to find the correct schema, even for literal SQL migrations.
         - sqlFile:
-            dbms: postgresql
             path: prepopulate-user-information.sql
             relativeToChangelogFile: true
         - sqlFile:
-            dbms: postgresql
             path: repair-createdby-updatedby.sql
             relativeToChangelogFile: true
+  - changeSet:
+      id: add-unique-user-constraint
+      author: ben.warfield@usds.dhs.gov
+      comment: Add unique constraint for the external user ID in user_information.
+      changes:
+        - addUniqueConstraint:
+            tableName: user_information
+            constraint_name: uk__user_information
+            columnNames: user_id
+  - changeSet:
+      id: tag-release-0.1.0
+      author: ben.warfield@usds.dhs.gov
+      comment: Tag the schema when we moved fully to postgresql, and away from HSQLDB.
+      changes:
+        - tagDatabase:
+            tag: version_0.1.0
   - changeSet:
       id: jdbc-session-support
       author: ben.warfield@usds.dhs.gov
@@ -501,3 +522,4 @@ databaseChangeLog:
         - addPrimaryKey:
             tableName: user_session_attributes
             columnNames: session_primary_id, attribute_name
+

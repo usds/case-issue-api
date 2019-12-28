@@ -1,12 +1,15 @@
 HELP.md
 .gradle
 build/
+/docker-build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
 # allow local property overrides without annoying git statuses
 /src/main/resources/application-local.properties
 /src/main/resources/application-local.yml
+/src/main/resources/application-autotest-local.yml
+/src/main/resources/application-autotest-local.properties
 
 ### STS ###
 .apt_generated
@@ -37,3 +40,4 @@ out/
 
 ### MacOS ###
 .DS_Store
+
