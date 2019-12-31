@@ -482,8 +482,8 @@ public class CaseListService {
 	}
 
 	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
-		LOG.info("Finding snoozed case from {}.", _snoozeRepo);
-		LOG.info("Finding attachment from {}.", _attachmentService);
+		LOG.debug("Finding snoozed case from {}.", _snoozeRepo);
+		LOG.debug("Finding attachment from {}.", _attachmentService);
 		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
