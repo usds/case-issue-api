@@ -8,7 +8,7 @@ public enum AttachmentType {
 	COMMENT,
 	/**
 	 * A value that can be turned into a link (e.g. a trouble ticket in some external system). Requires an associated
-	 * NoteSubtype record that will tell us what the rest of the URL for the link is.
+	 * {@link AttachmentSubtype} record that will tell us what the rest of the URL for the link is.
 	 */
 	LINK,
 	/**
@@ -16,7 +16,7 @@ public enum AttachmentType {
 	 */
 	CORRELATION_ID,
 	/**
-	 * A tag that may be applied to multiple cases. Requires an associated NoteSubtype to explain the meaning of the tag.
+	 * A tag that may be applied to multiple cases. Requires an associated {@link AttachmentSubtype} to explain the meaning of the tag.
 	 */
 	TAG;
 }
