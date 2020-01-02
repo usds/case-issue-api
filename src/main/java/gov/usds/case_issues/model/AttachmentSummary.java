@@ -20,13 +20,13 @@ public class AttachmentSummary {
 
 	public AttachmentSummary(CaseAttachmentAssociation backEnd) {
 		CaseAttachment note = backEnd.getAttachment();
-		type = note.getNoteType();
+		type = note.getAttachmentType();
 		content = note.getContent();
-		if (null != note.getNoteSubtype()) {
-			subType = note.getNoteSubtype().getExternalId();
+		if (null != note.getSubtype()) {
+			subType = note.getSubtype().getExternalId();
 		}
-		if (note.getNoteType() == AttachmentType.LINK) {
-			String urlTemplate = note.getNoteSubtype().getUrlTemplate();
+		if (note.getAttachmentType() == AttachmentType.LINK) {
+			String urlTemplate = note.getSubtype().getUrlTemplate();
 			if (urlTemplate.contains("%s")) {
 				href= String.format(urlTemplate, content);
 			} else {
