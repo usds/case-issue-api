@@ -8,7 +8,7 @@ import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.AttachmentType;
 
-public class NoteSummary {
+public class AttachmentSummary {
 
 	private String content;
 	private AttachmentType type;
@@ -18,7 +18,7 @@ public class NoteSummary {
 	private String name;
 	private ZonedDateTime timestamp;
 
-	public NoteSummary(CaseAttachmentAssociation backEnd) {
+	public AttachmentSummary(CaseAttachmentAssociation backEnd) {
 		CaseAttachment note = backEnd.getAttachment();
 		type = note.getNoteType();
 		content = note.getContent();
@@ -38,7 +38,7 @@ public class NoteSummary {
 		timestamp = ZonedDateTime.ofInstant(backEnd.getCreatedAt().toInstant(), ZoneId.of("Z"));
 	}
 
-	public NoteSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
+	public AttachmentSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
 		this(backEnd);
 		id = user != null ? user.getId() : backEnd.getCreatedBy();
 		name = user != null ? user.getPrintName() : "";

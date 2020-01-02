@@ -39,7 +39,7 @@ import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
-import gov.usds.case_issues.model.NoteSummary;
+import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
 /**
@@ -489,7 +489,7 @@ public class CaseListService {
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
 					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			List<NoteSummary> notes = _attachmentService.findAttachmentsForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
+			List<AttachmentSummary> notes = _attachmentService.findAttachmentsForCase(rootCase).stream().map(AttachmentSummary::new).collect(Collectors.toList());
 			return new CaseSummary(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
