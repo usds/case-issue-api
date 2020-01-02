@@ -13,6 +13,7 @@ import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.AttachmentSubtype;
+import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.repositories.CaseAttachmentRepository;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
@@ -34,21 +35,33 @@ public class CaseAttachmentService {
 
 	@Transactional(readOnly=false)
 	public CaseAttachmentAssociation attachToSnooze(AttachmentRequest request, CaseSnooze snooze) {
-		AttachmentSubtype subType = null;
-		CaseAttachment attachment = null;
+		AttachmentType requestedType = request.getNoteType();
+		String requestedSubtype = request.getSubtype();
 
-		LOG.debug("Attempting to attach note {} {} {}", request.getNoteType(), request.getSubtype(), request.getContent());
-		if (null != request.getSubtype()) {
+		AttachmentSubtype subType = null;
+		LOG.debug("Attempting to attach note {} {} {}", requestedType, requestedSubtype, request.getContent());
+		if (requestedType.requiresSubtype()) {
+			if (null == requestedSubtype) {
+				throw new IllegalArgumentException("Subtype is required for attachment type " + requestedType);
+			}
 			subType = _subtypeRepository
-				.findByExternalId(request.getSubtype())
+				.findByExternalId(requestedSubtype)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid subtype"));
+			if (subType.getForAttachmentType() != requestedType) {
+				throw new IllegalArgumentException("Requested subtype belongs to attachment type " + subType.getForAttachmentType()
+					+ ", not " + requestedType);
+			}
+		} else if (null != requestedSubtype) {
+			throw new IllegalArgumentException("Subtypes are not allowed for attachment type " + requestedType);
 		}
-		Optional<CaseAttachment> search = _attachmentRepository.findByAttachmentTypeAndAttachmentSubtypeAndContent(request.getNoteType(), subType, request.getContent());
+
+		CaseAttachment attachment = null;
+		Optional<CaseAttachment> search = _attachmentRepository.findByAttachmentTypeAndAttachmentSubtypeAndContent(requestedType, subType, request.getContent());
 		if (search.isPresent()) {
 			attachment = search.get();
 			LOG.debug("Found existing note {}", attachment.getInternalId());
 		} else {
-			attachment = _attachmentRepository.save(new CaseAttachment(request.getNoteType(), subType, request.getContent()));
+			attachment = _attachmentRepository.save(new CaseAttachment(requestedType, subType, request.getContent()));
 		}
 
 		return _associationRepository.save(new CaseAttachmentAssociation(snooze, attachment));

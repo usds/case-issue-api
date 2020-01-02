@@ -25,6 +25,9 @@ public class AttachmentSubtype extends TaggedEntity {
 	public AttachmentSubtype(String noteSubtypeTag, AttachmentType forNoteType, String name, String description,
 			String urlTemplate) {
 		super(noteSubtypeTag, name, description);
+		if (!forNoteType.requiresSubtype())  {
+			throw new IllegalArgumentException("Cannot create subtypes for attachment type " + forNoteType.name());
+		}
 		this.forAttachmentType = forNoteType;
 		this.urlTemplate = urlTemplate;
 	}
