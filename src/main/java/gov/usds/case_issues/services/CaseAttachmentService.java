@@ -30,12 +30,12 @@ public class CaseAttachmentService {
 	@Autowired
 	private AttachmentAssociationRepository _associationRepository;
 	@Autowired
-	private CaseAttachmentRepository _noteRepository;
+	private CaseAttachmentRepository _attachmentRepository;
 
 	@Transactional(readOnly=false)
-	public CaseAttachmentAssociation attachNote(AttachmentRequest request, CaseSnooze snooze) {
+	public CaseAttachmentAssociation attachToSnooze(AttachmentRequest request, CaseSnooze snooze) {
 		AttachmentSubtype subType = null;
-		CaseAttachment note = null;
+		CaseAttachment attachment = null;
 
 		LOG.debug("Attempting to attach note {} {} {}", request.getNoteType(), request.getSubtype(), request.getContent());
 		if (null != request.getSubtype()) {
@@ -43,18 +43,18 @@ public class CaseAttachmentService {
 				.findByExternalId(request.getSubtype())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid subtype"));
 		}
-		Optional<CaseAttachment> noteSearch = _noteRepository.findByAttachmentTypeAndAttachmentSubtypeAndContent(request.getNoteType(), subType, request.getContent());
-		if (noteSearch.isPresent()) {
-			note = noteSearch.get();
-			LOG.debug("Found existing note {}", note.getInternalId());
+		Optional<CaseAttachment> search = _attachmentRepository.findByAttachmentTypeAndAttachmentSubtypeAndContent(request.getNoteType(), subType, request.getContent());
+		if (search.isPresent()) {
+			attachment = search.get();
+			LOG.debug("Found existing note {}", attachment.getInternalId());
 		} else {
-			note = _noteRepository.save(new CaseAttachment(request.getNoteType(), subType, request.getContent()));
+			attachment = _attachmentRepository.save(new CaseAttachment(request.getNoteType(), subType, request.getContent()));
 		}
 
-		return _associationRepository.save(new CaseAttachmentAssociation(snooze, note));
+		return _associationRepository.save(new CaseAttachmentAssociation(snooze, attachment));
 	}
 
-	public List<CaseAttachmentAssociation> findNotesForCase(TroubleCase rootCase) {
+	public List<CaseAttachmentAssociation> findAttachmentsForCase(TroubleCase rootCase) {
 		return _associationRepository.findAllBySnoozeSnoozeCaseOrderByUpdatedAtAsc(rootCase);
 	}
 }

@@ -23,9 +23,9 @@ import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
+import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
-import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.NoteSummary;
 import gov.usds.case_issues.model.SnoozeRequest;
 
@@ -78,7 +78,7 @@ public class CaseDetailsService {
 														_userRepo.findByUserId(row.getCreatedBy())
 													))
 													.collect(Collectors.toList());
-		List<NoteSummary> notes = _attachmentService.findNotesForCase(mainCase).stream()
+		List<NoteSummary> notes = _attachmentService.findAttachmentsForCase(mainCase).stream()
 													.map(row -> new NoteSummary(
 														row,
 														 _userRepo.findByUserId(row.getCreatedBy())
@@ -120,7 +120,7 @@ public class CaseDetailsService {
 		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration);
 		_snoozeRepo.save(replacement);
 		List<NoteSummary> savedNotes = requestedSnooze.getNotes().stream()
-				.map(r->_attachmentService.attachNote(r, replacement))
+				.map(r->_attachmentService.attachToSnooze(r, replacement))
 				.map(NoteSummary::new)
 				.collect(Collectors.toList());
 		return new CaseSnoozeSummaryFacade(replacement, savedNotes);
@@ -134,10 +134,9 @@ public class CaseDetailsService {
 	public void annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
-		if (snoozeIsActive(foundSnooze)) {
-			_attachmentService.attachNote(newNote, foundSnooze.get());
-		} else {
+		if (!snoozeIsActive(foundSnooze)) {
 			throw new IllegalArgumentException("Cannot add a note to a case that is not snoozed.");
 		}
+		_attachmentService.attachToSnooze(newNote, foundSnooze.get());
 	}
 }

@@ -489,7 +489,7 @@ public class CaseListService {
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
 					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			List<NoteSummary> notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
+			List<NoteSummary> notes = _attachmentService.findAttachmentsForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
 			return new CaseSummary(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
