@@ -81,21 +81,17 @@ public class CaseDetailsApiController {
 	public ResponseEntity<List<AttachmentSummary>> getAttachments(@PathVariable String caseManagementSystemTag,
 			@PathVariable String receiptNumber) {
 		TroubleCase rootCase = _caseDetailsService.findCaseByTags(caseManagementSystemTag, receiptNumber);
-		List<AttachmentSummary> attachments = toSummaries(_attachmentService.findAttachmentsForCase(rootCase));
+		List<AttachmentSummary> attachments = _attachmentService.findAttachmentsForCase(rootCase).stream()
+				.map(AttachmentSummary::new)
+				.collect(Collectors.toList());
 		return ResponseEntity.ok(attachments);
 	}
 
 	@PostMapping({"activeSnooze/notes","activeSnooze/attachments"})
 	@RequireUpdateCasePermission
-	public ResponseEntity<List<AttachmentSummary>> addAttachment(@PathVariable String caseManagementSystemTag,
+	public ResponseEntity<AttachmentSummary> addAttachment(@PathVariable String caseManagementSystemTag,
 			@PathVariable String receiptNumber, @RequestBody AttachmentRequest attachment) {
-		List<CaseAttachmentAssociation> allAttachments = _caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, attachment);
-		return ResponseEntity.accepted().body(toSummaries(allAttachments));
-	}
-
-	private static List<AttachmentSummary> toSummaries(List<CaseAttachmentAssociation> associations) {
-		return associations.stream()
-			.map(AttachmentSummary::new)
-			.collect(Collectors.toList());
+		CaseAttachmentAssociation attached = _caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, attachment);
+		return ResponseEntity.accepted().body(new AttachmentSummary(attached));
 	}
 }

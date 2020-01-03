@@ -132,13 +132,12 @@ public class CaseDetailsService {
 	}
 
 	@Transactional(readOnly=false)
-	public List<CaseAttachmentAssociation> annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
+	public CaseAttachmentAssociation annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
 		if (!snoozeIsActive(foundSnooze)) {
 			throw new IllegalArgumentException("Cannot add a note to a case that is not snoozed.");
 		}
-		_attachmentService.attachToSnooze(newNote, foundSnooze.get());
-		return _attachmentService.findAttachmentsForCase(mainCase);
+		return _attachmentService.attachToSnooze(newNote, foundSnooze.get());
 	}
 }

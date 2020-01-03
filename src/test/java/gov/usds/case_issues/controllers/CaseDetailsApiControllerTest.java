@@ -305,22 +305,27 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		_dataService.snoozeCase(troubleCase);
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
 			.andExpect(status().isAccepted())
-			.andExpect(content().json("["+ attachmentJson(AttachmentType.COMMENT, null, "Hello World").toString() + "]"))
+			.andExpect(content().json(attachmentJson(AttachmentType.COMMENT, null, "Hello World").toString()))
 			;
 	}
 
 	@Test
-	public void addAttachmentToSnooze_snoozedCaseWithAttachment_bothNStored() throws Exception {
+	public void addAttachmentToSnooze_snoozedCaseWithAttachment_bothStored() throws Exception {
 		TroubleCase troubleCase = initSampleCase();
+		JSONObject attachment = attachmentJson(AttachmentType.COMMENT, null, "We're back");
 		JSONArray ar = new JSONArray(new JSONObject[] {
 				attachmentJson(AttachmentType.COMMENT, null, "Hello World"),
-				attachmentJson(AttachmentType.COMMENT, null, "We're back")
+				attachment
 		});
 		_dataService.snoozeCase(troubleCase);
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
 			.andExpect(status().isAccepted());
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "We're back", null)))
 			.andExpect(status().isAccepted())
+			.andExpect(content().json(attachment.toString()))
+			;
+		_mvc.perform(attachmentsRequest(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isOk())
 			.andExpect(content().json(ar.toString()))
 			;
 	}
@@ -344,6 +349,10 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	private MockHttpServletRequestBuilder detailsRequest(String systemTag, String receipt) {
 		return get("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}", systemTag, receipt);
+	}
+
+	private MockHttpServletRequestBuilder attachmentsRequest(String systemTag, String receipt) {
+		return get("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/attachments", systemTag, receipt);
 	}
 
 	private MockHttpServletRequestBuilder getSnooze(String systemTag, String receipt) {

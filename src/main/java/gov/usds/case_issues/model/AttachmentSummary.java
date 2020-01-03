@@ -10,6 +10,7 @@ import gov.usds.case_issues.db.model.AttachmentType;
 
 public class AttachmentSummary {
 
+	private long attachmentId;
 	private String content;
 	private AttachmentType type;
 	private String subType;
@@ -20,6 +21,7 @@ public class AttachmentSummary {
 
 	public AttachmentSummary(CaseAttachmentAssociation backEnd) {
 		CaseAttachment note = backEnd.getAttachment();
+		attachmentId = note.getInternalId();
 		type = note.getAttachmentType();
 		content = note.getContent();
 		if (null != note.getSubtype()) {
@@ -42,6 +44,10 @@ public class AttachmentSummary {
 		this(backEnd);
 		id = user != null ? user.getId() : backEnd.getCreatedBy();
 		name = user != null ? user.getPrintName() : "";
+	}
+
+	public long getId() {
+		return attachmentId;
 	}
 
 	public String getContent() {
