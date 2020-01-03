@@ -7,6 +7,8 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.SequenceGenerator;
 
@@ -47,6 +49,12 @@ public abstract class WriteOnceEntity {
 	@Column(updatable=false)
 	private Date createdAt;
 
+	@ManyToOne(optional=true)
+	@JoinColumn(name="createdBy", referencedColumnName="userId",
+		insertable=false, updatable=false)
+	@JsonIgnore
+	private UserInformation creationUser;
+
 	public Long getInternalId() {
 		return internalId;
 	}
@@ -59,4 +67,7 @@ public abstract class WriteOnceEntity {
 		return createdAt;
 	}
 
+	public UserInformation getCreationUser() {
+		return creationUser;
+	}
 }
