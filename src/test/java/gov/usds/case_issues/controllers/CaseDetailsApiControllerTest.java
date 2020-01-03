@@ -31,8 +31,12 @@ import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
 
-@WithMockUser(username = "d15f7835-7fe7-438d-b889-90a5f5974ec2", authorities = {"READ_CASES", "UPDATE_CASES"})
+@WithMockUser(username = CaseDetailsApiControllerTest.USER_ID, authorities = {"READ_CASES", "UPDATE_CASES"})
 public class CaseDetailsApiControllerTest extends ControllerTestBase {
+
+	static final String USER_ID = "d15f7835-7fe7-438d-b889-90a5f5974ec2";
+	private static final String CASE_DETAILS_URL_TEMPLATE = "/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}";
+	private static final String ACTIVE_SNOOZE_TEMPLATE = CASE_DETAILS_URL_TEMPLATE + "/activeSnooze";
 
 	private static final String VALID_SYS = "C1";
 	private static final String SAMPLE_CASE = "BH90210";
@@ -203,7 +207,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 				updateSnooze(VALID_SYS, SAMPLE_CASE, "Meh", 1, null, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null))
 			)
 			.andExpect(status().isOk());
-		UserInformation user = _userRepo.findByUserId("d15f7835-7fe7-438d-b889-90a5f5974ec2");
+		UserInformation user = _userRepo.findByUserId(USER_ID);
 		_userRepo.delete(user);
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
@@ -369,15 +373,15 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	private MockHttpServletRequestBuilder detailsRequest(String systemTag, String receipt) {
-		return get("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}", systemTag, receipt);
+		return get(CASE_DETAILS_URL_TEMPLATE, systemTag, receipt);
 	}
 
 	private MockHttpServletRequestBuilder attachmentsRequest(String systemTag, String receipt) {
-		return get("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/attachments", systemTag, receipt);
+		return get(CASE_DETAILS_URL_TEMPLATE + "/attachments", systemTag, receipt);
 	}
 
 	private MockHttpServletRequestBuilder getSnooze(String systemTag, String receipt) {
-		return get("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/activeSnooze", systemTag, receipt);
+		return get(ACTIVE_SNOOZE_TEMPLATE, systemTag, receipt);
 	}
 
 	private MockHttpServletRequestBuilder endSnooze(String systemTag, String receipt) {
@@ -385,7 +389,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	}
 
 	private MockHttpServletRequestBuilder endSnoozeNoCsrf(String systemTag, String receipt) {
-		return delete("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/activeSnooze", systemTag, receipt);
+		return delete(ACTIVE_SNOOZE_TEMPLATE, systemTag, receipt);
 	}
 
 
@@ -412,7 +416,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			}
 			body.put("notes", notesArray);
 		}
-		return put("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/activeSnooze", systemTag, receipt)
+		return put(ACTIVE_SNOOZE_TEMPLATE, systemTag, receipt)
 			.contentType("application/json")
 			.content(body.toString())
 			;
@@ -429,7 +433,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		body.put("type", note.getNoteType().name());
 		body.put("content", note.getContent());
 		body.put("subtype", note.getSubtype());
-		return post("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}/activeSnooze/notes", systemTag, receipt)
+		return post(ACTIVE_SNOOZE_TEMPLATE + "/attachments", systemTag, receipt)
 			.contentType("application/json")
 			.content(body.toString())
 			;
