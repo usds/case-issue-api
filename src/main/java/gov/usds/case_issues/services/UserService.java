@@ -3,7 +3,6 @@ package gov.usds.case_issues.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,14 +43,5 @@ public class UserService {
 			user = new UserInformation(id, printName);
 		}
 		_userRepo.save(user);
-	}
-
-	/**
-	 * Clear the cache, forcing re-fetch of UserInformation records from the database.
-	 * <b>Should only be needed for tests!</b>
-	 */
-	@CacheEvict(cacheNames=UserInformationRepository.USER_ID_CACHE, allEntries=true)
-	public void clearCache() {
-		LOG.warn("Manually emptying UserInformation cache");
 	}
 }
