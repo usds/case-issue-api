@@ -5,6 +5,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -36,5 +37,13 @@ public class ApiControllerAdvice {
 	public SpringRestError handleConstraintViolation(ConstraintViolationException e, HttpServletRequest req) {
 		LOG.warn("Got constraint violation", e);
 		return new SpringRestError(e, HttpStatus.BAD_REQUEST, req);
+	}
+
+	// duplicated from ResourceControllerAdvice
+	@ExceptionHandler
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public SpringRestError handleDataIntegrity(DataIntegrityViolationException e, HttpServletRequest req) {
+		LOG.warn("Got a data integrity violation!");
+		return new SpringRestError(e, HttpStatus.CONFLICT, req);
 	}
 }

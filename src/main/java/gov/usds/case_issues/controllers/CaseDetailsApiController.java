@@ -92,6 +92,6 @@ public class CaseDetailsApiController {
 	public ResponseEntity<AttachmentSummary> addAttachment(@PathVariable String caseManagementSystemTag,
 			@PathVariable String receiptNumber, @RequestBody AttachmentRequest attachment) {
 		CaseAttachmentAssociation attached = _caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, attachment);
-		return ResponseEntity.accepted().body(new AttachmentSummary(attached));
+		return ResponseEntity.created(null).body(new AttachmentSummary(attached));
 	}
 }

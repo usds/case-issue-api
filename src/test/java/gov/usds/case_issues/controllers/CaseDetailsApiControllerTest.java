@@ -304,7 +304,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		TroubleCase troubleCase = initSampleCase();
 		_dataService.snoozeCase(troubleCase);
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
-			.andExpect(status().isAccepted())
+			.andExpect(status().isCreated())
 			.andExpect(content().json(attachmentJson(AttachmentType.COMMENT, null, "Hello World").toString()))
 			;
 	}
@@ -319,9 +319,9 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		});
 		_dataService.snoozeCase(troubleCase);
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
-			.andExpect(status().isAccepted());
+			.andExpect(status().isCreated());
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "We're back", null)))
-			.andExpect(status().isAccepted())
+			.andExpect(status().isCreated())
 			.andExpect(content().json(attachment.toString()))
 			;
 		_mvc.perform(attachmentsRequest(VALID_SYS, SAMPLE_CASE))
@@ -329,6 +329,27 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			.andExpect(content().json(ar.toString()))
 			;
 	}
+
+	@Test
+	public void addAttachmentToSnooze_duplicateAttachment_conflict() throws Exception {
+		TroubleCase troubleCase = initSampleCase();
+		JSONObject attachment = attachmentJson(AttachmentType.COMMENT, null, "Hello World");
+		JSONArray ar = new JSONArray(new JSONObject[] {attachment});
+		_dataService.snoozeCase(troubleCase);
+		AttachmentRequest req = new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null);
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, req))
+			.andExpect(status().isCreated())
+			.andExpect(content().json(attachment.toString()))
+			;
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, req))
+			.andExpect(status().isConflict())
+			;
+		_mvc.perform(attachmentsRequest(VALID_SYS, SAMPLE_CASE))
+			.andExpect(status().isOk())
+			.andExpect(content().json(ar.toString()))
+			;
+	}
+
 	@Test
 	public void addNoteToSnooze_activeCase_badRequest() throws Exception {
 		initSampleCase();
