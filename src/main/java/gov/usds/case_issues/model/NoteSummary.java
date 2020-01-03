@@ -34,7 +34,7 @@ public class NoteSummary {
 			}
 		}
 		if (associationCreator != null) {
-			user = new SerializedUserInformation(associationCreator.getId(), associationCreator.getPrintName());
+			user = new SerializedUserInformation(associationCreator);
 		} else {
 			user = new SerializedUserInformation(backEnd.getCreatedBy(), "");
 		}

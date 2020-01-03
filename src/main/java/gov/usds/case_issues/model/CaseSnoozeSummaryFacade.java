@@ -27,7 +27,7 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 	public CaseSnoozeSummaryFacade(CaseSnooze wrapped) {
 		this.wrapped = wrapped;
 		if(wrapped.getCreationUser() != null) {
-			user = new SerializedUserInformation(wrapped.getCreationUser().getId(), wrapped.getCreationUser().getPrintName());
+			user = new SerializedUserInformation(wrapped.getCreationUser());
 		} else {
 			user = new SerializedUserInformation(wrapped.getCreatedBy(), "");
 		}

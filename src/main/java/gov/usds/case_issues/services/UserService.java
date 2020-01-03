@@ -28,7 +28,7 @@ public class UserService {
 		if (user == null) {
 			throw new IllegalArgumentException("User information is not populated in the database");
 		}
-		return new SerializedUserInformation(user.getId(), user.getPrintName());
+		return new SerializedUserInformation(user);
 	}
 
 	public void createUserOrUpdateLastSeen(String id, String printName) {
