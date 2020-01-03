@@ -31,7 +31,6 @@ public class UserServiceTest extends CaseIssueApiTestBase {
 	@Before
 	public void clear() {
 		truncateDb();
-		_service.clearCache();
 		_testStart = ZonedDateTime.now();
 	}
 
