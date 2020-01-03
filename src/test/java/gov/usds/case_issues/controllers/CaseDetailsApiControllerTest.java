@@ -1,6 +1,5 @@
 package gov.usds.case_issues.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,16 +19,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
-import gov.usds.case_issues.db.model.AttachmentSubtype;
-import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UserInformation;
-import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
 import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
 
@@ -41,8 +39,6 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	private static final String SAMPLE_CASE_DETAIL_JSON = "{\"receiptNumber\": \"" + SAMPLE_CASE + "\", \"snoozes\": []}";
 
 	private CaseManagementSystem _sys;
-	@Autowired
-	private AttachmentSubtypeRepository _subtypeRepository;
 	@Autowired
 	private UserInformationRepository _userRepo;
 
@@ -164,7 +160,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 	@SuppressWarnings("checkstyle:MagicNumber")
 	public void snoozeWithAttachment_technicalIssue_notesStored() throws Exception {
 		initSampleCase();
-		createSubtype("noteSubtypeTag");
+		_dataService.ensureAttachmentSubtypeInitialized("noteSubtypeTag", "Asignee", AttachmentType.TAG, null);
 
 		_mvc.perform(getSnooze(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isNoContent());
@@ -172,7 +168,9 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 				VALID_SYS, SAMPLE_CASE, "assigned_case", 5, null,
 				new AttachmentRequest(AttachmentType.TAG, "assignee", "noteSubtypeTag")
 			))
-			.andExpect(status().isOk());
+			.andExpect(status().isOk())
+			.andExpect(content().json("{\"notes\": [{\"content\": \"assignee\"}]}"))
+			;
 		_mvc.perform(detailsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("{\"notes\": [{\"content\": \"assignee\"}]}"))
@@ -306,9 +304,26 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		TroubleCase troubleCase = initSampleCase();
 		_dataService.snoozeCase(troubleCase);
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
-			.andExpect(status().isAccepted());
+			.andExpect(status().isAccepted())
+			.andExpect(content().json("["+ attachmentJson(AttachmentType.COMMENT, null, "Hello World").toString() + "]"))
+			;
 	}
 
+	@Test
+	public void addAttachmentToSnooze_snoozedCaseWithAttachment_bothNStored() throws Exception {
+		TroubleCase troubleCase = initSampleCase();
+		JSONArray ar = new JSONArray(new JSONObject[] {
+				attachmentJson(AttachmentType.COMMENT, null, "Hello World"),
+				attachmentJson(AttachmentType.COMMENT, null, "We're back")
+		});
+		_dataService.snoozeCase(troubleCase);
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
+			.andExpect(status().isAccepted());
+		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "We're back", null)))
+			.andExpect(status().isAccepted())
+			.andExpect(content().json(ar.toString()))
+			;
+	}
 	@Test
 	public void addNoteToSnooze_activeCase_badRequest() throws Exception {
 		initSampleCase();
@@ -325,17 +340,6 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		_userRepo.save(user);
 
 		return troubleCase;
-	}
-
-
-	private AttachmentSubtype createSubtype(String externalTag) {
-		return _subtypeRepository.save(new AttachmentSubtype(
-			externalTag,
-			AttachmentType.TAG,
-			"Assignee",
-			"Who is the case assigned to?",
-			""
-		));
 	}
 
 	private MockHttpServletRequestBuilder detailsRequest(String systemTag, String receipt) {
@@ -401,4 +405,13 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 			;
 	}
 
+	private static JSONObject attachmentJson(AttachmentType type, String subtype, String content) {
+		JSONObject j = new JSONObject();
+		j.put("type", type.name());
+		j.put("content", content);
+		if (subtype != null) {
+			j.put("subtype", subtype);
+		}
+		return j;
+	}
 }

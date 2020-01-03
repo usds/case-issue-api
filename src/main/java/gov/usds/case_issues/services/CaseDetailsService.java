@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.TroubleCase;
@@ -131,12 +132,13 @@ public class CaseDetailsService {
 	}
 
 	@Transactional(readOnly=false)
-	public void annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
+	public List<CaseAttachmentAssociation> annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
 		if (!snoozeIsActive(foundSnooze)) {
 			throw new IllegalArgumentException("Cannot add a note to a case that is not snoozed.");
 		}
 		_attachmentService.attachToSnooze(newNote, foundSnooze.get());
+		return _attachmentService.findAttachmentsForCase(mainCase);
 	}
 }
