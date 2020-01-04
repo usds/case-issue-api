@@ -310,6 +310,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		_mvc.perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "Hello World", null)))
 			.andExpect(status().isCreated())
 			.andExpect(content().json(attachmentJson(AttachmentType.COMMENT, null, "Hello World").toString()))
+			.andExpect(jsonPath("$.id", Matchers.greaterThan(1)))
 			;
 	}
 
@@ -331,6 +332,8 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		_mvc.perform(attachmentsRequest(VALID_SYS, SAMPLE_CASE))
 			.andExpect(status().isOk())
 			.andExpect(content().json(ar.toString()))
+			.andExpect(jsonPath("$[0].id", Matchers.greaterThan(1)))
+			.andExpect(jsonPath("$[1].id", Matchers.greaterThan(1)))
 			;
 	}
 
