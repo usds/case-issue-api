@@ -6,6 +6,10 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 
+/**
+ * A specific category of {@link AttachmentType#LINK} or {@link AttachmentType#TAG}, with associated metadata on how
+ * users will want to interpret or use those tags (mostly link base URLs).
+ */
 @Entity
 public class AttachmentSubtype extends TaggedEntity {
 
@@ -21,6 +25,9 @@ public class AttachmentSubtype extends TaggedEntity {
 	public AttachmentSubtype(String noteSubtypeTag, AttachmentType forNoteType, String name, String description,
 			String urlTemplate) {
 		super(noteSubtypeTag, name, description);
+		if (!forNoteType.requiresSubtype())  {
+			throw new IllegalArgumentException("Cannot create subtypes for attachment type " + forNoteType.name());
+		}
 		this.forAttachmentType = forNoteType;
 		this.urlTemplate = urlTemplate;
 	}

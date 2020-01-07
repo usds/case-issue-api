@@ -8,8 +8,9 @@ import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.AttachmentType;
 
-public class NoteSummary {
+public class AttachmentSummary {
 
+	private long attachmentId;
 	private String content;
 	private AttachmentType type;
 	private String subType;
@@ -18,15 +19,16 @@ public class NoteSummary {
 	private String name;
 	private ZonedDateTime timestamp;
 
-	public NoteSummary(CaseAttachmentAssociation backEnd) {
+	public AttachmentSummary(CaseAttachmentAssociation backEnd) {
 		CaseAttachment note = backEnd.getAttachment();
-		type = note.getNoteType();
+		attachmentId = note.getInternalId();
+		type = note.getAttachmentType();
 		content = note.getContent();
-		if (null != note.getNoteSubtype()) {
-			subType = note.getNoteSubtype().getExternalId();
+		if (null != note.getSubtype()) {
+			subType = note.getSubtype().getExternalId();
 		}
-		if (note.getNoteType() == AttachmentType.LINK) {
-			String urlTemplate = note.getNoteSubtype().getUrlTemplate();
+		if (note.getAttachmentType() == AttachmentType.LINK) {
+			String urlTemplate = note.getSubtype().getUrlTemplate();
 			if (urlTemplate.contains("%s")) {
 				href= String.format(urlTemplate, content);
 			} else {
@@ -38,10 +40,14 @@ public class NoteSummary {
 		timestamp = ZonedDateTime.ofInstant(backEnd.getCreatedAt().toInstant(), ZoneId.of("Z"));
 	}
 
-	public NoteSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
+	public AttachmentSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
 		this(backEnd);
 		id = user != null ? user.getId() : backEnd.getCreatedBy();
 		name = user != null ? user.getPrintName() : "";
+	}
+
+	public long getId() {
+		return attachmentId;
 	}
 
 	public String getContent() {

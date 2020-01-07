@@ -20,7 +20,7 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 
 	private CaseSnoozeSummary wrapped;
-	private List<NoteSummary> notes;
+	private List<AttachmentSummary> notes;
 	private String id;
 	private String name;
 
@@ -33,7 +33,7 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		this.wrapped = wrapped;
 	}
 
-	public CaseSnoozeSummaryFacade(CaseSnooze wrapped, List<NoteSummary> savedNotes) {
+	public CaseSnoozeSummaryFacade(CaseSnooze wrapped, List<AttachmentSummary> savedNotes) {
 		this(wrapped);
 		this.notes = savedNotes;
 	}
@@ -65,7 +65,7 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		return new SerializedUserInformation(id, name);
 	}
 
-	public List<NoteSummary> getNotes() {
+	public List<AttachmentSummary> getNotes() {
 		return notes;
 	}
 }

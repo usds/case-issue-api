@@ -30,8 +30,8 @@ public class ApplicationMetadataService {
 	private CaseTypeRepository _typeRepo;
 
 	public List<NavigationEntry> getCaseNavigation() {
-		LOG.info("Getting all case management systems from {}.", _systemRepo);
-		LOG.info("Getting Case types from {}.", _typeRepo);
+		LOG.debug("Getting all case management systems from {}.", _systemRepo);
+		LOG.debug("Getting Case types from {}.", _typeRepo);
 
 		Iterable<CaseManagementSystem> allSystems = _systemRepo.findAll(Sort.by("name").ascending());
 		Iterable<CaseType> allTypesIterable = _typeRepo.findAll();

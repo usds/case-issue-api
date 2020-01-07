@@ -21,12 +21,12 @@ public class CaseDetails {
 	private TroubleCase rootCase;
 	private Collection<? extends CaseIssueSummary> issues;
 	private Collection<? extends CaseSnoozeSummaryFacade> snoozes;
-	private List<NoteSummary> notes;
+	private List<AttachmentSummary> notes;
 
 	public CaseDetails(TroubleCase rootCase,
 			Collection<? extends CaseIssueSummary> issues,
 			Collection<? extends CaseSnoozeSummaryFacade> snoozes,
-			List<NoteSummary> notes) {
+			List<AttachmentSummary> notes) {
 		super();
 		this.rootCase = rootCase;
 		this.issues = issues;
@@ -60,7 +60,7 @@ public class CaseDetails {
 		return snoozes;
 	}
 
-	public List<NoteSummary> getNotes() {
+	public List<AttachmentSummary> getNotes() {
 		return notes;
 	}
 }

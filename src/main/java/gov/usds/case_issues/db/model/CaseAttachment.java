@@ -26,11 +26,11 @@ public class CaseAttachment extends WriteOnceEntity {
 		this.content = content;
 	}
 
-	public AttachmentType getNoteType() {
+	public AttachmentType getAttachmentType() {
 		return attachmentType;
 	}
 
-	public AttachmentSubtype getNoteSubtype() {
+	public AttachmentSubtype getSubtype() {
 		return attachmentSubtype;
 	}
 
