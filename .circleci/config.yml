@@ -25,11 +25,12 @@ jobs:
             docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --exit-code-from check check
       - run:
           name: Retrieve test results and reports
+          when: always
           command: |
             image_id=$(docker-compose -f docker-compose.yml -f docker-compose.ci.yml ps -q check);
             echo "Found ${image_id}"
-            docker cp ${image_id}:/home/gradle/case-issue-api/build/test-results docker-test-results;
-            docker cp ${image_id}:/home/gradle/case-issue-api/build/reports docker-reports;
+            docker cp ${image_id}:/home/gradle/case-issue-api/build/test-results docker-test-results || echo "No test results found";
+            docker cp ${image_id}:/home/gradle/case-issue-api/build/reports docker-reports || echo "No reports found";
       - store_test_results:
           path: docker-test-results
       - store_artifacts:
