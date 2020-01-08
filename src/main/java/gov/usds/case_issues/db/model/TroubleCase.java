@@ -218,7 +218,7 @@ public class TroubleCase extends UpdatableEntity {
 		+ ")";
 
 	public static final String AVERAGE_DAYS_TO_RESOLUTION =
-		"SELECT AVG(DATE_PART('day', i.issue_closed - c.case_creation)) "
+		"SELECT COALESCE(AVG(DATE_PART('day', i.issue_closed - c.case_creation)), 0) "
 		+ "FROM {h-schema}trouble_case c "
 		+ "LEFT JOIN {h-schema}case_issue i "
 		+ "ON c.internal_id = i.issue_case_internal_id "
@@ -240,7 +240,7 @@ public class TroubleCase extends UpdatableEntity {
 		+ ")";
 
 		public static final String AVERAGE_DAYS_WORKED =
-		"SELECT AVG(DATE_PART('day', i.issue_closed - s.created_at)) "
+		"SELECT COALESCE(AVG(DATE_PART('day', i.issue_closed - s.created_at)), 0) "
 		+ "FROM {h-schema}trouble_case c "
 		+ "LEFT JOIN {h-schema}case_issue i "
 		+ "ON c.internal_id = i.issue_case_internal_id "
