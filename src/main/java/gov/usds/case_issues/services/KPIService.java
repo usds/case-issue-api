@@ -35,6 +35,7 @@ public class KPIService {
 		Long caseTypeId = translated.getCaseTypeId();
 		kpis.put("ResolvedTickets", getResolvedTickets(caseManagementSystemId, caseTypeId));
 		kpis.put("DaysToResolution", getAverageDaysToResolution(caseManagementSystemId, caseTypeId));
+		kpis.put("DaysWorked", getAverageDaysWorked(caseManagementSystemId, caseTypeId));
 		return kpis;
 	}
 
@@ -57,6 +58,18 @@ public class KPIService {
 			ZonedDateTime start = now.minusWeeks(i +1);
 			ZonedDateTime end = now.minusWeeks(i);
 			Integer days = _bulkRepo.getAverageDaysToResolution(caseManagementSystemId, caseTypeId, start, end);
+			daysToResolution.add(i, days);
+		}
+		return daysToResolution;
+	}
+
+	private List<Integer> getAverageDaysWorked(Long caseManagementSystemId, Long caseTypeId) {
+		ArrayList<Integer> daysToResolution = new ArrayList<Integer>();
+		ZonedDateTime now = ZonedDateTime.now();
+		for (int i = 0; i < WEEKS; i++) {
+			ZonedDateTime start = now.minusWeeks(i +1);
+			ZonedDateTime end = now.minusWeeks(i);
+			Integer days = _bulkRepo.getAverageDaysWorked(caseManagementSystemId, caseTypeId, start, end);
 			daysToResolution.add(i, days);
 		}
 		return daysToResolution;

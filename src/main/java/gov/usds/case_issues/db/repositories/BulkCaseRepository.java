@@ -203,6 +203,16 @@ public interface BulkCaseRepository {
 		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
 	);
 
+
+	@Query(name="averageDaysWorked")
+	@RestResource(exported=false)
+	public Integer getAverageDaysWorked(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
+	);
+
 	@Query(name="summary")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozeSummary(Long caseManagementSystemId, Long caseTypeId);

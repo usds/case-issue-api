@@ -184,6 +184,10 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		name = "averageDaysToResoluton",
 		query = TroubleCase.AVERAGE_DAYS_TO_RESOLUTION
 	),
+	@NamedNativeQuery(
+		name = "averageDaysWorked",
+		query = TroubleCase.AVERAGE_DAYS_WORKED
+	),
 })
 @SqlResultSetMappings({
 	@SqlResultSetMapping(
@@ -216,7 +220,7 @@ public class TroubleCase extends UpdatableEntity {
 	public static final String AVERAGE_DAYS_TO_RESOLUTION =
 		"SELECT AVG(DATE_PART('day', i.issue_closed - c.case_creation)) "
 		+ "FROM {h-schema}trouble_case c "
-		+ "JOIN {h-schema}case_issue i "
+		+ "LEFT JOIN {h-schema}case_issue i "
 		+ "ON c.internal_id = i.issue_case_internal_id "
 		+ "WHERE case_management_system_internal_id = :caseManagementSystemId "
 		+ "AND case_type_internal_id = :caseTypeId "
@@ -233,6 +237,28 @@ public class TroubleCase extends UpdatableEntity {
 			+ "	SELECT *"
 			+ " FROM {h-schema}case_snooze s "
 			+ " WHERE s.snooze_case_internal_id = c.internal_id "
+		+ ")";
+
+		public static final String AVERAGE_DAYS_WORKED =
+		"SELECT AVG(DATE_PART('day', i.issue_closed - s.created_at)) "
+		+ "FROM {h-schema}trouble_case c "
+		+ "LEFT JOIN {h-schema}case_issue i "
+		+ "ON c.internal_id = i.issue_case_internal_id "
+		+ "LEFT JOIN ( "
+			+ "SELECT DISTINCT ON(s1.snooze_case_internal_id) * "
+			+ "FROM {h-schema}case_snooze s1 "
+			+ "ORDER BY s1.snooze_case_internal_id, s1.created_at ASC "
+		+ ") s "
+		+ "ON c.internal_id = s.snooze_case_internal_id "
+		+ "WHERE case_management_system_internal_id = :caseManagementSystemId "
+		+ "AND case_type_internal_id = :caseTypeId "
+		// case has been closed
+		+ "AND EXISTS ("
+			+ "SELECT openissues1_.internal_id "
+			+ "FROM {h-schema}case_issue openissues1_ "
+			+ "WHERE c.internal_id=openissues1_.issue_case_internal_id "
+			+ "AND ( openissues1_.issue_closed IS NOT null) "
+			+ "AND openissues1_.issue_closed BETWEEN :caseClosedWindowStart and :caseClosedWindowEnd "
 		+ ")";
 
 	public static final String CASE_SNOOZE_DECODE =
