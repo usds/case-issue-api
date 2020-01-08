@@ -40,7 +40,7 @@ import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.CaseSummaryImpl;
 import gov.usds.case_issues.model.DateRange;
-import gov.usds.case_issues.model.NoteSummary;
+import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
 /**
@@ -468,14 +468,14 @@ public class CaseListService implements CasePagingService, PageTranslationServic
 	}
 
 	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
-		LOG.info("Finding snoozed case from {}.", _snoozeRepo);
-		LOG.info("Finding attachment from {}.", _attachmentService);
+		LOG.debug("Finding snoozed case from {}.", _snoozeRepo);
+		LOG.debug("Finding attachment from {}.", _attachmentService);
 		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
 			TroubleCase rootCase = (TroubleCase) row[0];
 			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
 					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			List<NoteSummary> notes = _attachmentService.findNotesForCase(rootCase).stream().map(NoteSummary::new).collect(Collectors.toList());
+			List<AttachmentSummary> notes = _attachmentService.findAttachmentsForCase(rootCase).stream().map(AttachmentSummary::new).collect(Collectors.toList());
 			return new CaseSummaryImpl(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());

@@ -1,6 +1,8 @@
 package gov.usds.case_issues.controllers;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -18,11 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gov.usds.case_issues.authorization.RequireReadCasePermission;
 import gov.usds.case_issues.authorization.RequireUpdateCasePermission;
+import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
+import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.model.AttachmentRequest;
+import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
 import gov.usds.case_issues.model.SnoozeRequest;
+import gov.usds.case_issues.services.CaseAttachmentService;
 import gov.usds.case_issues.services.CaseDetailsService;
 
 @RestController
@@ -32,6 +38,8 @@ public class CaseDetailsApiController {
 
 	@Autowired
 	private CaseDetailsService _caseDetailsService;
+	@Autowired
+	private CaseAttachmentService _attachmentService;
 
 	@GetMapping
 	public CaseDetails getCaseDetails(@PathVariable String caseManagementSystemTag, @PathVariable String receiptNumber) {
@@ -69,11 +77,21 @@ public class CaseDetailsApiController {
 		return ResponseEntity.ok(replacement);
 	}
 
-	@PostMapping("activeSnooze/notes")
+	@GetMapping("attachments")
+	public ResponseEntity<List<AttachmentSummary>> getAttachments(@PathVariable String caseManagementSystemTag,
+			@PathVariable String receiptNumber) {
+		TroubleCase rootCase = _caseDetailsService.findCaseByTags(caseManagementSystemTag, receiptNumber);
+		List<AttachmentSummary> attachments = _attachmentService.findAttachmentsForCase(rootCase).stream()
+				.map(AttachmentSummary::new)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(attachments);
+	}
+
+	@PostMapping({"activeSnooze/notes","activeSnooze/attachments"})
 	@RequireUpdateCasePermission
-	public ResponseEntity<?> addNote(@PathVariable String caseManagementSystemTag,
-			@PathVariable String receiptNumber, @RequestBody AttachmentRequest newNote) {
-		_caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, newNote);
-		return ResponseEntity.accepted().build();
+	public ResponseEntity<AttachmentSummary> addAttachment(@PathVariable String caseManagementSystemTag,
+			@PathVariable String receiptNumber, @RequestBody AttachmentRequest attachment) {
+		CaseAttachmentAssociation attached = _caseDetailsService.annotateActiveSnooze(caseManagementSystemTag, receiptNumber, attachment);
+		return ResponseEntity.created(null).body(new AttachmentSummary(attached));
 	}
 }

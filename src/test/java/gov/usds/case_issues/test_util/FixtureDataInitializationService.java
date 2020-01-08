@@ -14,11 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.usds.case_issues.db.model.AttachmentSubtype;
+import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.repositories.AttachmentSubtypeRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
@@ -43,6 +46,8 @@ public class FixtureDataInitializationService {
 	private CaseIssueRepository _issueRepo;
 	@Autowired
 	private CaseSnoozeRepository _snoozeRepo;
+	@Autowired
+	private AttachmentSubtypeRepository _subtypeRepo;
 
 	public CaseManagementSystem ensureCaseManagementSystemInitialized(String tag, String name) {
 		return ensureCaseManagementSystemInitialized(tag, name, null);
@@ -73,6 +78,15 @@ public class FixtureDataInitializationService {
 			return found.get();
 		}
 		return _caseTypeRepository.save(new CaseType(tag, name, description));
+	}
+
+	public AttachmentSubtype ensureAttachmentSubtypeInitialized(String tag, String name, AttachmentType forType, String urlTempate) {
+		LOG.debug("(Re)initializing attachment subtype '{}'", tag);
+		Optional<AttachmentSubtype> found = _subtypeRepo.findByExternalId(tag);
+		if (found.isPresent()) {
+			return found.get();
+		}
+		return _subtypeRepo.save(new AttachmentSubtype(tag, forType, name, "Auto-subtype " + name, urlTempate));
 	}
 
 	public TroubleCase initCase(CaseManagementSystem caseManagementSystem, String receiptNumber, CaseType caseType, ZonedDateTime caseCreation,

@@ -20,9 +20,9 @@ public class CaseSummaryImpl implements CaseSummary {
 
 	private TroubleCase rootCase;
 	private CaseSnoozeSummary snoozeSummary;
-	private List<NoteSummary> notes;
+	private List<AttachmentSummary> notes;
 
-	public CaseSummaryImpl(TroubleCase rootCase, CaseSnoozeSummary summary, List<NoteSummary> notes) {
+	public CaseSummaryImpl(TroubleCase rootCase, CaseSnoozeSummary summary, List<AttachmentSummary> notes) {
 		super();
 		this.rootCase = rootCase;
 		this.snoozeSummary = summary;
@@ -62,7 +62,7 @@ public class CaseSummaryImpl implements CaseSummary {
 		return snoozeSummary;
 	}
 
-	public List<NoteSummary> getNotes() {
+	public List<AttachmentSummary> getNotes() {
 		return notes;
 	}
 }
