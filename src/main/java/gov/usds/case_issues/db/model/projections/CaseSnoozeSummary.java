@@ -14,7 +14,4 @@ public interface CaseSnoozeSummary {
 	ZonedDateTime getSnoozeStart();
 
 	ZonedDateTime getSnoozeEnd();
-
-	String getCreatedBy();
-
 }

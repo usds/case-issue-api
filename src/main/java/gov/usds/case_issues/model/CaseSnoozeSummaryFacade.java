@@ -4,10 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import gov.usds.case_issues.db.model.CaseSnooze;
-import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
 /**
@@ -21,16 +18,19 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 
 	private CaseSnoozeSummary wrapped;
 	private List<AttachmentSummary> notes;
-	private String id;
-	private String name;
+	private SerializedUserInformation user;
 
-	public CaseSnoozeSummaryFacade(Optional<? extends CaseSnoozeSummary> optionalWrapped) {
+	public CaseSnoozeSummaryFacade(Optional<? extends CaseSnooze> optionalWrapped) {
 		this(optionalWrapped.get());
 	}
 
-	public CaseSnoozeSummaryFacade(CaseSnoozeSummary wrapped) {
-		super();
+	public CaseSnoozeSummaryFacade(CaseSnooze wrapped) {
 		this.wrapped = wrapped;
+		if(wrapped.getCreationUser() != null) {
+			user = new SerializedUserInformation(wrapped.getCreationUser());
+		} else {
+			user = new SerializedUserInformation(wrapped.getCreatedBy(), "");
+		}
 	}
 
 	public CaseSnoozeSummaryFacade(CaseSnooze wrapped, List<AttachmentSummary> savedNotes) {
@@ -38,11 +38,6 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		this.notes = savedNotes;
 	}
 
-	public CaseSnoozeSummaryFacade(CaseSnoozeSummary wrapped, UserInformation user) {
-		this(wrapped);
-		id = user != null ? user.getId() : wrapped.getCreatedBy();
-		name = user != null ? user.getPrintName() : "";
-	}
 
 	public String getSnoozeReason() {
 		return wrapped.getSnoozeReason();
@@ -56,13 +51,8 @@ public class CaseSnoozeSummaryFacade implements CaseSnoozeSummary {
 		return wrapped.getSnoozeEnd();
 	}
 
-	@JsonIgnore
-	public String getCreatedBy() {
-		return id;
-	}
-
 	public SerializedUserInformation getUser() {
-		return new SerializedUserInformation(id, name);
+		return user;
 	}
 
 	public List<AttachmentSummary> getNotes() {

@@ -15,13 +15,13 @@ public class AttachmentSummary {
 	private AttachmentType type;
 	private String subType;
 	private String href;
-	private String id;
-	private String name;
 	private ZonedDateTime timestamp;
+	private SerializedUserInformation user;
 
 	public AttachmentSummary(CaseAttachmentAssociation backEnd) {
 		CaseAttachment note = backEnd.getAttachment();
 		attachmentId = note.getInternalId();
+		UserInformation associationCreator = backEnd.getCreationUser();
 		type = note.getAttachmentType();
 		content = note.getContent();
 		if (null != note.getSubtype()) {
@@ -35,15 +35,13 @@ public class AttachmentSummary {
 				href = urlTemplate + content;
 			}
 		}
-		id = backEnd.getCreatedBy();
-		name = "";
-		timestamp = ZonedDateTime.ofInstant(backEnd.getCreatedAt().toInstant(), ZoneId.of("Z"));
-	}
+		if (associationCreator != null) {
+			user = new SerializedUserInformation(associationCreator);
+		} else {
+			user = new SerializedUserInformation(backEnd.getCreatedBy(), "");
+		}
 
-	public AttachmentSummary(CaseAttachmentAssociation backEnd, UserInformation user) {
-		this(backEnd);
-		id = user != null ? user.getId() : backEnd.getCreatedBy();
-		name = user != null ? user.getPrintName() : "";
+		timestamp = ZonedDateTime.ofInstant(backEnd.getCreatedAt().toInstant(), ZoneId.of("Z"));
 	}
 
 	public long getId() {
@@ -64,7 +62,7 @@ public class AttachmentSummary {
 	}
 
 	public SerializedUserInformation getUser() {
-		return new SerializedUserInformation(id, name);
+		return user;
 	}
 
 	public ZonedDateTime getTimestamp() {

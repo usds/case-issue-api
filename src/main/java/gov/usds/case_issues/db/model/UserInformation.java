@@ -1,5 +1,6 @@
 package gov.usds.case_issues.db.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -13,7 +14,9 @@ import org.hibernate.annotations.NaturalId;
  */
 @Entity
 @DynamicUpdate
-public class UserInformation extends UpdatableEntity {
+public class UserInformation extends UpdatableEntity implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@NotNull
 	private Date lastSeen;

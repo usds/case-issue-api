@@ -22,7 +22,6 @@ import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
-import gov.usds.case_issues.db.repositories.UserInformationRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.AttachmentSummary;
@@ -42,8 +41,6 @@ public class CaseDetailsService {
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
 	@Autowired
 	private TroubleCaseRepository _caseRepo;
-	@Autowired
-	private UserInformationRepository _userRepo;
 	@Autowired
 	private CaseSnoozeRepository _snoozeRepo;
 	@Autowired
@@ -74,16 +71,10 @@ public class CaseDetailsService {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Collection<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase);
 		List<CaseSnoozeSummaryFacade> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase).stream()
-													.map(row -> new CaseSnoozeSummaryFacade(
-														row,
-														_userRepo.findByUserId(row.getCreatedBy())
-													))
+													.map(CaseSnoozeSummaryFacade::new)
 													.collect(Collectors.toList());
 		List<AttachmentSummary> notes = _attachmentService.findAttachmentsForCase(mainCase).stream()
-													.map(row -> new AttachmentSummary(
-														row,
-														 _userRepo.findByUserId(row.getCreatedBy())
-													))
+													.map(AttachmentSummary::new)
 													.collect(Collectors.toList());
 		return new CaseDetails(mainCase, issues, snoozes, notes);
 	}
