@@ -17,6 +17,17 @@ import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 
+/**
+ * This is an extraction from the paging/filtering tests, because having 36 test cases and all the
+ * setup infrastructure in a single file was unwieldy, to say the least. Unlike
+ * {@link FixtureDataInitializationService}, it is intended to create a single self-consistent set
+ * of data, for testing API calls that need data with some internal structure to test adequately.
+ *
+ * Since the data is consistent, this service will try not to tear it down and recreate it unnecessarily,
+ * while still recreating it sufficiently often that changes to the fixtures themselves are not missed.
+ * Accordingly, the main {@link #initFixtures()} method will check to see if it was most recently run
+ * less than {{@link #FIXTURE_STALENESS_SECONDS} ago, and if it was, return without making any changes.
+ */
 @Service
 @Profile("autotest")
 public class CaseListFixtureService {

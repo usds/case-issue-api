@@ -27,6 +27,9 @@ import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 
+/**
+ * Utility service for creating valid entities for testing purposes.
+ */
 @Service
 @Transactional(readOnly=false)
 public class FixtureDataInitializationService {
