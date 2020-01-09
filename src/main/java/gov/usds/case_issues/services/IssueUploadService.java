@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import gov.usds.case_issues.authorization.RequireUploadPermission;
 import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.model.CaseRequest;
-import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
 
 @Service
 // THIS SERVICE IS NOT TRANSACTIONAL (it launches multiple transactions)

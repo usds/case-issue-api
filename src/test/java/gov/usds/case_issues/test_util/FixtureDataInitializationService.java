@@ -1,6 +1,7 @@
 package gov.usds.case_issues.test_util;
 
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,9 @@ import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 
+/**
+ * Utility service for creating valid entities for testing purposes.
+ */
 @Service
 @Transactional(readOnly=false)
 public class FixtureDataInitializationService {
@@ -51,8 +55,10 @@ public class FixtureDataInitializationService {
 		return ensureCaseManagementSystemInitialized(tag, name, null);
 	}
 
-	public boolean checkForCaseManagementSystem(String tag) {
-		return _caseManagementSystemRepo.findByExternalId(tag).isPresent();
+	public boolean checkForCaseManagementSystem(String tag, Instant expires) {
+		LOG.debug("Checking that {} was created not before {}", tag, expires);
+		Optional<CaseManagementSystem> found = _caseManagementSystemRepo.findByExternalId(tag);
+		return found.isPresent() && found.get().getCreatedAt().toInstant().isAfter(expires);
 	}
 
 	public CaseManagementSystem ensureCaseManagementSystemInitialized(String tag, String name, String description) {

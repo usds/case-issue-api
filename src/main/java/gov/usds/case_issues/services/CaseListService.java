@@ -38,7 +38,10 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
+import gov.usds.case_issues.model.CaseSummaryImpl;
 import gov.usds.case_issues.model.DateRange;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
+import gov.usds.case_issues.services.model.CasePageInfo;
 import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
@@ -49,7 +52,7 @@ import gov.usds.case_issues.validators.TagFragment;
 @Service
 @Transactional(readOnly=true)
 @Validated
-public class CaseListService {
+public class CaseListService implements CasePagingService, PageTranslationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseListService.class);
 
@@ -92,15 +95,9 @@ public class CaseListService {
 		);
 	}
 
-	public List<CaseSummary> getActiveCases(
-			@TagFragment String caseManagementSystemTag,
-			@TagFragment String caseTypeTag,
-			@TagFragment String receiptNumber, // wrong validator!
-			int size
-		) {
-		return getActiveCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, size);
-	}
-
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.services.CasePagingService#getActiveCases(java.lang.String, java.lang.String, java.lang.String, gov.usds.case_issues.model.DateRange, int)
+	 */
 	public List<CaseSummary> getActiveCases(
 		@TagFragment String caseManagementSystemTag,
 		@TagFragment String caseTypeTag,
@@ -156,15 +153,10 @@ public class CaseListService {
 		return rewrap(foundCases);
 	}
 
-	public List<CaseSummary> getSnoozedCases(
-			@TagFragment String caseManagementSystemTag,
-			@TagFragment String caseTypeTag,
-			@TagFragment String receiptNumber, // wrong validation tag!
-			int size
-	) {
-		return getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, Optional.empty(), size);
-	}
 
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.services.CasePagingService#getSnoozedCases(java.lang.String, java.lang.String, java.lang.String, gov.usds.case_issues.model.DateRange, java.util.Optional, int)
+	 */
 	public List<CaseSummary> getSnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
@@ -281,14 +273,10 @@ public class CaseListService {
 		return rewrap(foundCases);
 	}
 
-	public List<CaseSummary> getPreviouslySnoozedCases(
-			@TagFragment String caseManagementSystemTag,
-			@TagFragment String caseTypeTag,
-			@TagFragment String receiptNumber,
-			int size) {
-		return getPreviouslySnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, size);
-	}
 
+	/* (non-Javadoc)
+	 * @see gov.usds.case_issues.services.CasePagingService#getPreviouslySnoozedCases(java.lang.String, java.lang.String, java.lang.String, gov.usds.case_issues.model.DateRange, int)
+	 */
 	public List<CaseSummary> getPreviouslySnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
@@ -490,75 +478,8 @@ public class CaseListService {
 			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
 					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
 			List<AttachmentSummary> notes = _attachmentService.findAttachmentsForCase(rootCase).stream().map(AttachmentSummary::new).collect(Collectors.toList());
-			return new CaseSummary(rootCase, summary, notes);
+			return new CaseSummaryImpl(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
-	}
-
-	public static class CaseGroupInfo {
-
-		private CaseManagementSystem _system;
-		private CaseType _type;
-
-		public CaseGroupInfo(CaseManagementSystem _system, CaseType _type) {
-			super();
-			this._system = _system;
-			this._type = _type;
-		}
-
-		public Long getCaseManagementSystemId() {
-			return _system.getInternalId();
-		}
-
-		public Long getCaseTypeId() {
-			return _type.getInternalId();
-		}
-
-		public CaseManagementSystem getCaseManagementSystem() {
-			return _system;
-		}
-
-		public CaseType getCaseType() {
-			return _type;
-		}
-	}
-
-	public static class CasePageInfo extends CaseGroupInfo {
-
-		private TroubleCase _case;
-
-		public CasePageInfo(CaseGroupInfo group, TroubleCase c) {
-			this(group.getCaseManagementSystem(), group.getCaseType(), c);
-		}
-
-		public CasePageInfo(CaseManagementSystem system, CaseType type, TroubleCase c) {
-			super(system, type);
-			_case = c;
-		}
-
-		public boolean isFirstPage() {
-			return _case == null;
-		}
-
-		public TroubleCase getCase() {
-			assertCase();
-			return _case;
-		}
-
-		public Long getCaseId() {
-			assertCase();
-			return _case.getInternalId();
-		}
-
-		public ZonedDateTime getCaseCreationDate() {
-			assertCase();
-			return _case.getCaseCreation();
-		}
-
-		private void assertCase() {
-			if (null == _case) {
-				throw new IllegalArgumentException("No case was included in this page request");
-			}
-		}
 	}
 }

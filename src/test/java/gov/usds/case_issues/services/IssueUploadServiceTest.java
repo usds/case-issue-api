@@ -21,7 +21,7 @@ import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.model.CaseRequest;
-import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 import gov.usds.case_issues.test_util.MockConfig;
 

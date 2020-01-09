@@ -40,8 +40,8 @@ import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.services.CaseListService;
-import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
 import gov.usds.case_issues.services.IssueUploadService;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.validators.TagFragment;
 
 @RestController
@@ -64,7 +64,7 @@ public class HitlistApiController {
 	}
 
 	@GetMapping
-	public List<CaseSummary> getCases(
+	public List<? extends CaseSummary> getCases(
 			@PathVariable String caseManagementSystemTag,
 			@PathVariable String caseTypeTag,
 			@RequestParam(required=true) CaseSnoozeFilter mainFilter,
@@ -105,7 +105,7 @@ public class HitlistApiController {
 	}
 
 	@GetMapping("snoozed")
-	public List<CaseSummary> getSnoozedCases(
+	public List<? extends CaseSummary> getSnoozedCases(
 		@PathVariable String caseManagementSystemTag,
 		@PathVariable String caseTypeTag,
 		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,
@@ -115,7 +115,7 @@ public class HitlistApiController {
 	}
 
 	@GetMapping("active")
-	public List<CaseSummary> getActiveCases(
+	public List<? extends CaseSummary> getActiveCases(
 		@PathVariable String caseManagementSystemTag,
 		@PathVariable String caseTypeTag,
 		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,

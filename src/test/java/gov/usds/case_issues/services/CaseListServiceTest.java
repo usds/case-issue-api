@@ -42,7 +42,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
-import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
 @SuppressWarnings("checkstyle:MagicNumber")
@@ -411,7 +411,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		String issueTypeC = "HAM";
 
 		_dataService.ensureCaseManagementSystemInitialized(otherSystem, "A different system");
-		List<CaseSummary> activeCases = fetchCasesForSystem(VALID_SYS_TAG);
+		List<? extends CaseSummary> activeCases = fetchCasesForSystem(VALID_SYS_TAG);
 		assertEquals("no active cases in " + VALID_SYS_TAG + " at start", 0, activeCases.size());
 		activeCases = fetchCasesForSystem(otherSystem);
 		assertEquals("no active cases in " + otherSystem + " at start", 0, activeCases.size());
@@ -431,7 +431,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		issues.forEach(i -> assertNull("Issue not closed for C2: " + i.getIssueType(), i.getIssueClosed()));
 
 		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Collections.singletonList(b), _now);
-		List<CaseSummary> nowActive = fetchCasesForSystem(VALID_SYS_TAG);
+		List<? extends CaseSummary> nowActive = fetchCasesForSystem(VALID_SYS_TAG);
 		assertEquals("One case is gone", 2, nowActive.size());
 		Set<String> activeReceipts = nowActive.stream().map(ac -> ac.getReceiptNumber()).collect(Collectors.toSet());
 		assertTrue("C2 still active", activeReceipts.contains("C2"));
@@ -489,7 +489,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_dataService.initIssue(b, "FOOBAR", lastMonth, null);
 		_dataService.initIssue(c, "FOOBAR", lastMonth, null);
 
-		List<CaseSummary> activeCases = _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, oldestReceiptNumber, 20);
+		List<? extends CaseSummary> activeCases = _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, oldestReceiptNumber, 20);
 		assertEquals("The two newer cases should be returned", 2, activeCases.size());
 	}
 
@@ -502,7 +502,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 	}
 
 	@SuppressWarnings("checkstyle:MagicNumber")
-	private List<CaseSummary> fetchCasesForSystem(String systemTag) {
+	private List<? extends CaseSummary> fetchCasesForSystem(String systemTag) {
 		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, null, 20);
 	}
 
