@@ -40,8 +40,8 @@ import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.services.CaseListService;
-import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
 import gov.usds.case_issues.services.IssueUploadService;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.validators.TagFragment;
 
 @RestController

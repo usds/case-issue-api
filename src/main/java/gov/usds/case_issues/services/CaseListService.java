@@ -40,6 +40,8 @@ import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.CaseSummaryImpl;
 import gov.usds.case_issues.model.DateRange;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
+import gov.usds.case_issues.services.model.CasePageInfo;
 import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
@@ -479,72 +481,5 @@ public class CaseListService implements CasePagingService, PageTranslationServic
 			return new CaseSummaryImpl(rootCase, summary, notes);
 		};
 		return queryResult.stream().map(mapper).collect(Collectors.toList());
-	}
-
-	public static class CaseGroupInfo {
-
-		private CaseManagementSystem _system;
-		private CaseType _type;
-
-		public CaseGroupInfo(CaseManagementSystem _system, CaseType _type) {
-			super();
-			this._system = _system;
-			this._type = _type;
-		}
-
-		public Long getCaseManagementSystemId() {
-			return _system.getInternalId();
-		}
-
-		public Long getCaseTypeId() {
-			return _type.getInternalId();
-		}
-
-		public CaseManagementSystem getCaseManagementSystem() {
-			return _system;
-		}
-
-		public CaseType getCaseType() {
-			return _type;
-		}
-	}
-
-	public static class CasePageInfo extends CaseGroupInfo {
-
-		private TroubleCase _case;
-
-		public CasePageInfo(CaseGroupInfo group, TroubleCase c) {
-			this(group.getCaseManagementSystem(), group.getCaseType(), c);
-		}
-
-		public CasePageInfo(CaseManagementSystem system, CaseType type, TroubleCase c) {
-			super(system, type);
-			_case = c;
-		}
-
-		public boolean isFirstPage() {
-			return _case == null;
-		}
-
-		public TroubleCase getCase() {
-			assertCase();
-			return _case;
-		}
-
-		public Long getCaseId() {
-			assertCase();
-			return _case.getInternalId();
-		}
-
-		public ZonedDateTime getCaseCreationDate() {
-			assertCase();
-			return _case.getCaseCreation();
-		}
-
-		private void assertCase() {
-			if (null == _case) {
-				throw new IllegalArgumentException("No case was included in this page request");
-			}
-		}
 	}
 }

@@ -42,7 +42,7 @@ import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
-import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
+import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
 @SuppressWarnings("checkstyle:MagicNumber")
