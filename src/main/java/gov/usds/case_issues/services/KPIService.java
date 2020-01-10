@@ -15,7 +15,7 @@ import gov.usds.case_issues.validators.TagFragment;
 
 @Service
 public class KPIService {
-	private static final Integer WEEKS = 10;
+	private static final int WEEKS = 10;
 
 	@Autowired
 	private BulkCaseRepository _bulkRepo;
@@ -45,7 +45,7 @@ public class KPIService {
 		for (int i = 0; i < WEEKS; i++) {
 			ZonedDateTime start = now.minusWeeks(i +1);
 			ZonedDateTime end = now.minusWeeks(i);
-			Integer resolved = _bulkRepo.getResolvedCaseCount(caseManagementSystemId, caseTypeId, start, end);
+			int resolved = _bulkRepo.getResolvedCaseCount(caseManagementSystemId, caseTypeId, start, end);
 			ticketsResolved.add(i, resolved);
 		}
 		return ticketsResolved;
@@ -57,7 +57,7 @@ public class KPIService {
 		for (int i = 0; i < WEEKS; i++) {
 			ZonedDateTime start = now.minusWeeks(i +1);
 			ZonedDateTime end = now.minusWeeks(i);
-			Integer days = _bulkRepo.getAverageDaysToResolution(caseManagementSystemId, caseTypeId, start, end);
+			int days = _bulkRepo.getAverageDaysToResolution(caseManagementSystemId, caseTypeId, start, end);
 			daysToResolution.add(i, days);
 		}
 		return daysToResolution;
@@ -69,7 +69,7 @@ public class KPIService {
 		for (int i = 0; i < WEEKS; i++) {
 			ZonedDateTime start = now.minusWeeks(i +1);
 			ZonedDateTime end = now.minusWeeks(i);
-			Integer days = _bulkRepo.getAverageDaysWorked(caseManagementSystemId, caseTypeId, start, end);
+			int days = _bulkRepo.getAverageDaysWorked(caseManagementSystemId, caseTypeId, start, end);
 			daysToResolution.add(i, days);
 		}
 		return daysToResolution;
