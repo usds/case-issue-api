@@ -220,17 +220,18 @@ public class TroubleCase extends UpdatableEntity {
 	public static final String AVERAGE_DAYS_TO_RESOLUTION =
 		"SELECT COALESCE(AVG(DATE_PART('day', i.issue_closed - c.case_creation)), 0) "
 		+ "FROM {h-schema}trouble_case c "
-		+ "LEFT JOIN {h-schema}case_issue i "
-		+ "ON c.internal_id = i.issue_case_internal_id "
+		+ "INNER JOIN {h-schema}case_issue i "
+		+ "ON c.internal_id = i.issue_case_internal_id AND ( i.issue_closed IS NOT NULL) "
 		+ "WHERE case_management_system_internal_id = :caseManagementSystemId "
 		+ "AND case_type_internal_id = :caseTypeId "
 		// case has been closed
 		+ "AND EXISTS ("
-			+ "SELECT openissues1_.internal_id "
+			+ "SELECT DISTINCT ON(openissues1_.internal_id) * "
 			+ "FROM {h-schema}case_issue openissues1_ "
 			+ "WHERE c.internal_id=openissues1_.issue_case_internal_id "
-			+ "AND ( openissues1_.issue_closed IS NOT null) "
-			+ "AND openissues1_.issue_closed BETWEEN :caseClosedWindowStart and :caseClosedWindowEnd "
+			+ "AND ( openissues1_.issue_closed IS NOT NULL) "
+			+ "AND openissues1_.issue_closed BETWEEN :caseClosedWindowStart AND :caseClosedWindowEnd "
+			+ "ORDER BY openissues1_.internal_id, openissues1_.issue_created DESC"
 		+ ") "
 		// case has been snoozed
 		+ "AND EXISTS ("
@@ -242,9 +243,9 @@ public class TroubleCase extends UpdatableEntity {
 		public static final String AVERAGE_DAYS_WORKED =
 		"SELECT COALESCE(AVG(DATE_PART('day', i.issue_closed - s.created_at)), 0) "
 		+ "FROM {h-schema}trouble_case c "
-		+ "LEFT JOIN {h-schema}case_issue i "
-		+ "ON c.internal_id = i.issue_case_internal_id "
-		+ "LEFT JOIN ( "
+		+ "INNER JOIN {h-schema}case_issue i "
+		+ "ON c.internal_id = i.issue_case_internal_id AND ( i.issue_closed IS NOT NULL) "
+		+ "INNER JOIN ( "
 			+ "SELECT DISTINCT ON(s1.snooze_case_internal_id) * "
 			+ "FROM {h-schema}case_snooze s1 "
 			+ "ORDER BY s1.snooze_case_internal_id, s1.created_at ASC "
@@ -254,11 +255,12 @@ public class TroubleCase extends UpdatableEntity {
 		+ "AND case_type_internal_id = :caseTypeId "
 		// case has been closed
 		+ "AND EXISTS ("
-			+ "SELECT openissues1_.internal_id "
+			+ "SELECT DISTINCT ON(openissues1_.internal_id) * "
 			+ "FROM {h-schema}case_issue openissues1_ "
 			+ "WHERE c.internal_id=openissues1_.issue_case_internal_id "
-			+ "AND ( openissues1_.issue_closed IS NOT null) "
-			+ "AND openissues1_.issue_closed BETWEEN :caseClosedWindowStart and :caseClosedWindowEnd "
+			+ "AND ( openissues1_.issue_closed IS NOT NULL) "
+			+ "AND openissues1_.issue_closed BETWEEN :caseClosedWindowStart AND :caseClosedWindowEnd "
+			+ "ORDER BY openissues1_.internal_id, openissues1_.issue_created DESC"
 		+ ")";
 
 	public static final String CASE_SNOOZE_DECODE =
