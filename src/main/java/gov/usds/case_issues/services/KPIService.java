@@ -8,12 +8,14 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.services.CaseListService.CaseGroupInfo;
 import gov.usds.case_issues.validators.TagFragment;
 
 @Service
+@Validated
 public class KPIService {
 	private static final int WEEKS = 10;
 
