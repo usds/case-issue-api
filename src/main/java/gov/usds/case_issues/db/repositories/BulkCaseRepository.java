@@ -187,7 +187,7 @@ public interface BulkCaseRepository {
 
 	@Query(name="resolvedCount")
 	@RestResource(exported=false)
-	public Integer getResolvedCaseCount(
+	public int getResolvedCaseCount(
 		Long caseManagementSystemId,
 		Long caseTypeId,
 		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
@@ -196,7 +196,7 @@ public interface BulkCaseRepository {
 
 	@Query(name="averageDaysToResoluton")
 	@RestResource(exported=false)
-	public Integer getAverageDaysToResolution(
+	public int getAverageDaysToResolution(
 		Long caseManagementSystemId,
 		Long caseTypeId,
 		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
@@ -206,7 +206,7 @@ public interface BulkCaseRepository {
 
 	@Query(name="averageDaysWorked")
 	@RestResource(exported=false)
-	public Integer getAverageDaysWorked(
+	public int getAverageDaysWorked(
 		Long caseManagementSystemId,
 		Long caseTypeId,
 		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
