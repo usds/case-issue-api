@@ -198,7 +198,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 })
 public class TroubleCase extends UpdatableEntity {
 	public static final String RESOLVED_CASE_COUNT =
-		"SELECT COUNT(*) "
+		"SELECT COUNT(DISTINCT c.internal_id) "
 		+ "FROM {h-schema}trouble_case c "
 		+ "WHERE case_management_system_internal_id = :caseManagementSystemId "
 		+ "AND case_type_internal_id = :caseTypeId "
