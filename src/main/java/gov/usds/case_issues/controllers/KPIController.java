@@ -17,14 +17,14 @@ import gov.usds.case_issues.services.KPIService;
  */
 @RestController
 @Profile("auth-testing")
-@RequestMapping("/kpis/{caseManagementSystemTag}/{caseTypeTag}")
+@RequestMapping("/api/reporting/{caseManagementSystemTag}/{caseTypeTag}")
 public class KPIController {
 
 	@Autowired
 	KPIService _KPIService;
 
 	@GetMapping
-	public Map<String, Object> getCurrentUser(
+	public Map<String, Object> getAppPerformanceMetrics(
 		@PathVariable String caseManagementSystemTag,
 		@PathVariable String caseTypeTag
 	) {
