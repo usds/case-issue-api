@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 import gov.usds.case_issues.db.JsonOperatorContributor;
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
-import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
 import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
@@ -43,6 +42,7 @@ import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.services.model.CasePageInfo;
+import gov.usds.case_issues.services.model.DelegatingFilterableCaseSummary;
 
 @Service
 public class CaseFilteringService implements CasePagingService {
@@ -164,7 +164,7 @@ public class CaseFilteringService implements CasePagingService {
 			List<FilterableCase> cases = page.getContent();
 			Map<Long, List<AttachmentSummary>> attachments = fetchAllAttachments(cases);
 			return cases.stream()
-					.map(c -> new DelegatingSummary(c, attachments.get(c.getInternalId())))
+					.map(c -> new DelegatingFilterableCaseSummary(c, attachments.get(c.getInternalId())))
 					.collect(Collectors.toList());
 		} catch (InvalidDataAccessApiUsageException e) {
 			if (e.getCause() instanceof IllegalArgumentException) {
@@ -254,58 +254,6 @@ public class CaseFilteringService implements CasePagingService {
 			// this should probably do the subquery directly rather than using the one in the view
 			cb1.isTrue(root1.get("hasOpenIssue"))
 		);
-	}
-
-	private static class DelegatingSummary implements CaseSummary {
-		private FilterableCase _root;
-		private List<AttachmentSummary> _attachments;
-
-		public DelegatingSummary(FilterableCase r, List<AttachmentSummary> attachments) {
-			_root = r;
-			_attachments = attachments;
-			if (attachments == null) {
-				_attachments = Collections.emptyList();
-			}
-		}
-		@Override
-		public String getReceiptNumber() {
-			return _root.getReceiptNumber();
-		}
-		@Override
-		public ZonedDateTime getCaseCreation() {
-			return _root.getCaseCreation();
-		}
-		@Override
-		public Map<String, Object> getExtraData() {
-			return _root.getExtraData();
-		}
-		@Override
-		public boolean isPreviouslySnoozed() {
-			return false;
-		}
-		@Override
-		public CaseSnoozeSummary getSnoozeInformation() {
-			return new CaseSnoozeSummary() {
-				@Override
-				public ZonedDateTime getSnoozeStart() {
-					return _root.getSnoozeStart();
-				}
-				
-				@Override
-				public String getSnoozeReason() {
-					return _root.getSnoozeReason();
-				}
-				
-				@Override
-				public ZonedDateTime getSnoozeEnd() {
-					return _root.getSnoozeEnd();
-				}
-			};
-		}
-		@Override
-		public List<AttachmentSummary> getNotes() {
-			return _attachments;
-		}
 	}
 	
 	
