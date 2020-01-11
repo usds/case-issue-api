@@ -65,7 +65,7 @@ public class CaseListFixtureService {
 
 	public static class Keywords {
 		public static final String PARITY = "parity";
-		private static final String EVEN = "even";
+		public static final String EVEN = "even";
 		public static final String ODD = "odd";
 	}
 
