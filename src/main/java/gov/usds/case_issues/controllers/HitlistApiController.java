@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,11 @@ import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
+import gov.usds.case_issues.services.CaseFilteringService;
 import gov.usds.case_issues.services.CaseListService;
+import gov.usds.case_issues.services.FilterFactory;
 import gov.usds.case_issues.services.IssueUploadService;
+import gov.usds.case_issues.services.model.CaseFilter;
 import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.validators.TagFragment;
 
@@ -52,6 +56,8 @@ public class HitlistApiController {
 
 	@Autowired
 	private CaseListService _listService;
+	@Autowired
+	private CaseFilteringService _filteringService;
 	@Autowired
 	private IssueUploadService _uploadService;
 
@@ -67,41 +73,22 @@ public class HitlistApiController {
 	public List<? extends CaseSummary> getCases(
 			@PathVariable String caseManagementSystemTag,
 			@PathVariable String caseTypeTag,
-			@RequestParam(required=true) CaseSnoozeFilter mainFilter,
+			@RequestParam(required=true) Set<CaseSnoozeFilter> mainFilter,
 			@RequestParam(required=false) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime caseCreationRangeBegin,
 			@RequestParam(required=false) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime caseCreationRangeEnd,
-			@RequestParam(required=false) String pageReference,
+			@RequestParam Optional<String> pageReference,
 			@RequestParam Optional<String> snoozeReason,
 			@RequestParam(defaultValue = "20") @Range(max=BulkCaseRepository.MAX_PAGE_SIZE) int size
 			) {
-		DateRange caseCreationFilterRange = null;
-		if (caseCreationRangeBegin != null) {
-			caseCreationFilterRange = new DateRange(caseCreationRangeBegin, caseCreationRangeEnd);
-		}
-		switch(mainFilter) {
-			case ACTIVE:
-				assertNoSnoozeReasonPresent(snoozeReason);
-				return _listService.getActiveCases(caseManagementSystemTag, caseTypeTag,
-					pageReference, caseCreationFilterRange, size);
-			case ALARMED:
-				assertNoSnoozeReasonPresent(snoozeReason);
-				return _listService.getPreviouslySnoozedCases(caseManagementSystemTag, caseTypeTag,
-					pageReference, caseCreationFilterRange, size);
-			case SNOOZED:
-				return _listService.getSnoozedCases(caseManagementSystemTag, caseTypeTag,
-					pageReference, caseCreationFilterRange, snoozeReason, size);
-			case UNCHECKED:
-				assertNoSnoozeReasonPresent(snoozeReason); /* and fall through */
-			default:
-				throw new IllegalArgumentException(
-					"Filter parameter must currently be one of 'ACTIVE','ALARMED' or 'SNOOZED'");
-		}
-	}
-
-	private void assertNoSnoozeReasonPresent(Optional<String> snoozeReason) {
-		if (snoozeReason.isPresent()) {
+		if (snoozeReason.isPresent() && !mainFilter.contains(CaseSnoozeFilter.SNOOZED)) {
 			throw new IllegalArgumentException("Snooze reason cannot be specified for cases that are not snoozed");
 		}
+		List<CaseFilter> filters = new ArrayList<>();
+		if (caseCreationRangeBegin != null) {
+			filters.add(FilterFactory.dateRange(new DateRange(caseCreationRangeBegin, caseCreationRangeEnd)));
+		}
+		snoozeReason.ifPresent(reason -> filters.add(FilterFactory.snoozeReason(reason)));
+		return _filteringService.getCases(caseManagementSystemTag, caseTypeTag, mainFilter, size, Optional.empty(), pageReference, filters);
 	}
 
 	@GetMapping("snoozed")

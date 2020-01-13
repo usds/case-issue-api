@@ -232,8 +232,6 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isBadRequest());
 		perform(doGetCases().param(Filters.MAIN, "FAKE"))
 			.andExpect(status().isBadRequest());
-		perform(doGetCases().param(Filters.MAIN, "UNCHECKED"))
-			.andExpect(status().isBadRequest());
 	}
 
 	@Test
