@@ -35,7 +35,6 @@ import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
 import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
-import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
@@ -51,9 +50,9 @@ public class CaseFilteringService implements CasePagingService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseFilteringService.class);
 
-	private static final Sort DEFAULT_SORT = Sort.by(
+	protected static final Sort DEFAULT_SORT = Sort.by(
 			Order.asc("caseCreation"), Order.asc("receiptNumber"));
-	private static final Sort SNOOZE_SORT = Sort.by(
+	protected static final Sort SNOOZE_SORT = Sort.by(
 		Order.asc("snoozeEnd"), Order.asc("caseCreation"), Order.asc("receiptNumber"));
 
 	@Autowired
@@ -66,24 +65,35 @@ public class CaseFilteringService implements CasePagingService {
 	@Override
 	public List<? extends CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag,
 			String receiptNumber, DateRange caseCreationRange, int size) {
-		return getCases(CaseSnoozeFilter.ACTIVE, caseManagementSystemTag, caseTypeTag, DEFAULT_SORT, Optional.ofNullable(receiptNumber), size, Optional.ofNullable(caseCreationRange),
-				Optional.empty(), Collections.emptyMap(), Optional.empty());
+		List<CaseFilter> filters = new ArrayList<>();
+		if (caseCreationRange != null) {
+			filters.add(FilterFactory.dateRange(caseCreationRange));
+		}
+		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ACTIVE), size, Optional.of(DEFAULT_SORT),
+				Optional.ofNullable(receiptNumber), filters);
 	}
 
 	@Override
 	public List<? extends CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag,
 			String receiptNumber, DateRange caseCreationRange, Optional<String> snoozeReason, int size) {
-		return getCases(CaseSnoozeFilter.SNOOZED, caseManagementSystemTag, caseTypeTag, SNOOZE_SORT, Optional.ofNullable(receiptNumber), size,
-				Optional.ofNullable(caseCreationRange),
-				snoozeReason, Collections.emptyMap(), Optional.empty());
+		List<CaseFilter> filters = new ArrayList<>();
+		if (caseCreationRange != null) {
+			filters.add(FilterFactory.dateRange(caseCreationRange));
+		}
+		snoozeReason.ifPresent(reason -> filters.add(FilterFactory.snoozeReason(reason)));
+		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.SNOOZED), size, Optional.of(SNOOZE_SORT),
+				Optional.ofNullable(receiptNumber), filters);
 	}
 
 	@Override
 	public List<? extends CaseSummary> getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
 			String receiptNumber, DateRange caseCreationRange, int size) {
-		return getCases(CaseSnoozeFilter.ALARMED, caseManagementSystemTag, caseTypeTag, DEFAULT_SORT, Optional.ofNullable(receiptNumber), size,
-				Optional.ofNullable(caseCreationRange),
-				Optional.empty(), Collections.emptyMap(), Optional.empty());
+		List<CaseFilter> filters = new ArrayList<>();
+		if (caseCreationRange != null) {
+			filters.add(FilterFactory.dateRange(caseCreationRange));
+		}
+		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ALARMED), size, Optional.of(DEFAULT_SORT),
+				Optional.ofNullable(receiptNumber), filters);
 	}
 
 	public List<CaseSummary> getCases(
@@ -107,32 +117,6 @@ public class CaseFilteringService implements CasePagingService {
 
 	private Sort defaultSort(Set<CaseSnoozeFilter> queryFilters) {
 		return queryFilters.contains(CaseSnoozeFilter.SNOOZED) ? SNOOZE_SORT : DEFAULT_SORT;
-	}
-
-	public List<CaseSummary> getCases(CaseSnoozeFilter queryFilter, String caseManagementSystemTag, String caseTypeTag, 
-			Sort sortOrder, Optional<String> pageReference, int pageSize,
-			@NotNull Optional<DateRange> caseCreationRange,
-			@NotNull Optional<String> snoozeReason,
-			@NotNull Map<String, Object> fieldFilter,
-			@NotNull Optional<AttachmentRequest> attachmentFilter
-			) {
-		if (sortOrder == null) {
-			sortOrder = DEFAULT_SORT;
-		}
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange.isPresent()) {
-			filters.add(FilterFactory.dateRange(caseCreationRange.get()));
-		}
-		if (snoozeReason.isPresent()) {
-			filters.add(FilterFactory.snoozeReason(snoozeReason.get()));
-		}
-		if (fieldFilter != null && fieldFilter.size() > 0) {
-			filters.add(FilterFactory.caseExtraData(fieldFilter));
-		}
-		if (attachmentFilter.isPresent()) {
-			filters.add(FilterFactory.hasAttachment(attachmentFilter.get()));
-		}
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(queryFilter), pageSize, Optional.of(sortOrder), pageReference, filters);
 	}
 
 	private Specification<FilterableCase> caseCategorySpec(CaseSnoozeFilter queryFilter) {
