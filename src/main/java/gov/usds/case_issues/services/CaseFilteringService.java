@@ -7,17 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +29,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
-import gov.usds.case_issues.db.JsonOperatorContributor;
-import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
@@ -41,10 +40,13 @@ import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
+import gov.usds.case_issues.services.model.CaseFilter;
 import gov.usds.case_issues.services.model.CasePageInfo;
 import gov.usds.case_issues.services.model.DelegatingFilterableCaseSummary;
+import gov.usds.case_issues.validators.TagFragment;
 
 @Service
+@Validated
 public class CaseFilteringService implements CasePagingService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseFilteringService.class);
@@ -84,6 +86,29 @@ public class CaseFilteringService implements CasePagingService {
 				Optional.empty(), Collections.emptyMap(), Optional.empty());
 	}
 
+	public List<CaseSummary> getCases(
+			@TagFragment String caseManagementSystemTag,
+			@TagFragment String caseTypeTag,
+			@NotNull @Size(min=1,max=1) Set<CaseSnoozeFilter> queryFilters,
+			@Positive int pageSize,
+			@NotNull Optional<Sort> requestedSortOrder,
+			@NotNull Optional<String> pageReference,
+			@NotNull List<? extends Specification<FilterableCase>> filters
+			) {
+		Sort sortOrder = requestedSortOrder.orElse(defaultSort(queryFilters)); // in the long run we should probably validate this better.
+		CaseSnoozeFilter singleFilter = queryFilters.stream().findFirst().get();
+		Specification<FilterableCase> spec = baseSpec(caseManagementSystemTag, caseTypeTag, sortOrder, pageReference)
+			.and(caseCategorySpec(singleFilter));
+		for (Specification<FilterableCase> f : filters) {
+			spec = spec.and(f);
+		}
+		return wrapFetched(spec, PageRequest.of(0, pageSize, sortOrder));
+	}
+
+	private Sort defaultSort(Set<CaseSnoozeFilter> queryFilters) {
+		return queryFilters.contains(CaseSnoozeFilter.SNOOZED) ? SNOOZE_SORT : DEFAULT_SORT;
+	}
+
 	public List<CaseSummary> getCases(CaseSnoozeFilter queryFilter, String caseManagementSystemTag, String caseTypeTag, 
 			Sort sortOrder, Optional<String> pageReference, int pageSize,
 			@NotNull Optional<DateRange> caseCreationRange,
@@ -94,48 +119,20 @@ public class CaseFilteringService implements CasePagingService {
 		if (sortOrder == null) {
 			sortOrder = DEFAULT_SORT;
 		}
-		Specification<FilterableCase> mainSpec = commonSpec(caseManagementSystemTag, caseTypeTag, sortOrder,
-				pageReference, caseCreationRange);
-		if (queryFilter != null) {
-			mainSpec = mainSpec.and(caseCategorySpec(queryFilter));
+		List<CaseFilter> filters = new ArrayList<>();
+		if (caseCreationRange.isPresent()) {
+			filters.add(FilterFactory.dateRange(caseCreationRange.get()));
 		}
 		if (snoozeReason.isPresent()) {
-			mainSpec = mainSpec.and((root, query, cb) -> cb.equal(root.get("snoozeReason"), snoozeReason.get()));
+			filters.add(FilterFactory.snoozeReason(snoozeReason.get()));
 		}
 		if (fieldFilter != null && fieldFilter.size() > 0) {
-			mainSpec = mainSpec.and(caseExtraDataSpec(fieldFilter));
+			filters.add(FilterFactory.caseExtraData(fieldFilter));
 		}
 		if (attachmentFilter.isPresent()) {
-			mainSpec = mainSpec.and(attachmentSpec(attachmentFilter.get()));
+			filters.add(FilterFactory.hasAttachment(attachmentFilter.get()));
 		}
-		return wrapFetched(mainSpec, PageRequest.of(0, pageSize, sortOrder));
-	}
-
-	private Specification<FilterableCase> attachmentSpec(AttachmentRequest attachmentRequest) {
-		return (root, query, cb) -> {
-			Subquery<CaseAttachmentAssociation> sq = query.subquery(CaseAttachmentAssociation.class);
-			List<Predicate> conjunction = new ArrayList<>();
-			Root<CaseAttachmentAssociation> aRoot = sq.from(CaseAttachmentAssociation.class);
-			sq.select(aRoot);
-			Path<CaseAttachment> aPath = aRoot.get("attachment");
-			conjunction.add(cb.equal(aPath.get("attachmentType"), cb.literal(attachmentRequest.getNoteType())));
-			if (attachmentRequest.getSubtype() != null) {
-				conjunction.add(cb.equal(aPath.get("attachmentSubtype").get("externalId"), cb.literal(attachmentRequest.getSubtype())));
-			}
-			if (attachmentRequest.getContent() != null) {
-				conjunction.add(cb.equal(aPath.get("content"), cb.literal(attachmentRequest.getContent())));
-
-			}
-			conjunction.add(cb.equal(aRoot.get("snooze").get("snoozeCase").get("internalId"), root.get("internalId")));
-			sq.where(conjunction.toArray(new Predicate[0]));
-			return cb.exists(sq);
-		};
-	}
-
-	private Specification<FilterableCase> caseExtraDataSpec(Map<String, Object> fieldFilter) {
-		String jsonQuery = new JSONObject(fieldFilter).toString();
-		return (root, query, cb) -> cb.isTrue(
-				cb.function(JsonOperatorContributor.JSON_CONTAINS, Boolean.class, root.get("extraData"), cb.literal(jsonQuery)));
+		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(queryFilter), pageSize, Optional.of(sortOrder), pageReference, filters);
 	}
 
 	private Specification<FilterableCase> caseCategorySpec(CaseSnoozeFilter queryFilter) {
@@ -144,7 +141,7 @@ public class CaseFilteringService implements CasePagingService {
 				return (root, query, cb) -> cb.or(
 						cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp()),
 						cb.isNull(root.get("snoozeEnd"))
-				);
+						);
 			case SNOOZED:
 				return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("snoozeEnd"), cb.currentTimestamp());
 			case ALARMED:
@@ -191,23 +188,12 @@ public class CaseFilteringService implements CasePagingService {
 		return attachments;
 	}
 
-	private Specification<FilterableCase> commonSpec(
-			String caseManagementSystemTag,
-			String caseTypeTag,
-			Sort sortOrder,
-			Optional<String> pageReference, Optional<DateRange> caseCreationRange) {
+	private Specification<FilterableCase> baseSpec(String caseManagementSystemTag, String caseTypeTag, Sort sortOrder,
+			Optional<String> pageReference) {
 		CasePageInfo path = _translator.translatePath(caseManagementSystemTag, caseTypeTag, pageReference.orElse(null)); 
 		Specification<FilterableCase> fullSpec = pathSpec(path);
 		if (!path.isFirstPage()) {
 			fullSpec = fullSpec.and(pageSpec(path.getCase(), sortOrder));
-		}
-		if (caseCreationRange.isPresent()) {
-			DateRange dateRange = caseCreationRange.get();
-			Specification<FilterableCase> dateSpec = (root, query, cb) -> cb.and(
-				cb.greaterThanOrEqualTo(root.get("caseCreation"), dateRange.getStartDate()),
-				cb.lessThanOrEqualTo(root.get("caseCreation"), dateRange.getEndDate())
-			);
-			fullSpec = fullSpec.and(dateSpec);
 		}
 		return fullSpec;
 	}
@@ -255,6 +241,4 @@ public class CaseFilteringService implements CasePagingService {
 			cb1.isTrue(root1.get("hasOpenIssue"))
 		);
 	}
-	
-	
 }
