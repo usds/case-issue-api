@@ -1,6 +1,9 @@
 package gov.usds.case_issues.services;
 
+import java.time.DayOfWeek;
 import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +21,7 @@ import gov.usds.case_issues.validators.TagFragment;
 @Validated
 public class KPIService {
 	private static final int WEEKS = 10;
+	private static TemporalAdjuster START_OF_WEEK = TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY);
 
 	@Autowired
 	private BulkCaseRepository _bulkRepo;
@@ -43,7 +47,7 @@ public class KPIService {
 
 	private List<Integer> getResolvedTickets(Long caseManagementSystemId, Long caseTypeId) {
 		ArrayList<Integer> ticketsResolved = new ArrayList<Integer>();
-		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime now = ZonedDateTime.now().with(START_OF_WEEK);
 		for (int i = 0; i < WEEKS; i++) {
 			ZonedDateTime start = now.minusWeeks(i +1);
 			ZonedDateTime end = now.minusWeeks(i);
@@ -55,7 +59,7 @@ public class KPIService {
 
 	private List<Integer> getAverageDaysToResolution(Long caseManagementSystemId, Long caseTypeId) {
 		ArrayList<Integer> daysToResolution = new ArrayList<Integer>();
-		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime now = ZonedDateTime.now().with(START_OF_WEEK);
 		for (int i = 0; i < WEEKS; i++) {
 			ZonedDateTime start = now.minusWeeks(i +1);
 			ZonedDateTime end = now.minusWeeks(i);
@@ -67,7 +71,7 @@ public class KPIService {
 
 	private List<Integer> getAverageDaysWorked(Long caseManagementSystemId, Long caseTypeId) {
 		ArrayList<Integer> daysToResolution = new ArrayList<Integer>();
-		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime now = ZonedDateTime.now().with(START_OF_WEEK);
 		for (int i = 0; i < WEEKS; i++) {
 			ZonedDateTime start = now.minusWeeks(i +1);
 			ZonedDateTime end = now.minusWeeks(i);
