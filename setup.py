@@ -76,6 +76,7 @@ create_attachment_subtype("Trouble Ticket", "troubleticket", "LINK", "trouble ti
 create_attachment_subtype("Assignee", "assignee", "TAG", "The assignee the case is assigend to", None)
 create_attachment_subtype("Field Office", "fieldoffice", "TAG", "The Field office the case is assigend to", None)
 create_attachment_subtype("Referral", "referral", "TAG", "The reason for a referal", None)
+create_attachment_subtype("Subreason", "subreason", "TAG", "The subreason reason for a technical issue", None)
 
 def create_case_management_system(name, application_url, description, tag, case_details_url_template):
   data = {
