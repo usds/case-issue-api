@@ -57,14 +57,16 @@ import gov.usds.case_issues.services.model.CaseFilter;
 import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.validators.FilterParameter;
 import gov.usds.case_issues.validators.TagFragment;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequireReadCasePermission
 @RequestMapping("/api/cases/{caseManagementSystemTag}/{caseTypeTag}")
 @Validated
 public class HitlistApiController {
-
-	private static final Pattern FILTER_PATTERN = Pattern.compile("filter_(\\w+)(?:\\[(\\w+)\\])?");
 
 	private static final Logger LOG = LoggerFactory.getLogger(HitlistApiController.class);
 
@@ -75,6 +77,18 @@ public class HitlistApiController {
 	@Autowired
 	private IssueUploadService _uploadService;
 
+	protected static final class FilterParams {
+		protected static final String STEM = "filter_";
+		protected static final String LINK_BY_TYPE = "hasLinkType";
+		protected static final String LINK_BY_CONTENT = "hasLink";
+		protected static final String TAG_BY_TYPE = "hasTagType";
+		protected static final String TAG_BY_CONTENT = "hasTag";
+		protected static final String COMMENT_ANY = "hasAnyComment";
+		protected static final String COMMENT_CONTENT = "hasComment";
+		protected static final String DATA_FIELD = "dataField";
+	}
+	private static final Pattern FILTER_PATTERN = Pattern.compile(FilterParams.STEM + "(\\w+)(?:\\[(\\w+)\\])?");
+
 	@GetMapping("search")
 	public List<TroubleCase> getCases(
 		@PathVariable String caseManagementSystemTag,
@@ -83,17 +97,48 @@ public class HitlistApiController {
 		return _listService.getCases(caseManagementSystemTag, caseTypeTag, query);
 	}
 
+	@ApiImplicitParams({
+		@ApiImplicitParam(
+			name=FilterParams.STEM + FilterParams.LINK_BY_TYPE,
+			value="Has any attached link of this subtype (e.g. 'troubleticket')",
+			paramType="query"),
+		@ApiImplicitParam(
+			name=FilterParams.STEM + FilterParams.LINK_BY_CONTENT + "[$SUBTYPE]",
+			value="Has a specific link of the type $SUBTYPE",
+			paramType="query"),
+		@ApiImplicitParam(
+			name=FilterParams.STEM + FilterParams.TAG_BY_TYPE,
+			value="Has any attached tag of this subtype (e.g. 'troubleticket')",
+			paramType="query"),
+		@ApiImplicitParam(
+			name=FilterParams.STEM + FilterParams.TAG_BY_CONTENT + "[$SUBTYPE]",
+			value="Has a specific tag of the type $SUBTYPE",
+			paramType="query"),
+		@ApiImplicitParam(
+			name=FilterParams.STEM + FilterParams.COMMENT_ANY,
+			value="Has at least one comment",
+			paramType="query",
+			dataType="boolean"),
+		@ApiImplicitParam(
+			name=FilterParams.STEM + FilterParams.COMMENT_CONTENT,
+			value="Has a comment with exactly this content",
+			paramType="query"),
+		@ApiImplicitParam(
+			name=FilterParams.STEM + FilterParams.DATA_FIELD + "[$FIELD_NAME]",
+			value="Has the given value for user-defined field $FIELD_NAME",
+			paramType="query"),
+	})
 	@GetMapping
 	public List<? extends CaseSummary> getCases(
-			@PathVariable String caseManagementSystemTag,
-			@PathVariable String caseTypeTag,
-			@RequestParam(required=true) Set<CaseSnoozeFilter> mainFilter,
+			@PathVariable @ApiParam(value="The case management system to search in", required=true) String caseManagementSystemTag,
+			@PathVariable @ApiParam(value="The type of case to select", required=true) String caseTypeTag,
+			@RequestParam(required=true) @ApiParam(value="Which group of cases to select", required=true) Set<CaseSnoozeFilter> mainFilter,
 			@RequestParam(required=false) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime caseCreationRangeBegin,
 			@RequestParam(required=false) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime caseCreationRangeEnd,
-			@RequestParam Optional<String> pageReference,
+			@RequestParam @ApiParam("An opaque parameter that specifies the page to fetch") Optional<String> pageReference,
 			@RequestParam Optional<String> snoozeReason,
-			@RequestParam(defaultValue = "20") @Range(max=BulkCaseRepository.MAX_PAGE_SIZE) int size,
-			@RequestParam MultiValueMap<@FilterParameter String, String> allParams
+			@RequestParam(defaultValue = "20") @Range(max=BulkCaseRepository.MAX_PAGE_SIZE) @ApiParam("The maximum records to return") int size,
+			@ApiIgnore @RequestParam MultiValueMap<@FilterParameter String, String> allParams
 			) {
 		if (snoozeReason.isPresent() && !mainFilter.contains(CaseSnoozeFilter.SNOOZED)) {
 			throw new IllegalArgumentException("Snooze reason cannot be specified for cases that are not snoozed");
@@ -114,33 +159,33 @@ public class HitlistApiController {
 				String parameterRoot = nameMatch.group(1);
 				String subParameter = nameMatch.group(2);
 				switch(parameterRoot) {
-					case "hasLinkType":
+					case FilterParams.LINK_BY_TYPE:
 						LOG.debug("Looking for any link with subtype {}", firstValue);
 						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.LINK, null, firstValue)));
 						break;
-					case "hasLink":
+					case FilterParams.LINK_BY_CONTENT:
 						assertSubparameter(parameterRoot, subParameter);
 						LOG.debug("Looking for link with subtype {} and value {}", subParameter, firstValue);
 						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.LINK, firstValue, subParameter)));
 						break;
-					case "hasTagType":
+					case FilterParams.TAG_BY_TYPE:
 						LOG.debug("Looking for any tag with subtype {}", firstValue);
 						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.TAG, null, firstValue)));
 						break;
-					case "hasTag":
+					case FilterParams.TAG_BY_CONTENT:
 						assertSubparameter(parameterRoot, subParameter);
 						LOG.debug("Looking for tag with subtype {} and value {}", subParameter, firstValue);
 						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.TAG, firstValue, subParameter)));
 						break;
-					case "hasAnyComment":
+					case FilterParams.COMMENT_ANY:
 						LOG.debug("Looking for any comment");
 						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.COMMENT, null)));
 						break;
-					case "hasComment":
+					case FilterParams.COMMENT_CONTENT:
 						LOG.debug("Looking for a comment with text [{}]", firstValue);
 						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.COMMENT, firstValue)));
 						break;
-					case "dataField":
+					case FilterParams.DATA_FIELD:
 						LOG.debug("Filtering on a single data field");
 						assertSubparameter(parameterRoot, subParameter);
 						filters.add(FilterFactory.caseExtraData(Collections.singletonMap(subParameter, firstValue)));
