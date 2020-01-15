@@ -60,6 +60,10 @@ public class FilterFactory {
 	}
 
 	public static CaseFilter hasAttachment(AttachmentRequest attachmentRequest) {
+		return hasAttachment(attachmentRequest, true);
+	}
+
+	public static CaseFilter hasAttachment(AttachmentRequest attachmentRequest, boolean attachmentDesired) {
 		return (root, query, cb) -> {
 			Subquery<CaseAttachmentAssociation> sq = query.subquery(CaseAttachmentAssociation.class);
 			List<Predicate> conjunction = new ArrayList<>();
@@ -79,7 +83,8 @@ public class FilterFactory {
 			}
 			conjunction.add(cb.equal(aRoot.get("snooze").get("snoozeCase").get(MetaModel.ID), root.get(MetaModel.ID)));
 			sq.where(conjunction.toArray(new Predicate[0]));
-			return cb.exists(sq);
+			Predicate attachmentExists = cb.exists(sq);
+			return attachmentDesired ? attachmentExists : cb.not(attachmentExists) ;
 		};
 	}
 }

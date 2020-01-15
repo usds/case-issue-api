@@ -153,6 +153,16 @@ public class HitlistApiControllerFilteringTest extends ControllerTestBase {
 	}
 
 	@Test
+	public void snoozedCases_withoutComment_correctList() throws Exception {
+		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
+		additional.add(ANY_COMMENT, "false");
+		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
+			.andExpect(status().isOk())
+			.andExpect(caseJson(FixtureCase.SNOOZED01, FixtureCase.SNOOZED03))
+		;
+	}
+
+	@Test
 	public void snoozedCases_withSpecificComment_correctList() throws Exception {
 		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
 		additional.add(COMMENT_CONTENT, FixtureAttachment.COMMENT2.name());

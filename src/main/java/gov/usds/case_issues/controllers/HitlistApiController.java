@@ -179,7 +179,8 @@ public class HitlistApiController {
 						break;
 					case FilterParams.COMMENT_ANY:
 						LOG.debug("Looking for any comment");
-						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.COMMENT, null)));
+						boolean yesNo = Boolean.parseBoolean(firstValue);
+						filters.add(FilterFactory.hasAttachment(new AttachmentRequest(AttachmentType.COMMENT, null), yesNo));
 						break;
 					case FilterParams.COMMENT_CONTENT:
 						LOG.debug("Looking for a comment with text [{}]", firstValue);
