@@ -10,6 +10,8 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import gov.usds.case_issues.db.JsonOperatorContributor;
@@ -21,6 +23,8 @@ import gov.usds.case_issues.services.model.CaseFilter;
 
 @Service
 public class FilterFactory {
+
+	private static final Logger LOG = LoggerFactory.getLogger(FilterFactory.class);
 
 	private static final class MetaModel {
 
@@ -63,10 +67,13 @@ public class FilterFactory {
 			sq.select(aRoot);
 			Path<CaseAttachment> aPath = aRoot.get("attachment");
 			conjunction.add(cb.equal(aPath.get("attachmentType"), cb.literal(attachmentRequest.getNoteType())));
+			LOG.debug("Filtering on attachment type {}", attachmentRequest.getNoteType());
 			if (attachmentRequest.getSubtype() != null) {
+				LOG.debug("Filtering on attachment subtype {}", attachmentRequest.getSubtype());
 				conjunction.add(cb.equal(aPath.get("attachmentSubtype").get(MetaModel.EXTERNAL_ID), cb.literal(attachmentRequest.getSubtype())));
 			}
 			if (attachmentRequest.getContent() != null) {
+				LOG.debug("Filtering on content {}", attachmentRequest.getContent());
 				conjunction.add(cb.equal(aPath.get("content"), cb.literal(attachmentRequest.getContent())));
 
 			}
