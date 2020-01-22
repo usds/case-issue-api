@@ -17,19 +17,19 @@ import gov.usds.case_issues.db.model.TroubleCaseFixedData;
 @Immutable
 public class FilterableCase extends TroubleCaseFixedData {
 
-    @Column(name="extra_data_converted")
-    private Map<String, Object> extraData;
+	@Column(name="extra_data_converted")
+	private Map<String, Object> extraData;
 
-    // snooze embeds
-    private Long snoozeId;
-    private String snoozeReason;
-    private ZonedDateTime snoozeStart;
-    private ZonedDateTime snoozeEnd;
-    private Date snoozeCreatedAt;
-    private Date snoozeUpdatedAt;
+	// snooze embeds
+	private Long snoozeId;
+	private String snoozeReason;
+	private ZonedDateTime snoozeStart;
+	private ZonedDateTime snoozeEnd;
+	private Date snoozeCreatedAt;
+	private Date snoozeUpdatedAt;
 
-    // state
-    private boolean hasOpenIssue;
+	// state
+	private boolean hasOpenIssue;
 
 	public Map<String, Object> getExtraData() {
 		return extraData;
