@@ -9,8 +9,6 @@ import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.Entity;
 import javax.persistence.EntityResult;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToMany;
@@ -20,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
@@ -196,7 +193,8 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 		columns=@ColumnResult(name="last_snooze_end", type=ZonedDateTime.class)
 	),
 })
-public class TroubleCase extends UpdatableEntity {
+
+public class TroubleCase extends TroubleCaseFixedData {
 	public static final String RESOLVED_CASE_COUNT =
 		"SELECT COUNT(DISTINCT c.internal_id) "
 		+ "FROM {h-schema}trouble_case c "
@@ -319,22 +317,6 @@ public class TroubleCase extends UpdatableEntity {
 	public static final String CASE_DTO_CTE = "(" + CASE_DTO_QUERY + ") as trouble_case_dto ";
 	public static final String CASE_SELECT_STEM = "SELECT * FROM" + CASE_DTO_CTE + " WHERE ";
 
-	@NaturalId
-	@ManyToOne(optional=false)
-	@JoinColumn(updatable=false)
-	private CaseManagementSystem caseManagementSystem;
-	@NaturalId
-	@NotNull
-	@Pattern(regexp="[-\\w]+")
-	@Column(updatable=false)
-	private String receiptNumber;
-
-	@ManyToOne(optional=false)
-	@JoinColumn(nullable=false, updatable=false)
-	private CaseType caseType;
-	@NotNull
-	private ZonedDateTime caseCreation;
-
 	@OneToMany(mappedBy = "issueCase")
 	@Where(clause="issue_closed is null")
 	private List<CaseIssue> openIssues;
@@ -349,30 +331,10 @@ public class TroubleCase extends UpdatableEntity {
 			@NotNull @Pattern(regexp = "[-\\w]+") String receiptNumber, CaseType caseType,
 			@NotNull ZonedDateTime caseCreation,
 			Map<String,Object> extraData) {
-		this();
-		this.caseManagementSystem = caseManagementSystem;
-		this.receiptNumber = receiptNumber;
-		this.caseType = caseType;
-		this.caseCreation = caseCreation;
+		super(caseManagementSystem, receiptNumber, caseType, caseCreation);
 		this.extraData = new HashMap<String, Object>(extraData); // shallow copy for reasonable safety
 	}
 
-
-	public CaseManagementSystem getCaseManagementSystem() {
-		return caseManagementSystem;
-	}
-
-	public String getReceiptNumber() {
-		return receiptNumber;
-	}
-
-	public CaseType getCaseType() {
-		return caseType;
-	}
-
-	public ZonedDateTime getCaseCreation() {
-		return caseCreation;
-	}
 
 	@JsonIgnore
 	public List<CaseIssue> getOpenIssues() {

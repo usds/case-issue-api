@@ -522,4 +522,44 @@ databaseChangeLog:
         - addPrimaryKey:
             tableName: user_session_attributes
             columnNames: session_primary_id, attribute_name
+  - changeSet:
+      id: filterable-case-view
+      author: ben.warfield@usds.dhs.gov
+      comment: Create view that exposes the case and snooze information we want for the main query API.
+      changes:
+        - createView:
+            viewName: filterable_case_view
+            selectQuery: |
+              SELECT
+                c.internal_id,
+                c.created_at,
+                c.created_by,
+                c.updated_at,
+                c.updated_by,
+                c.case_management_system_internal_id,
+                c.case_type_internal_id,
+                c.receipt_number,
+                c.case_creation,
+                c.extra_data::jsonb as extra_data_converted,
+                s.internal_id as snooze_id,
+                s.snooze_reason,
+                s.snooze_start,
+                s.snooze_end,
+                s.created_at snooze_created_at,
+                s.created_by snooze_created_by,
+                s.updated_at as snooze_updated_at,
+                s.updated_by as snooze_updated_by,
+                exists (
+                  select case_issue.internal_id
+                  from ${database.defaultSchemaName}.case_issue
+                  where c.internal_id=case_issue.issue_case_internal_id
+                    and issue_closed is null
+                ) as has_open_issue
+              FROM
+                ${database.defaultSchemaName}.trouble_case c
+                LEFT JOIN (
+                  SELECT DISTINCT ON(snooze_case_internal_id) *
+                  from ${database.defaultSchemaName}.case_snooze
+                  order by snooze_case_internal_id, created_at desc
+                ) s on s.snooze_case_internal_id = c.internal_id
 

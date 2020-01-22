@@ -65,10 +65,23 @@ public class CaseListFixtureService {
 
 	public static class Keywords {
 		public static final String PARITY = "parity";
-		private static final String EVEN = "even";
+		public static final String EVEN = "even";
 		public static final String ODD = "odd";
 	}
 
+	/**
+	 * An enumeration of all the cases we will create, in the order they will be created in the system.
+	 * For reference, here are the cases in their groups, in the order they come out in their respective
+	 * default sorts:
+	 * <ul>
+	 *   <li> FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01, FixtureCase.SNOOZED04, FixtureCase.SNOOZED03</li>
+	 *   <li> FixtureCase.ACTIVE01, FixtureCase.DESNOOZED02, FixtureCase.DESNOOZED01,
+	 *        FixtureCase.ACTIVE04, FixtureCase.ACTIVE02, FixtureCase.ACTIVE03,
+	 *        FixtureCase.DESNOOZED03, FixtureCase.ACTIVE05, FixtureCase.DESNOOZED04
+	 *   </li>
+	 *   <li>FixtureCase.CLOSED01, FixtureCase.CLOSED02</li>
+	 * </ul>
+	 */
 	@SuppressWarnings("checkstyle:MagicNumber")
 	public enum FixtureCase {
 		/** An active case */
