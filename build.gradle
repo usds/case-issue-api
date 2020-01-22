@@ -25,6 +25,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
+	// this next line is only here so we can tweak the cookie serializer to set SameSite:
+	// otherwise, a runtimeOnly dependency on spring-session-jdbc would be sufficient.
+	implementation 'org.springframework.session:spring-session-core'
+	runtimeOnly 'org.springframework.session:spring-session-jdbc'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
 	implementation 'org.springframework.retry:spring-retry'
@@ -48,7 +53,6 @@ dependencies {
 	implementation "org.liquibase:liquibase-core"
 
 	runtimeOnly 'org.postgresql:postgresql'
-	runtimeOnly 'org.springframework.session:spring-session-jdbc'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
