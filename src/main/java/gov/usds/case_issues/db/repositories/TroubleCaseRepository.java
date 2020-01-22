@@ -2,9 +2,13 @@ package gov.usds.case_issues.db.repositories;
 
 import java.util.Collection;
 
+import javax.persistence.LockModeType;
+import javax.validation.constraints.Size;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.Description;
@@ -39,6 +43,11 @@ public interface TroubleCaseRepository extends TroubleCaseFixedDataRepository<Tr
 	// we will want to fetch the snooze info in a join: need to figure out how DTO works
 	@Query(ACTIVE_CASE_QUERY + " and " + ACTIVE_SNOOZE_CLAUSE)
 	public Page<TroubleCase> getSnoozedWithOpenIssues(CaseManagementSystem caseManagementSystem, CaseType caseType, Pageable pageable);
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE) // might need to be more aggressive when postgresql table-level LOCK is available
+	@Override // for the lock annotation
+	public Collection<TroubleCase> getAllByCaseManagementSystemAndReceiptNumberIn(CaseManagementSystem caseManager,
+			@Size(max=MAX_INLIST_SIZE, message=INLIST_SIZE_MESSAGE) Collection<String> receiptNumbers);
 
 	// this override is to make this method work in a testing context, since that is the only context in which this method
 	// should EVER BE CALLED

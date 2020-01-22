@@ -1,7 +1,9 @@
 package gov.usds.case_issues.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,22 @@ public class CaseAttachmentService {
 
 	@Transactional(readOnly=false)
 	public CaseAttachmentAssociation attachToSnooze(AttachmentRequest request, CaseSnooze snooze) {
+		CaseAttachment attachment = getOrCreateAttachment(request);
+		return _associationRepository.save(new CaseAttachmentAssociation(snooze, attachment));
+	}
+
+	@Transactional(readOnly=false)
+	public CaseAttachment attachToSnoozes(AttachmentRequest request, Collection<CaseSnooze> snoozes) {
+		CaseAttachment attachment = getOrCreateAttachment(request);
+		LOG.debug("Attaching attachment {} to {} snoozes", attachment.getInternalId(), snoozes.size());
+		List<CaseAttachmentAssociation> associations = snoozes.stream()
+				.map(s -> new CaseAttachmentAssociation(s, attachment))
+				.collect(Collectors.toList());
+		_associationRepository.saveAll(associations);
+		return attachment;
+	}
+
+	private CaseAttachment getOrCreateAttachment(AttachmentRequest request) {
 		AttachmentType requestedType = request.getNoteType();
 		String requestedSubtype = request.getSubtype();
 
@@ -63,8 +81,7 @@ public class CaseAttachmentService {
 		} else {
 			attachment = _attachmentRepository.save(new CaseAttachment(requestedType, subType, request.getContent()));
 		}
-
-		return _associationRepository.save(new CaseAttachmentAssociation(snooze, attachment));
+		return attachment;
 	}
 
 	public List<CaseAttachmentAssociation> findAttachmentsForCase(TroubleCase rootCase) {

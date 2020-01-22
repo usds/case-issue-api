@@ -1,6 +1,7 @@
 package gov.usds.case_issues.db.model.reporting;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -20,9 +21,12 @@ public class FilterableCase extends TroubleCaseFixedData {
     private Map<String, Object> extraData;
 
     // snooze embeds
+    private Long snoozeId;
     private String snoozeReason;
     private ZonedDateTime snoozeStart;
     private ZonedDateTime snoozeEnd;
+    private Date snoozeCreatedAt;
+    private Date snoozeUpdatedAt;
 
     // state
     private boolean hasOpenIssue;
@@ -41,6 +45,18 @@ public class FilterableCase extends TroubleCaseFixedData {
 
 	public ZonedDateTime getSnoozeEnd() {
 		return snoozeEnd;
+	}
+
+	public Long getSnoozeId() {
+		return snoozeId;
+	}
+
+	public Date getSnoozeCreatedAt() {
+		return snoozeCreatedAt;
+	}
+
+	public Date getSnoozeUpdatedAt() {
+		return snoozeUpdatedAt;
 	}
 
 	public boolean isHasOpenIssue() {
