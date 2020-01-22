@@ -185,6 +185,34 @@ public interface BulkCaseRepository {
 		@Range(max=MAX_PAGE_SIZE) int size
 	);
 
+	@Query(name="resolvedCount")
+	@RestResource(exported=false)
+	public int getResolvedCaseCount(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
+	);
+
+	@Query(name="averageDaysToResoluton")
+	@RestResource(exported=false)
+	public int getAverageDaysToResolution(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
+	);
+
+
+	@Query(name="averageDaysWorked")
+	@RestResource(exported=false)
+	public int getAverageDaysWorked(
+		Long caseManagementSystemId,
+		Long caseTypeId,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
+		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
+	);
+
 	@Query(name="summary")
 	@RestResource(exported=false)
 	public List<Object[]> getSnoozeSummary(Long caseManagementSystemId, Long caseTypeId);

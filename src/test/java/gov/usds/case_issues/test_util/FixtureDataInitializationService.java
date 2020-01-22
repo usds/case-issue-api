@@ -87,7 +87,11 @@ public class FixtureDataInitializationService {
 		LOG.debug("(Re)initializing attachment subtype '{}'", tag);
 		Optional<AttachmentSubtype> found = _subtypeRepo.findByExternalId(tag);
 		if (found.isPresent()) {
-			return found.get();
+			AttachmentSubtype subtype = found.get();
+			if (subtype.getForAttachmentType() != forType) {
+				throw new IllegalArgumentException("Conflicting definitions for attachment subtype " + tag);
+			}
+			return subtype;
 		}
 		return _subtypeRepo.save(new AttachmentSubtype(tag, forType, name, "Auto-subtype " + name, urlTempate));
 	}
