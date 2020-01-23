@@ -2,6 +2,7 @@ package gov.usds.case_issues.controllers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -9,8 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Month;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +27,18 @@ import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UploadStatus;
+import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
+import gov.usds.case_issues.model.CaseDetails;
+import gov.usds.case_issues.services.CaseDetailsService;
 import gov.usds.case_issues.services.UploadStatusService;
 
 @WithMockUser(username = "default_hitlist_user", authorities = "READ_CASES")
+@SuppressWarnings("checkstyle:MagicNumber")
 public class HitlistApiControllerTest extends ControllerTestBase {
 
 	private static final String DATE_STAMP_2018 = "2018-01-01T12:00:00Z";
 	private static final String DATE_STAMP_2019 = "2019-01-01T12:00:00Z";
-	private static final String VALUE_ISSUE_TYPE = "WONKY";
+	private static final String VALID_ISSUE_TYPE = "WONKY";
 	private static final String VALID_CASE_TYPE = "C1";
 	private static final String VALID_CASE_MGT_SYS = "F1";
 	private static final String API_PATH = "/api/cases/{caseManagementSystemTag}/{caseTypeTag}/";
@@ -50,6 +58,8 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	@Autowired
 	private UploadStatusService _uploadService;
+	@Autowired
+	private CaseDetailsService _detailsService;
 
 	@Before
 	public void resetDb() {
@@ -134,7 +144,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putJson_emptyListNoCsrf_forbidden() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = put(ISSUE_UPLOAD_PATH, VALID_CASE_MGT_SYS, VALID_CASE_TYPE, VALUE_ISSUE_TYPE)
+		MockHttpServletRequestBuilder jsonPut = put(ISSUE_UPLOAD_PATH, VALID_CASE_MGT_SYS, VALID_CASE_TYPE, VALID_ISSUE_TYPE)
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("[]");
 		perform(jsonPut).andExpect(status().isForbidden());
@@ -174,6 +184,46 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		perform(jsonPut).andExpect(status().isBadRequest());
 		assertEquals("No upload records should exist",
 			0, _uploadService.getUploadHistory(_system, _type).size());
+	}
+
+	@Test
+	@WithMockUser(authorities = "UPDATE_ISSUES")
+	public void putJson_backDatedWithoutStructureAuthority_forbidden() throws Exception {
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
+				.param("effectiveDate", "2019-12-31T20:00:00Z")
+				.content("[]");
+			perform(jsonPut).andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(authorities = "UPDATE_STRUCTURE")
+	public void putJson_backDatedWithoutIssuesAuthority_forbidden() throws Exception {
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
+				.param("effectiveDate", "2019-12-31T20:00:00Z")
+				.content("[]");
+			perform(jsonPut).andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putJson_backDatedIssues_correctDateUsed() throws Exception {
+		JSONObject requestCase = new JSONObject();
+		String receiptNumber = "FKE31415926";
+		requestCase.put("receiptNumber", receiptNumber);
+		requestCase.put("creationDate", "2001-08-29T00:00:00-04:00");
+		requestCase.put("channelType", "Pay Per View");
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
+				.param("effectiveDate", "2019-12-31T20:00:00Z")
+				.content("[" + requestCase.toString() + "]");
+		perform(jsonPut).andExpect(status().isAccepted());
+		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
+		assertEquals(2019, lastUpload.getEffectiveDate().getYear());
+		assertEquals(Month.DECEMBER, lastUpload.getEffectiveDate().getMonth());
+		assertEquals(31, lastUpload.getEffectiveDate().getDayOfMonth());
+		CaseDetails details = _detailsService.findCaseDetails(VALID_CASE_MGT_SYS, receiptNumber);
+		Optional<? extends CaseIssueSummary> optIssue = details.getIssues().stream().findFirst();
+		assertTrue("Issue exists", optIssue.isPresent());
+		assertEquals(lastUpload.getEffectiveDate(), optIssue.get().getIssueCreated());
 	}
 
 	@Test
@@ -361,7 +411,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	private void checkUploadRecord(int recordCount, int newIssues, int closedIssues) {
-		CaseIssueUpload uploadInfo = _uploadService.getLastUpload(_system, _type, VALUE_ISSUE_TYPE);
+		CaseIssueUpload uploadInfo = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
 		assertNotNull(uploadInfo);
 		assertEquals(UploadStatus.SUCCESSFUL, uploadInfo.getUploadStatus());
 		assertEquals(newIssues, uploadInfo.getNewIssueCount().intValue());
@@ -389,7 +439,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	private static MockHttpServletRequestBuilder putIssues(String contentType) {
-		return put(ISSUE_UPLOAD_PATH, VALID_CASE_MGT_SYS, VALID_CASE_TYPE, VALUE_ISSUE_TYPE)
+		return put(ISSUE_UPLOAD_PATH, VALID_CASE_MGT_SYS, VALID_CASE_TYPE, VALID_ISSUE_TYPE)
 			.contentType(contentType)
 			.with(csrf());
 	}
