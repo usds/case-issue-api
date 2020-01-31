@@ -140,9 +140,6 @@ public class HitlistApiController {
 			@RequestParam(defaultValue = "20") @Range(max=BulkCaseRepository.MAX_PAGE_SIZE) @ApiParam("The maximum records to return") int size,
 			@ApiIgnore @RequestParam MultiValueMap<@FilterParameter String, String> allParams
 			) {
-		if (snoozeReason.isPresent() && !mainFilter.contains(CaseSnoozeFilter.SNOOZED)) {
-			throw new IllegalArgumentException("Snooze reason cannot be specified for cases that are not snoozed");
-		}
 		List<CaseFilter> filters = new ArrayList<>();
 		if (caseCreationRangeBegin != null) {
 			filters.add(FilterFactory.dateRange(new DateRange(caseCreationRangeBegin, caseCreationRangeEnd)));

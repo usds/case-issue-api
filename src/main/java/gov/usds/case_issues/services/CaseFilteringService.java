@@ -121,6 +121,10 @@ public class CaseFilteringService implements CasePagingService {
 
 	private Specification<FilterableCase> caseCategorySpec(CaseSnoozeFilter queryFilter) {
 		switch (queryFilter) {
+			case ALL:
+				return null;
+			case TRIAGED:
+				return (root, query, cb) -> cb.isNotNull(root.get("snoozeReason"));
 			case ACTIVE:
 				return (root, query, cb) -> cb.or(
 						cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp()),
@@ -174,7 +178,7 @@ public class CaseFilteringService implements CasePagingService {
 
 	private Specification<FilterableCase> baseSpec(String caseManagementSystemTag, String caseTypeTag, Sort sortOrder,
 			Optional<String> pageReference) {
-		CasePageInfo path = _translator.translatePath(caseManagementSystemTag, caseTypeTag, pageReference.orElse(null)); 
+		CasePageInfo path = _translator.translatePath(caseManagementSystemTag, caseTypeTag, pageReference.orElse(null));
 		Specification<FilterableCase> fullSpec = pathSpec(path);
 		if (!path.isFirstPage()) {
 			fullSpec = fullSpec.and(pageSpec(path.getCase(), sortOrder));
@@ -210,7 +214,7 @@ public class CaseFilteringService implements CasePagingService {
 				Expression<Comparable> placeholder = cb.literal(val);
 				conjunction.add(o.isAscending() ? cb.greaterThan(field, placeholder) : cb.lessThan(field, placeholder));
 				alternates.add(cb.and(conjunction.toArray(new Predicate[conjunction.size()])));
-				priorFields.add(cb.equal(field, placeholder));	
+				priorFields.add(cb.equal(field, placeholder));
 			}
 			return cb.or(alternates.toArray(new Predicate[alternates.size()]));
 		};

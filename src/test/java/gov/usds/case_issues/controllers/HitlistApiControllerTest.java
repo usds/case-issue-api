@@ -257,33 +257,6 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
-	public void getCases_badFilterCombination_badRequest() throws Exception {
-		String expectedErrorJson =
-			"{\"message\": \"Snooze reason cannot be specified for cases that are not snoozed\"}";
-		perform(doGetCases()
-				.param(Filters.MAIN, "ACTIVE")
-				.param(Filters.SNOOZE_REASON, "anything")
-			   )
-			.andExpect(status().isBadRequest())
-			.andExpect(content().json(expectedErrorJson))
-			;
-		perform(doGetCases()
-				.param(Filters.MAIN, "ALARMED")
-				.param(Filters.SNOOZE_REASON, "anything")
-			   )
-			.andExpect(status().isBadRequest())
-			.andExpect(content().json(expectedErrorJson))
-			;
-		perform(doGetCases()
-				.param(Filters.MAIN, "UNCHECKED")
-				.param(Filters.SNOOZE_REASON, "anything")
-			   )
-			.andExpect(status().isBadRequest())
-			.andExpect(content().json(expectedErrorJson))
-			;
-	}
-
-	@Test
 	public void getCases_smokeTest_emptyResponses() throws Exception {
 		perform(doGetCases().param(Filters.MAIN, "ACTIVE"))
 			.andExpect(status().isOk())
