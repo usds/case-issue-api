@@ -36,6 +36,7 @@ import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
 import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
 import gov.usds.case_issues.model.AttachmentSummary;
+import gov.usds.case_issues.model.CaseListResponse;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
@@ -63,7 +64,7 @@ public class CaseFilteringService implements CasePagingService {
 	private PageTranslationService _translator;
 
 	@Override
-	public List<? extends CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag,
+	public CaseListResponse getActiveCases(String caseManagementSystemTag, String caseTypeTag,
 			String receiptNumber, DateRange caseCreationRange, int size) {
 		List<CaseFilter> filters = new ArrayList<>();
 		if (caseCreationRange != null) {
@@ -74,7 +75,7 @@ public class CaseFilteringService implements CasePagingService {
 	}
 
 	@Override
-	public List<? extends CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag,
+	public CaseListResponse getSnoozedCases(String caseManagementSystemTag, String caseTypeTag,
 			String receiptNumber, DateRange caseCreationRange, Optional<String> snoozeReason, int size) {
 		List<CaseFilter> filters = new ArrayList<>();
 		if (caseCreationRange != null) {
@@ -86,7 +87,7 @@ public class CaseFilteringService implements CasePagingService {
 	}
 
 	@Override
-	public List<? extends CaseSummary> getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
+	public CaseListResponse getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
 			String receiptNumber, DateRange caseCreationRange, int size) {
 		List<CaseFilter> filters = new ArrayList<>();
 		if (caseCreationRange != null) {
@@ -96,7 +97,7 @@ public class CaseFilteringService implements CasePagingService {
 				Optional.ofNullable(receiptNumber), filters);
 	}
 
-	public List<CaseSummary> getCases(
+	public CaseListResponse getCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@NotNull @Size(min=1,max=1) Set<CaseSnoozeFilter> queryFilters,
@@ -112,7 +113,7 @@ public class CaseFilteringService implements CasePagingService {
 		for (Specification<FilterableCase> f : filters) {
 			spec = spec.and(f);
 		}
-		return wrapFetched(spec, PageRequest.of(0, pageSize, sortOrder));
+		return wrapFetched(caseManagementSystemTag, caseTypeTag, spec, PageRequest.of(0, pageSize, sortOrder));
 	}
 
 	private Sort defaultSort(Set<CaseSnoozeFilter> queryFilters) {
@@ -141,16 +142,21 @@ public class CaseFilteringService implements CasePagingService {
 		}
 	}
 
-	private List<CaseSummary> wrapFetched(Specification<FilterableCase> mainSpec, Pageable pageInfo) {
+	private CaseListResponse wrapFetched(String caseManagementSystemTag, String caseTypeTag, Specification<FilterableCase> mainSpec, Pageable pageInfo) {
 		try {
 			LOG.debug("Starting fetch using {}/{}", mainSpec, pageInfo);
 			Slice<FilterableCase> page = _repo.findAll(mainSpec, pageInfo);
 			LOG.debug("Finished fetch using {}/{}", mainSpec, pageInfo);
 			List<FilterableCase> cases = page.getContent();
 			Map<Long, List<AttachmentSummary>> attachments = fetchAllAttachments(cases);
-			return cases.stream()
-					.map(c -> new DelegatingFilterableCaseSummary(c, attachments.get(c.getInternalId())))
-					.collect(Collectors.toList());
+			List<? extends CaseSummary> casesWithSummarys = cases.stream()
+			.map(c -> new DelegatingFilterableCaseSummary(c, attachments.get(c.getInternalId())))
+			.collect(Collectors.toList());
+			long queryCount=  _repo.count(mainSpec);
+			CasePageInfo path = _translator.translatePath(caseManagementSystemTag, caseTypeTag, null);
+			Specification<FilterableCase> fullSpec = pathSpec(path);
+			long totalCount= _repo.count(fullSpec);
+			return new CaseListResponse(casesWithSummarys, totalCount, queryCount);
 		} catch (InvalidDataAccessApiUsageException e) {
 			if (e.getCause() instanceof IllegalArgumentException) {
 				throw (IllegalArgumentException) e.getCause();

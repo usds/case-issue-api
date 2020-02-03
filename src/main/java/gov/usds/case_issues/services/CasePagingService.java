@@ -1,9 +1,8 @@
 package gov.usds.case_issues.services;
 
-import java.util.List;
 import java.util.Optional;
 
-import gov.usds.case_issues.model.CaseSummary;
+import gov.usds.case_issues.model.CaseListResponse;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.validators.TagFragment;
 
@@ -12,7 +11,7 @@ import gov.usds.case_issues.validators.TagFragment;
  */
 public interface CasePagingService {
 
-	List<? extends CaseSummary> getActiveCases(
+	CaseListResponse getActiveCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -20,14 +19,14 @@ public interface CasePagingService {
 			int size
 	);
 
-	default List<? extends CaseSummary> getActiveCases(
+	default CaseListResponse getActiveCases(
 			@TagFragment String system,
 			@TagFragment String caseType,
 			@TagFragment String firstReceipt,
 			int size) {
 		return getActiveCases(system, caseType, firstReceipt, null, size);
 	}
-	List<? extends CaseSummary> getSnoozedCases(
+	CaseListResponse getSnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -36,7 +35,7 @@ public interface CasePagingService {
 			int size
 	);
 
-	default List<? extends CaseSummary> getSnoozedCases(
+	default CaseListResponse getSnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -44,7 +43,7 @@ public interface CasePagingService {
 		return getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, null, Optional.empty(), size);
 	}
 
-	List<? extends CaseSummary> getPreviouslySnoozedCases(
+	CaseListResponse getPreviouslySnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,
@@ -52,7 +51,7 @@ public interface CasePagingService {
 			int size
 	);
 
-	default List<? extends CaseSummary> getPreviouslySnoozedCases(
+	default CaseListResponse getPreviouslySnoozedCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@TagFragment String receiptNumber,

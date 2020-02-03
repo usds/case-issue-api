@@ -45,9 +45,9 @@ import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
+import gov.usds.case_issues.model.CaseListResponse;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
-import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.services.CaseFilteringService;
 import gov.usds.case_issues.services.CaseListService;
@@ -129,7 +129,7 @@ public class HitlistApiController {
 			paramType="query"),
 	})
 	@GetMapping
-	public List<? extends CaseSummary> getCases(
+	public CaseListResponse getCases(
 			@PathVariable @ApiParam(value="The case management system to search in", required=true) String caseManagementSystemTag,
 			@PathVariable @ApiParam(value="The type of case to select", required=true) String caseTypeTag,
 			@RequestParam(required=true) @ApiParam(value="Which group of cases to select", required=true) Set<CaseSnoozeFilter> mainFilter,
@@ -203,26 +203,6 @@ public class HitlistApiController {
 		if (null == subParameter || subParameter.isEmpty()) {
 			throw new IllegalArgumentException("Parameter " + parameter + " requires a sub-parameter");
 		}
-	}
-
-	@GetMapping("snoozed")
-	public List<? extends CaseSummary> getSnoozedCases(
-		@PathVariable String caseManagementSystemTag,
-		@PathVariable String caseTypeTag,
-		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,
-		@RequestParam(name = "size", defaultValue = "20") Integer size
-	) {
-		return _listService.getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, size);
-	}
-
-	@GetMapping("active")
-	public List<? extends CaseSummary> getActiveCases(
-		@PathVariable String caseManagementSystemTag,
-		@PathVariable String caseTypeTag,
-		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,
-		@RequestParam(name = "size", defaultValue = "20") Integer size
-	) {
-		return _listService.getActiveCases(caseManagementSystemTag, caseTypeTag, receiptNumber, size);
 	}
 
 	@RequestMapping(value="summary", method=RequestMethod.GET)
