@@ -562,4 +562,58 @@ databaseChangeLog:
                   from ${database.defaultSchemaName}.case_snooze
                   order by snooze_case_internal_id, created_at desc
                 ) s on s.snooze_case_internal_id = c.internal_id
-
+  - changeSet:
+      id: 3973e1b8-41f2-47a1-af1f-442bd523f2ac
+      author: tim.best@usds.dhs.gov
+      comment: Add column to record when the user resolves a case problem. this allow for the capture of over/under "snooze" duration
+      changes:
+        - addColumn:
+            tableName: case_snooze
+            columns:
+                - column:
+                    name: snooze_resolved
+                    type: *user_date
+                    remarks: The date and time when the user resolved the snooze
+  - changeSet:
+      id: add-resolved-to-filterable-case-view
+      author: tim.bet@usds.dhs.gov
+      comment: add "snooze" resolve to view
+      changes:
+          - dropView:
+              viewName: filterable_case_view
+          - createView:
+              viewName: filterable_case_view
+              selectQuery: |
+                SELECT
+                  c.internal_id,
+                  c.created_at,
+                  c.created_by,
+                  c.updated_at,
+                  c.updated_by,
+                  c.case_management_system_internal_id,
+                  c.case_type_internal_id,
+                  c.receipt_number,
+                  c.case_creation,
+                  c.extra_data::jsonb as extra_data_converted,
+                  s.internal_id as snooze_id,
+                  s.snooze_reason,
+                  s.snooze_start,
+                  s.snooze_end,
+                  s.snooze_resolved,
+                  s.created_at snooze_created_at,
+                  s.created_by snooze_created_by,
+                  s.updated_at as snooze_updated_at,
+                  s.updated_by as snooze_updated_by,
+                  exists (
+                    select case_issue.internal_id
+                    from ${database.defaultSchemaName}.case_issue
+                    where c.internal_id=case_issue.issue_case_internal_id
+                      and issue_closed is null
+                  ) as has_open_issue
+                FROM
+                  ${database.defaultSchemaName}.trouble_case c
+                  LEFT JOIN (
+                    SELECT DISTINCT ON(snooze_case_internal_id) *
+                    from ${database.defaultSchemaName}.case_snooze
+                    order by snooze_case_internal_id, created_at desc
+                  ) s on s.snooze_case_internal_id = c.internal_id

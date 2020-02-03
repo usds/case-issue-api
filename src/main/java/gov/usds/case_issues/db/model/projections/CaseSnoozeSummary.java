@@ -14,4 +14,6 @@ public interface CaseSnoozeSummary {
 	ZonedDateTime getSnoozeStart();
 
 	ZonedDateTime getSnoozeEnd();
+
+	ZonedDateTime getSnoozeResolved();
 }

@@ -31,6 +31,7 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 	private ZonedDateTime snoozeStart;
 	@NotNull
 	private ZonedDateTime snoozeEnd;
+	private ZonedDateTime snoozeResolved;
 
 	protected CaseSnooze() { /* for hibernate/JPA */ }
 
@@ -57,8 +58,12 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 		return snoozeEnd;
 	}
 
+	public ZonedDateTime getSnoozeResolved() {
+		return snoozeResolved;
+	}
+
 	public void endSnoozeNow() {
-		snoozeEnd = ZonedDateTime.now();
+		snoozeResolved = ZonedDateTime.now();
 	}
 
 	public static ZonedDateTime getEndTime(ZonedDateTime startTime, int durationDays) {
