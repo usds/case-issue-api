@@ -1,7 +1,6 @@
 package gov.usds.case_issues.db.repositories;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
@@ -47,8 +46,4 @@ public interface BulkCaseRepository {
 		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowStart,
 		@PastOrPresent @NotNull ZonedDateTime caseClosedWindowEnd
 	);
-
-	@Query(name="summary")
-	@RestResource(exported=false)
-	public List<Object[]> getSnoozeSummary(Long caseManagementSystemId, Long caseTypeId);
 }

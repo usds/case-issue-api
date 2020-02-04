@@ -2,6 +2,7 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,6 @@ import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.model.reporting.FilterableCase;
-import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
@@ -55,8 +55,6 @@ public class CaseListService implements PageTranslationService {
 	private CaseTypeRepository _caseTypeRepo;
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
-	@Autowired
-	private BulkCaseRepository _bulkRepo;
 
 	@Autowired
 	private CaseIssueRepository _issueRepo;
@@ -90,9 +88,7 @@ public class CaseListService implements PageTranslationService {
 
 	public Map<String, Object> getSummaryInfo(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag) {
 		CaseGroupInfo translated = translatePath(caseManagementSystemTag, caseTypeTag);
-		Map<String, Object> caseCounts = _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
-				.stream()
-				.collect(Collectors.toMap(a->((String) a[0]).trim(), a->(Number) a[1]));
+		Map<String, Object> caseCounts = new HashMap<String, Object>();
 		CaseIssueUpload lastSuccess = _uploadStatusService.getLastUpload(
 			translated.getCaseManagementSystem(), translated.getCaseType(), UploadStatus.SUCCESSFUL);
 		if (lastSuccess != null) {
