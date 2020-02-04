@@ -2,7 +2,6 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,15 +38,13 @@ import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseListResponse;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
-import gov.usds.case_issues.model.DateRange;
-import gov.usds.case_issues.services.model.CaseFilter;
 import gov.usds.case_issues.services.model.CasePageInfo;
 import gov.usds.case_issues.services.model.DelegatingFilterableCaseSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
 @Service
 @Validated
-public class CaseFilteringService implements CasePagingService {
+public class CaseFilteringService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseFilteringService.class);
 
@@ -63,40 +60,6 @@ public class CaseFilteringService implements CasePagingService {
 	@Autowired
 	private PageTranslationService _translator;
 
-	@Override
-	public CaseListResponse getActiveCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ACTIVE), size, Optional.of(DEFAULT_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
-	@Override
-	public CaseListResponse getSnoozedCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, Optional<String> snoozeReason, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		snoozeReason.ifPresent(reason -> filters.add(FilterFactory.snoozeReason(reason)));
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.SNOOZED), size, Optional.of(SNOOZE_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
-	@Override
-	public CaseListResponse getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ALARMED), size, Optional.of(DEFAULT_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
 	public CaseListResponse getCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
@@ -106,7 +69,7 @@ public class CaseFilteringService implements CasePagingService {
 			@NotNull Optional<String> pageReference,
 			@NotNull List<? extends Specification<FilterableCase>> filters
 			) {
-		Sort sortOrder = requestedSortOrder.orElse(defaultSort(queryFilters)); // in the long run we should probably validate this better.
+		Sort sortOrder = requestedSortOrder.orElse(DEFAULT_SORT); // in the long run we should probably validate this better.
 		CaseSnoozeFilter singleFilter = queryFilters.stream().findFirst().get();
 		Specification<FilterableCase> spec = baseSpec(caseManagementSystemTag, caseTypeTag, sortOrder, pageReference)
 			.and(caseCategorySpec(singleFilter));
@@ -116,23 +79,12 @@ public class CaseFilteringService implements CasePagingService {
 		return wrapFetched(caseManagementSystemTag, caseTypeTag, spec, PageRequest.of(0, pageSize, sortOrder));
 	}
 
-	private Sort defaultSort(Set<CaseSnoozeFilter> queryFilters) {
-		return queryFilters.contains(CaseSnoozeFilter.SNOOZED) ? SNOOZE_SORT : DEFAULT_SORT;
-	}
-
 	private Specification<FilterableCase> caseCategorySpec(CaseSnoozeFilter queryFilter) {
 		switch (queryFilter) {
 			case ALL:
 				return null;
 			case TRIAGED:
 				return (root, query, cb) -> cb.isNotNull(root.get("snoozeReason"));
-			case ACTIVE:
-				return (root, query, cb) -> cb.or(
-						cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp()),
-						cb.isNull(root.get("snoozeEnd"))
-						);
-			case SNOOZED:
-				return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("snoozeEnd"), cb.currentTimestamp());
 			case ALARMED:
 				return (root, query, cb) -> cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp());
 			case UNCHECKED:

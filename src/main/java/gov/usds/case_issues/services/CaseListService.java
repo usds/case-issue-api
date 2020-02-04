@@ -26,24 +26,18 @@ import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UploadStatus;
-import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
 import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
-import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
-import gov.usds.case_issues.model.CaseSummary;
-import gov.usds.case_issues.model.CaseSummaryImpl;
-import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.services.model.CasePageInfo;
-import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
 /**
@@ -62,8 +56,6 @@ public class CaseListService implements PageTranslationService {
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
 	@Autowired
-	private CaseSnoozeRepository _snoozeRepo;
-	@Autowired
 	private BulkCaseRepository _bulkRepo;
 
 	@Autowired
@@ -72,8 +64,6 @@ public class CaseListService implements PageTranslationService {
 	private TroubleCaseRepository _caseRepo;
 	@Autowired
 	private FilterableCaseRepository _filterableCaseRepo;
-	@Autowired
-	private CaseAttachmentService _attachmentService;
 	@Autowired
 	private UploadStatusService _uploadStatusService; // we should not have this and the repo injected in the same class!
 	@Autowired
@@ -96,57 +86,6 @@ public class CaseListService implements PageTranslationService {
 			translated.getCaseType(),
 			query
 		);
-	}
-
-	/* (non-Javadoc)
-	 * @see gov.usds.case_issues.services.CasePagingService#getPreviouslySnoozedCases(java.lang.String, java.lang.String, java.lang.String, gov.usds.case_issues.model.DateRange, int)
-	 */
-	public List<CaseSummary> getPreviouslySnoozedCases(
-			@TagFragment String caseManagementSystemTag,
-			@TagFragment String caseTypeTag,
-			@TagFragment String receiptNumber,
-			DateRange caseCreationRange,
-			int size) {
-		CasePageInfo translated = translatePath(caseManagementSystemTag, caseTypeTag, receiptNumber);
-		List<Object[]> foundCases;
-		if (translated.isFirstPage()) {
-			if (caseCreationRange == null) {
-				foundCases = _bulkRepo.getPreviouslySnoozedCases(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					size
-				);
-			} else {
-				foundCases = _bulkRepo.getPreviouslySnoozedCases(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					caseCreationRange.getStartDate(),
-					caseCreationRange.getEndDate(),
-					size
-				);
-			}
-		} else {
-			if (caseCreationRange == null) {
-				foundCases = _bulkRepo.getPreviouslySnoozedCasesAfter(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					translated.getCaseCreationDate(),
-					translated.getCaseId(),
-					size
-				);
-			} else {
-				foundCases = _bulkRepo.getPreviouslySnoozedCasesAfter(
-					translated.getCaseManagementSystemId(),
-					translated.getCaseTypeId(),
-					translated.getCaseCreationDate(),
-					translated.getCaseId(),
-					caseCreationRange.getStartDate(),
-					caseCreationRange.getEndDate(),
-					size
-				);
-			}
-		}
-		return rewrap(foundCases);
 	}
 
 	public Map<String, Object> getSummaryInfo(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag) {
@@ -291,19 +230,5 @@ public class CaseListService implements PageTranslationService {
 			throw new IllegalArgumentException("Not a recognized data format");
 		}
 		return spec;
-	}
-
-	private List<CaseSummary> rewrap(List<Object[]> queryResult) {
-		LOG.debug("Finding snoozed case from {}.", _snoozeRepo);
-		LOG.debug("Finding attachment from {}.", _attachmentService);
-		Function<? super Object[], ? extends CaseSummary> mapper = row ->{
-			TroubleCase rootCase = (TroubleCase) row[0];
-			ZonedDateTime lastSnoozeEnd = (ZonedDateTime) row[1];
-			CaseSnoozeSummary summary = lastSnoozeEnd == null ? null
-					: _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(rootCase).get();
-			List<AttachmentSummary> notes = _attachmentService.findAttachmentsForCase(rootCase).stream().map(AttachmentSummary::new).collect(Collectors.toList());
-			return new CaseSummaryImpl(rootCase, summary, notes);
-		};
-		return queryResult.stream().map(mapper).collect(Collectors.toList());
 	}
 }
