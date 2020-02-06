@@ -36,6 +36,7 @@ import gov.usds.case_issues.services.UploadStatusService;
 @SuppressWarnings("checkstyle:MagicNumber")
 public class HitlistApiControllerTest extends ControllerTestBase {
 
+	private static final String NO_OP = "non-empty request body";
 	private static final String DATE_STAMP_2018 = "2018-01-01T12:00:00Z";
 	private static final String DATE_STAMP_2019 = "2019-01-01T12:00:00Z";
 	private static final String VALID_ISSUE_TYPE = "WONKY";
@@ -184,6 +185,44 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		perform(jsonPut).andExpect(status().isBadRequest());
 		assertEquals("No upload records should exist",
 			0, _uploadService.getUploadHistory(_system, _type).size());
+	}
+
+	@Test
+	@WithMockUser(authorities = "UPDATE_ISSUES")
+	public void putCsv_backDatedWithoutStructureAuthority_forbidden() throws Exception {
+		MockHttpServletRequestBuilder issuePut = putIssues("text/csv")
+				.param("effectiveDate", "2019-12-31T20:00:00Z")
+				.content(NO_OP);
+			perform(issuePut).andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(authorities = "UPDATE_STRUCTURE")
+	public void putCsv_backDatedWithoutIssuesAuthority_forbidden() throws Exception {
+		MockHttpServletRequestBuilder issuePut = putIssues("text/csv")
+				.param("effectiveDate", "2019-12-31T20:00:00Z")
+				.content(NO_OP);
+			perform(issuePut).andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putCsv_backDatedIssues_correctDateUsed() throws Exception {
+		String receiptNumber = "FKE27182818";
+		String csvString = "receiptNumber,creationDate,channelType\n"
+			+ receiptNumber + ",2001-08-29T00:00:00-04:00,Pay PerView\n";
+		MockHttpServletRequestBuilder issuePut = putIssues("text/csv")
+				.param("effectiveDate", "2017-05-15T20:00:00Z")
+				.content(csvString);
+		perform(issuePut).andExpect(status().isAccepted());
+		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
+		assertEquals(2017, lastUpload.getEffectiveDate().getYear());
+		assertEquals(Month.MAY, lastUpload.getEffectiveDate().getMonth());
+		assertEquals(15, lastUpload.getEffectiveDate().getDayOfMonth());
+		CaseDetails details = _detailsService.findCaseDetails(VALID_CASE_MGT_SYS, receiptNumber);
+		Optional<? extends CaseIssueSummary> optIssue = details.getIssues().stream().findFirst();
+		assertTrue("Issue exists", optIssue.isPresent());
+		assertEquals(lastUpload.getEffectiveDate(), optIssue.get().getIssueCreated());
 	}
 
 	@Test

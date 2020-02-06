@@ -135,13 +135,28 @@ public class HitlistApiController {
 	public ResponseEntity<?> updateIssueListCsv(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
 			@RequestBody InputStream csvStream, @RequestParam(required=false) String uploadSchema) throws IOException {
 		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
+		return processCsvUpload(translated, issueTag, csvStream, ZonedDateTime.now(), uploadSchema);
+	}
+
+	@RequireUploadAndStructurePermission
+	@PutMapping(value="/{issueTag}",consumes={"text/csv"}, params="effectiveDate")
+	public ResponseEntity<?> updateIssueListCsvWithBackdate(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
+			@RequestBody InputStream csvStream,
+			@RequestParam(required=true) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime effectiveDate,
+			@RequestParam(required=false) String uploadSchema) throws IOException {
+		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
+		return processCsvUpload(translated, issueTag, csvStream, effectiveDate, uploadSchema);
+	}
+
+	private ResponseEntity<?> processCsvUpload(CaseGroupInfo translated, String issueTag, InputStream csvStream,
+			ZonedDateTime effectiveDate, String uploadSchema) throws IOException {
 		CsvSchema schema = CsvSchema.emptySchema().withHeader();
 		MappingIterator<Map<String, Object>> valueIterator = new CsvMapper()
 			.readerFor(Map.class)
 			.with(schema)
 			.readValues(csvStream);
 		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
-		_uploadService.putIssueList(translated, issueTag, newIssueCases, ZonedDateTime.now());
+		_uploadService.putIssueList(translated, issueTag, newIssueCases, effectiveDate);
 		return ResponseEntity.accepted().build();
 	}
 
