@@ -86,6 +86,7 @@ public class HitlistApiController {
 		protected static final String COMMENT_ANY = "hasAnyComment";
 		protected static final String COMMENT_CONTENT = "hasComment";
 		protected static final String DATA_FIELD = "dataField";
+		protected static final String RECEIPT_NUMBER = "receiptNumebr";
 	}
 	private static final Pattern FILTER_PATTERN = Pattern.compile(FilterParams.STEM + "(\\w+)(?:\\[(\\w+)\\])?");
 
@@ -188,6 +189,8 @@ public class HitlistApiController {
 						assertSubparameter(parameterRoot, subParameter);
 						filters.add(FilterFactory.caseExtraData(Collections.singletonMap(subParameter, firstValue)));
 						break;
+					case FilterParams.RECEIPT_NUMBER:
+						filters.add(FilterFactory.receiptNumebr(firstValue));
 					default:
 						throw new IllegalArgumentException(String.format("Invalid filter parameter %s", parameterName));
 				}
