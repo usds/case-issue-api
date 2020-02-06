@@ -237,7 +237,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	@Test
 	@WithMockUser(authorities = {"READ_CASES", "UPDATE_ISSUES"})
-	public void getSummary_emptyCasesAdded_lastActviePresent() throws Exception {
+	public void getSummary_emptyCasesAdded_lastActivePresent() throws Exception {
 		initCaseData();
 		perform(put(API_PATH + "{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
 			.contentType("text/csv")
