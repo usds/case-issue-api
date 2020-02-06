@@ -11,8 +11,8 @@ import gov.usds.case_issues.db.model.TroubleCase;
 public interface CaseSnoozeRepository extends PagingAndSortingRepository<CaseSnooze, Long> {
 
 	/** Retrieve all snoozes for a particular case, excluding details that are not exposed to read-only clients */
-	public List<CaseSnooze> findAllBySnoozeCaseOrderBySnoozeStartAsc(TroubleCase snoozed);
+	public List<CaseSnooze> findAllBySnoozeCaseOrderBySnoozeStartAsc(TroubleCase mainCase);
 
 	/** Retrieve the latest snooze, if any */
-	public Optional<CaseSnooze> findFirstBySnoozeCaseOrderBySnoozeEndDesc(TroubleCase mainCase);
+	public Optional<CaseSnooze> findFirstBySnoozeCaseOrderBySnoozeStartDesc(TroubleCase mainCase);
 }

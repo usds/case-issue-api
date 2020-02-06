@@ -617,3 +617,11 @@ databaseChangeLog:
                     from ${database.defaultSchemaName}.case_snooze
                     order by snooze_case_internal_id, created_at desc
                   ) s on s.snooze_case_internal_id = c.internal_id
+  - changeSet:
+      id: 147786cd-8c4d-4ac9-bc65-6bfa7b6afd94
+      author: tim.best@usds.dhs.gov
+      comment: make snooze end optional
+      changes:
+          - dropNotNullConstraint:
+              columnName: snooze_end
+              tableName: case_snooze

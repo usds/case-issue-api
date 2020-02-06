@@ -130,26 +130,26 @@ public class CaseListFixtureService {
 		ACTIVE05(CaseListFixtureService.START_DATE.plusDays(6),
 				Keywords.PARITY, Keywords.EVEN),
 		;
-	
+
 		public final ZonedDateTime startDate;
 		public final ZonedDateTime endDate;
 		public final String[] keyValues;
 		public final String snoozeReason;
 		public final int snoozeDays;
 		public final boolean terminateSnooze;
-	
+
 		private FixtureCase(ZonedDateTime startDate, String... keyValues) {
 			this(startDate, null, keyValues);
 		}
-	
+
 		private FixtureCase(ZonedDateTime startDate, ZonedDateTime endDate, String... keyValues) {
 			this(startDate, endDate, null, 0, false, keyValues);
 		}
-	
+
 		private FixtureCase(ZonedDateTime startDate, String snoozeReason, int snoozeDays, boolean cancelSnooze, String... keyValues) {
 			this(startDate, null, snoozeReason, snoozeDays, cancelSnooze, keyValues);
 		}
-	
+
 		private FixtureCase(ZonedDateTime startDate, ZonedDateTime endDate, String snoozeReason, int snoozeDays, boolean cancelSnooze, String... keyValues) {
 			this.startDate = startDate;
 			this.keyValues = keyValues;
@@ -246,7 +246,7 @@ public class CaseListFixtureService {
 			for (FixtureCase c : fixture.getCases()) {
 				LOG.info("Looking up latest snooze for case {}", c.name());
 				TroubleCase mainCase = _caseRepo.findByCaseManagementSystemAndReceiptNumber(sys, c.name()).get();
-				CaseSnooze snooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase).get();
+				CaseSnooze snooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeStartDesc(mainCase).get();
 				_attachmentService.attachToSnooze(req, snooze);
 			}
 		};

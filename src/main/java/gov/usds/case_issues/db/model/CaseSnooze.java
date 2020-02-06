@@ -24,7 +24,6 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 	@JoinColumn(updatable=false)
 	private TroubleCase snoozeCase;
 	@NotNull
-	@Column(updatable=false)
 	private String snoozeReason; // Needs FK relationship
 	@NotNull
 	@Column(updatable=false)
@@ -50,12 +49,21 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 		return snoozeReason;
 	}
 
+	public void setSnoozeReason(String reason) {
+		snoozeReason = reason;
+	}
+
 	public ZonedDateTime getSnoozeStart() {
 		return snoozeStart;
 	}
 
 	public ZonedDateTime getSnoozeEnd() {
 		return snoozeEnd;
+	}
+
+	public void setSnoozeEnd(int days) {
+		ZonedDateTime now = ZonedDateTime.now();
+		snoozeEnd = getEndTime(now, days);
 	}
 
 	public ZonedDateTime getSnoozeResolved() {
