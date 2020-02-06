@@ -36,7 +36,9 @@ import gov.usds.case_issues.services.UploadStatusService;
 @SuppressWarnings("checkstyle:MagicNumber")
 public class HitlistApiControllerTest extends ControllerTestBase {
 
+	private static final String CSV_CONTENT = "text/csv";
 	private static final String NO_OP = "non-empty request body";
+
 	private static final String DATE_STAMP_2018 = "2018-01-01T12:00:00Z";
 	private static final String DATE_STAMP_2019 = "2019-01-01T12:00:00Z";
 	private static final String VALID_ISSUE_TYPE = "WONKY";
@@ -156,7 +158,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_emptyList_accepted() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = putIssues("text/csv")
+		MockHttpServletRequestBuilder jsonPut = putIssues(CSV_CONTENT)
 			.content("header1,header2\n");
 		perform(jsonPut).andExpect(status().isAccepted());
 		checkUploadRecord(0, 0, 0);
@@ -165,7 +167,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_singleCase_accepted() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = putIssues("text/csv")
+		MockHttpServletRequestBuilder jsonPut = putIssues(CSV_CONTENT)
 			.content(
 				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
 				"FKE5250608,2014-08-29T00:00:00-04:00,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing\n"
@@ -177,7 +179,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_invalidCreationDate_badRequest() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = putIssues("text/csv")
+		MockHttpServletRequestBuilder jsonPut = putIssues(CSV_CONTENT)
 			.content(
 				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
 				"FKE5250608,NOT A DATE,1816,Pigeon,Happy,true,Eschewing Obfuscation,Boredom,43375,Scrutinizing\n"
@@ -190,7 +192,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_backDatedWithoutStructureAuthority_forbidden() throws Exception {
-		MockHttpServletRequestBuilder issuePut = putIssues("text/csv")
+		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT)
 				.param("effectiveDate", "2019-12-31T20:00:00Z")
 				.content(NO_OP);
 			perform(issuePut).andExpect(status().isForbidden());
@@ -199,7 +201,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@Test
 	@WithMockUser(authorities = "UPDATE_STRUCTURE")
 	public void putCsv_backDatedWithoutIssuesAuthority_forbidden() throws Exception {
-		MockHttpServletRequestBuilder issuePut = putIssues("text/csv")
+		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT)
 				.param("effectiveDate", "2019-12-31T20:00:00Z")
 				.content(NO_OP);
 			perform(issuePut).andExpect(status().isForbidden());
@@ -211,7 +213,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		String receiptNumber = "FKE27182818";
 		String csvString = "receiptNumber,creationDate,channelType\n"
 			+ receiptNumber + ",2001-08-29T00:00:00-04:00,Pay PerView\n";
-		MockHttpServletRequestBuilder issuePut = putIssues("text/csv")
+		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT)
 				.param("effectiveDate", "2017-05-15T20:00:00Z")
 				.content(csvString);
 		perform(issuePut).andExpect(status().isAccepted());
@@ -279,7 +281,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	public void getSummary_emptyCasesAdded_lastActivePresent() throws Exception {
 		initCaseData();
 		perform(put(API_PATH + "{issueTag}", VALID_CASE_MGT_SYS, VALID_CASE_TYPE, "WONKY")
-			.contentType("text/csv")
+			.contentType(CSV_CONTENT)
 			.with(csrf())
 			.content(
 				"receiptNumber,creationDate,caseAge,channelType,caseState,i90SP,caseStatus,applicationReason,caseId,caseSubstatus\n" +
