@@ -30,7 +30,8 @@ public class KPIService {
 
 	public Map<String, Object> getKPIData(
 		@TagFragment String caseManagementSystemTag,
-		@TagFragment String caseTypeTag
+		@TagFragment String caseTypeTag,
+		ZonedDateTime start
 	) {
 		CaseGroupInfo translated = _caseListService.translatePath(
 			caseManagementSystemTag,
@@ -39,42 +40,40 @@ public class KPIService {
 		HashMap<String, Object> kpis = new HashMap<String, Object>();
 		Long caseManagementSystemId = translated.getCaseManagementSystemId();
 		Long caseTypeId = translated.getCaseTypeId();
-		kpis.put("ResolvedTickets", getResolvedTickets(caseManagementSystemId, caseTypeId));
-		kpis.put("DaysToResolution", getAverageDaysToResolution(caseManagementSystemId, caseTypeId));
-		kpis.put("DaysWorked", getAverageDaysWorked(caseManagementSystemId, caseTypeId));
+		ZonedDateTime startOfWeek = start.with(START_OF_WEEK);
+		kpis.put("ResolvedTickets", getResolvedTickets(caseManagementSystemId, caseTypeId, startOfWeek));
+		kpis.put("DaysToResolution", getAverageDaysToResolution(caseManagementSystemId, caseTypeId, startOfWeek));
+		kpis.put("DaysWorked", getAverageDaysWorked(caseManagementSystemId, caseTypeId, startOfWeek));
 		return kpis;
 	}
 
-	private List<Integer> getResolvedTickets(Long caseManagementSystemId, Long caseTypeId) {
+	private List<Integer> getResolvedTickets(Long caseManagementSystemId, Long caseTypeId, ZonedDateTime rangeStart) {
 		ArrayList<Integer> ticketsResolved = new ArrayList<Integer>();
-		ZonedDateTime now = ZonedDateTime.now().with(START_OF_WEEK);
 		for (int i = 0; i < WEEKS; i++) {
-			ZonedDateTime start = now.minusWeeks(i +1);
-			ZonedDateTime end = now.minusWeeks(i);
+			ZonedDateTime start = rangeStart.minusWeeks(i +1);
+			ZonedDateTime end = rangeStart.minusWeeks(i);
 			int resolved = _bulkRepo.getResolvedCaseCount(caseManagementSystemId, caseTypeId, start, end);
 			ticketsResolved.add(i, resolved);
 		}
 		return ticketsResolved;
 	}
 
-	private List<Integer> getAverageDaysToResolution(Long caseManagementSystemId, Long caseTypeId) {
+	private List<Integer> getAverageDaysToResolution(Long caseManagementSystemId, Long caseTypeId, ZonedDateTime rangeStart) {
 		ArrayList<Integer> daysToResolution = new ArrayList<Integer>();
-		ZonedDateTime now = ZonedDateTime.now().with(START_OF_WEEK);
 		for (int i = 0; i < WEEKS; i++) {
-			ZonedDateTime start = now.minusWeeks(i +1);
-			ZonedDateTime end = now.minusWeeks(i);
+			ZonedDateTime start = rangeStart.minusWeeks(i +1);
+			ZonedDateTime end = rangeStart.minusWeeks(i);
 			int days = _bulkRepo.getAverageDaysToResolution(caseManagementSystemId, caseTypeId, start, end);
 			daysToResolution.add(i, days);
 		}
 		return daysToResolution;
 	}
 
-	private List<Integer> getAverageDaysWorked(Long caseManagementSystemId, Long caseTypeId) {
+	private List<Integer> getAverageDaysWorked(Long caseManagementSystemId, Long caseTypeId, ZonedDateTime rangeStart) {
 		ArrayList<Integer> daysToResolution = new ArrayList<Integer>();
-		ZonedDateTime now = ZonedDateTime.now().with(START_OF_WEEK);
 		for (int i = 0; i < WEEKS; i++) {
-			ZonedDateTime start = now.minusWeeks(i +1);
-			ZonedDateTime end = now.minusWeeks(i);
+			ZonedDateTime start = rangeStart.minusWeeks(i +1);
+			ZonedDateTime end = rangeStart.minusWeeks(i);
 			int days = _bulkRepo.getAverageDaysWorked(caseManagementSystemId, caseTypeId, start, end);
 			daysToResolution.add(i, days);
 		}
