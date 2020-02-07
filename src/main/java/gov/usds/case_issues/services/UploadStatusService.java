@@ -16,6 +16,7 @@ import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
+import gov.usds.case_issues.model.BusinessConstraintViolationException;
 
 @Service
 @Transactional
@@ -26,10 +27,25 @@ public class UploadStatusService {
 	@Autowired
 	private CaseIssueUploadRepository _uploadRepository;
 
+	/**
+	 * <p>Create a new upload record with status {@link UploadStatus#STARTED}, provided that there is no
+	 * business rule preventing us from creating an upload with the given parameters.</p>
+	 *
+	 * Currently, the only such rule is that uploads must be created in chronological order (that is,
+	 * one can be created in the past relative to the current date, but not in the past relative to
+	 * existing uploads).
+	 * @throws BusinessConstraintViolationException (unchecked) if appropriate
+	 */
 	@Transactional(readOnly=false, propagation=Propagation.REQUIRES_NEW)
 	public CaseIssueUpload commenceUpload(CaseManagementSystem sys, CaseType caseType, String issueType,
 	        ZonedDateTime effectiveDate, int uploadedRecords) {
-		LOG.debug("Saving upload record for {}/{}/{}", sys.getExternalId(), caseType.getExternalId(), issueType);
+		LOG.debug("Checking previous upload record for {}/{}/{}", sys.getExternalId(), caseType.getExternalId(), issueType);
+		CaseIssueUpload previous = getLastUpload(sys, caseType, issueType);
+		if (previous != null && previous.getEffectiveDate().isAfter(effectiveDate)) {
+			throw new BusinessConstraintViolationException("Cannot back-date issue upload beyond the latest existing upload.");
+		}
+
+		LOG.debug("Saving new upload record for {}/{}/{}", sys.getExternalId(), caseType.getExternalId(), issueType);
 		return _uploadRepository.save(
 		    new CaseIssueUpload(sys, caseType, issueType, effectiveDate, uploadedRecords));
 	}

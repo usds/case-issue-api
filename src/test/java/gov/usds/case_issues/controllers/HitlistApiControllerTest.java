@@ -36,6 +36,7 @@ import gov.usds.case_issues.services.UploadStatusService;
 @SuppressWarnings("checkstyle:MagicNumber")
 public class HitlistApiControllerTest extends ControllerTestBase {
 
+	private static final String CSV_HEADER_SHORT = "receiptNumber,creationDate,channelType\n";
 	private static final String CSV_CONTENT = "text/csv";
 	private static final String NO_OP = "non-empty request body";
 
@@ -211,11 +212,8 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
 	public void putCsv_backDatedIssues_correctDateUsed() throws Exception {
 		String receiptNumber = "FKE27182818";
-		String csvString = "receiptNumber,creationDate,channelType\n"
-			+ receiptNumber + ",2001-08-29T00:00:00-04:00,Pay PerView\n";
-		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT)
-				.param("effectiveDate", "2017-05-15T20:00:00Z")
-				.content(csvString);
+		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT, "2017-05-15T20:00:00Z")
+			.content(CSV_HEADER_SHORT + receiptNumber + ",2001-08-29T00:00:00-04:00,Pay Per View\n");
 		perform(issuePut).andExpect(status().isAccepted());
 		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
 		assertEquals(2017, lastUpload.getEffectiveDate().getYear());
@@ -228,10 +226,41 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putCsv_backDatedIssuesClosed_issueDatesCorrected() throws Exception {
+		String receiptNumber = "FKE27182818";
+		String startDateString = "2010-05-15T20:00:00Z";
+		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT, startDateString)
+			.content(CSV_HEADER_SHORT + receiptNumber + ",1978-08-29T00:00:00-04:00,Broadcast\n");
+		perform(issuePut).andExpect(status().isAccepted());
+		String endDateString = "2011-04-30T20:00:00Z";
+		issuePut = putIssues(CSV_CONTENT, endDateString)
+			.content(CSV_HEADER_SHORT);
+		perform(issuePut).andExpect(status().isAccepted());
+		CaseDetails details = _detailsService.findCaseDetails(VALID_CASE_MGT_SYS, receiptNumber);
+		Optional<? extends CaseIssueSummary> optIssue = details.getIssues().stream().findFirst();
+		assertTrue("Issue exists", optIssue.isPresent());
+		ZonedDateTime openedDate = optIssue.get().getIssueCreated();
+		ZonedDateTime closedDate = optIssue.get().getIssueClosed();
+		assertTrue("issue creation backdate", ZonedDateTime.parse(startDateString).isEqual(openedDate));
+		assertTrue("issue closure backdate", ZonedDateTime.parse(endDateString).isEqual(closedDate));
+	}
+
+	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putCsv_backDatedIssuesOutOfOrder_conflict() throws Exception {
+		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT, "2015-05-15T20:00:00Z")
+			.content(CSV_HEADER_SHORT);
+		perform(issuePut).andExpect(status().isAccepted());
+		issuePut = putIssues(CSV_CONTENT, "2010-05-15T20:00:00Z")
+			.content(CSV_HEADER_SHORT);
+		perform(issuePut).andExpect(status().isConflict());
+	}
+
+	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putJson_backDatedWithoutStructureAuthority_forbidden() throws Exception {
-		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
-				.param("effectiveDate", "2019-12-31T20:00:00Z")
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE, "2019-12-31T20:00:00Z")
 				.content("[]");
 			perform(jsonPut).andExpect(status().isForbidden());
 	}
@@ -253,8 +282,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		requestCase.put("receiptNumber", receiptNumber);
 		requestCase.put("creationDate", "2001-08-29T00:00:00-04:00");
 		requestCase.put("channelType", "Pay Per View");
-		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
-				.param("effectiveDate", "2019-12-31T20:00:00Z")
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE, "2019-12-31T20:00:00Z")
 				.content("[" + requestCase.toString() + "]");
 		perform(jsonPut).andExpect(status().isAccepted());
 		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
@@ -477,6 +505,10 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 
 	private static MockHttpServletRequestBuilder getSummary(String cmsTag, String ctTag) {
 		return get(API_PATH + "summary", cmsTag, ctTag);
+	}
+
+	private static MockHttpServletRequestBuilder putIssues(String contentType, String effectiveDate) {
+		return putIssues(contentType).param("effectiveDate", effectiveDate);
 	}
 
 	private static MockHttpServletRequestBuilder putIssues(String contentType) {
