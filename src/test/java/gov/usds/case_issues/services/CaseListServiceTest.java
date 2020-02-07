@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
@@ -41,7 +40,6 @@ import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
-import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
@@ -163,102 +161,6 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 		assertEquals(1, cases.size());
 		assertEquals(receiptNumber, cases.get(0).getReceiptNumber());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_invalidSystemTag_exception() {
-		_service.getActiveCases("hello\nworld", VALID_TYPE_TAG, null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_invalidTypeTag_exception() {
-		_service.getActiveCases(VALID_SYS_TAG, "hello\nworld", null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_invalidReceipt_exception() {
-		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_excessivePageSize_exception() {
-		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_excessivePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
-	}
-
-	@Test
-	public void getActiveCases_zeroPageSize_emptyList() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_negativePageSize_exception() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -10).size());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_negativePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -10).size());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_invalidSystemTag_exception() {
-		_service.getSnoozedCases("hello\nworld", VALID_TYPE_TAG, null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_invalidTypeTag_exception() {
-		_service.getSnoozedCases(VALID_SYS_TAG, "hello\nworld", null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_invalidReceipt_exception() {
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_excessivePageSize_exception() {
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_excessivePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_negativePageSize_exception() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_negativePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -1);
-	}
-
-	@Test
-	public void getSnoozedCases_zeroPageSize_emptyList() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		assertEquals(0, _service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
 	}
 
 	@Test
@@ -396,60 +298,6 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, "UNCHECKED", Collections.emptyList(), _now);
 	}
 
-	@Test
-	// just ... exercise a bunch of things and make sure things come out right, to determine
-	@SuppressWarnings("checkstyle:MagicNumber")
-	@WithMockUser(authorities="UPDATE_ISSUES")
-	public void omnibusListOperationsTest() {
-		String checkKey = "requestedAs";
-		CaseRequest a = new CaseRequestImpl("C1", Collections.singletonMap(checkKey, "C1"));
-		CaseRequest b = new CaseRequestImpl("C2", Collections.singletonMap(checkKey, "C2"));
-		CaseRequest c = new CaseRequestImpl("C3", Collections.singletonMap(checkKey, "C3"));
-		String otherSystem = "DIFFERENT_ONE";
-		String issueTypeA = "BACON";
-		String issueTypeB = "SAUSAGE";
-		String issueTypeC = "HAM";
-
-		_dataService.ensureCaseManagementSystemInitialized(otherSystem, "A different system");
-		List<? extends CaseSummary> activeCases = fetchCasesForSystem(VALID_SYS_TAG);
-		assertEquals("no active cases in " + VALID_SYS_TAG + " at start", 0, activeCases.size());
-		activeCases = fetchCasesForSystem(otherSystem);
-		assertEquals("no active cases in " + otherSystem + " at start", 0, activeCases.size());
-		wrappedPutIssueList(otherSystem, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a,b,c), _now.minusHours(1));
-		assertEquals("No active cases for " + VALID_SYS_TAG, 0, fetchCasesForSystem(VALID_SYS_TAG).size());
-		assertEquals("3 active cases for " + otherSystem, 3, fetchCasesForSystem(otherSystem).size());
-
-		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Arrays.asList(a, b), _now.minusDays(3));
-		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeB, Arrays.asList(b, c), _now.minusDays(2));
-		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeC, Arrays.asList(b, c), _now.minusDays(1));
-		assertEquals("3 active cases for " + VALID_SYS_TAG, 3, fetchCasesForSystem(VALID_SYS_TAG).size());
-
-		// spot check
-		TroubleCase foundCase = _caseRepo.findByCaseManagementSystemAndReceiptNumber(_system, "C2").get();
-		List<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(foundCase);
-		assertEquals("three issues for C2", 3, issues.size());
-		issues.forEach(i -> assertNull("Issue not closed for C2: " + i.getIssueType(), i.getIssueClosed()));
-
-		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeA, Collections.singletonList(b), _now);
-		List<? extends CaseSummary> nowActive = fetchCasesForSystem(VALID_SYS_TAG);
-		assertEquals("One case is gone", 2, nowActive.size());
-		Set<String> activeReceipts = nowActive.stream().map(ac -> ac.getReceiptNumber()).collect(Collectors.toSet());
-		assertTrue("C2 still active", activeReceipts.contains("C2"));
-		assertTrue("C3 still active", activeReceipts.contains("C3"));
-		foundCase = _caseRepo.findByCaseManagementSystemAndReceiptNumber(_system, "C1").get();
-		issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(foundCase);
-		assertEquals("issue type", issueTypeA, issues.get(0).getIssueType());
-		assertEquals("issue closed date", _now, issues.get(0).getIssueClosed());
-		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeB, Collections.emptyList(), _now);
-		assertEquals("Still two cases", 2, fetchCasesForSystem(VALID_SYS_TAG).size());
-		wrappedPutIssueList(VALID_SYS_TAG, VALID_TYPE_TAG, issueTypeC, Collections.emptyList(), _now);
-		activeCases = fetchCasesForSystem(VALID_SYS_TAG);
-		assertEquals("Just one active case", 1, activeCases.size());
-		assertEquals("C2", activeCases.get(0).getReceiptNumber());
-		assertEquals("Checking extra data", "C2", activeCases.get(0).getExtraData().get(checkKey));
-		assertEquals("Other list remains intact", 3, fetchCasesForSystem(otherSystem).size());
-	}
-
 	@Test()
 	public void getUploadFormat_formatIdNull_DefaultFormat() {
 		DataFormatSpec uploadFormat = _service.getUploadFormat(null);
@@ -476,34 +324,12 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_service.getUploadFormat("INVALID DATE FORMAT");
 	}
 
-	// if this test breaks during a re-build of the paging feature, delete it and re-implement it in CaseListPagingFilteringTest
-	@Test
-	@SuppressWarnings("checkstyle:MagicNumber")
-	public void getActiveCases_addedNewestFirst_paginatedCorrectly() {
-		String oldestReceiptNumber = "FKE7487700";
-		TroubleCase a = _dataService.initCase(_system, "FKE3742810", _type, ZonedDateTime.parse("2018-08-29T00:00:00-04:00"));
-		TroubleCase b = _dataService.initCase(_system, "FKE7209266", _type, ZonedDateTime.parse("2017-08-29T00:00:00-04:00"));
-		TroubleCase c = _dataService.initCase(_system, oldestReceiptNumber, _type, ZonedDateTime.parse("2016-08-29T00:00:00-04:00"));
-		ZonedDateTime lastMonth = ZonedDateTime.now().minusMonths(1);
-		_dataService.initIssue(a, "FOOBAR", lastMonth, null);
-		_dataService.initIssue(b, "FOOBAR", lastMonth, null);
-		_dataService.initIssue(c, "FOOBAR", lastMonth, null);
-
-		List<? extends CaseSummary> activeCases = _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, oldestReceiptNumber, 20);
-		assertEquals("The two newer cases should be returned", 2, activeCases.size());
-	}
-
 	private CaseIssueUpload wrappedPutIssueList(String systemTag, String caseTypeTag, String issueTypeTag,
 			List<CaseRequest> newIssueCases, ZonedDateTime eventDate) {
 		CaseGroupInfo translated = _service.translatePath(systemTag, caseTypeTag);
 		CaseIssueUpload uploadInfo = new CaseIssueUpload(translated.getCaseManagementSystem(),
 		    translated.getCaseType(), issueTypeTag, eventDate, newIssueCases.size());
 		return _service.putIssueList(uploadInfo, newIssueCases);
-	}
-
-	@SuppressWarnings("checkstyle:MagicNumber")
-	private List<? extends CaseSummary> fetchCasesForSystem(String systemTag) {
-		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, null, 20);
 	}
 
 	private class CaseRequestImpl implements CaseRequest {

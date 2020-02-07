@@ -11,7 +11,7 @@ import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseSummary;
 
 /**
- * A delegating façade that implements the {@link CaseSummary} interface by wrapping a {@link FilterableCase}. 
+ * A delegating façade that implements the {@link CaseSummary} interface by wrapping a {@link FilterableCase}.
  */
 public class DelegatingFilterableCaseSummary implements CaseSummary {
 
@@ -68,6 +68,11 @@ public class DelegatingFilterableCaseSummary implements CaseSummary {
 		@Override
 		public ZonedDateTime getSnoozeEnd() {
 			return _root.getSnoozeEnd();
+		}
+
+		@Override
+		public ZonedDateTime getSnoozeResolved() {
+			return _root.getSnoozeResolved();
 		}
 	}
 }

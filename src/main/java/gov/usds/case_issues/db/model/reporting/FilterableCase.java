@@ -23,6 +23,7 @@ public class FilterableCase extends TroubleCaseFixedData {
     private String snoozeReason;
     private ZonedDateTime snoozeStart;
     private ZonedDateTime snoozeEnd;
+    private ZonedDateTime snoozeResolved;
 
     // state
     private boolean hasOpenIssue;
@@ -41,6 +42,10 @@ public class FilterableCase extends TroubleCaseFixedData {
 
 	public ZonedDateTime getSnoozeEnd() {
 		return snoozeEnd;
+	}
+
+	public ZonedDateTime getSnoozeResolved() {
+		return snoozeResolved;
 	}
 
 	public boolean isHasOpenIssue() {

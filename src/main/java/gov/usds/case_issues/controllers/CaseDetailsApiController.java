@@ -63,7 +63,7 @@ public class CaseDetailsApiController {
 		if (_caseDetailsService.endActiveSnooze(caseManagementSystemTag, receiptNumber)) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
-			return ResponseEntity.noContent().build();
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 

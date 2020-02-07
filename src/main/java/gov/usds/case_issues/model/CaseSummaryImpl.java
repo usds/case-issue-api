@@ -54,7 +54,10 @@ public class CaseSummaryImpl implements CaseSummary {
 	}
 
 	public boolean isPreviouslySnoozed() {
-		return snoozeSummary != null && snoozeSummary.getSnoozeEnd().isBefore(ZonedDateTime.now());
+		return snoozeSummary != null && (
+			snoozeSummary.getSnoozeEnd().isBefore(ZonedDateTime.now()) ||
+			snoozeSummary.getSnoozeResolved() != null
+		);
 	}
 
 	@JsonSerialize(as=CaseSnoozeSummary.class)

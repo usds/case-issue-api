@@ -45,9 +45,9 @@ import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
+import gov.usds.case_issues.model.CaseListResponse;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
-import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.services.CaseFilteringService;
 import gov.usds.case_issues.services.CaseListService;
@@ -86,6 +86,7 @@ public class HitlistApiController {
 		protected static final String COMMENT_ANY = "hasAnyComment";
 		protected static final String COMMENT_CONTENT = "hasComment";
 		protected static final String DATA_FIELD = "dataField";
+		protected static final String RECEIPT_NUMBER = "receiptNumebr";
 	}
 	private static final Pattern FILTER_PATTERN = Pattern.compile(FilterParams.STEM + "(\\w+)(?:\\[(\\w+)\\])?");
 
@@ -129,7 +130,7 @@ public class HitlistApiController {
 			paramType="query"),
 	})
 	@GetMapping
-	public List<? extends CaseSummary> getCases(
+	public CaseListResponse getCases(
 			@PathVariable @ApiParam(value="The case management system to search in", required=true) String caseManagementSystemTag,
 			@PathVariable @ApiParam(value="The type of case to select", required=true) String caseTypeTag,
 			@RequestParam(required=true) @ApiParam(value="Which group of cases to select", required=true) Set<CaseSnoozeFilter> mainFilter,
@@ -140,9 +141,6 @@ public class HitlistApiController {
 			@RequestParam(defaultValue = "20") @Range(max=BulkCaseRepository.MAX_PAGE_SIZE) @ApiParam("The maximum records to return") int size,
 			@ApiIgnore @RequestParam MultiValueMap<@FilterParameter String, String> allParams
 			) {
-		if (snoozeReason.isPresent() && !mainFilter.contains(CaseSnoozeFilter.SNOOZED)) {
-			throw new IllegalArgumentException("Snooze reason cannot be specified for cases that are not snoozed");
-		}
 		List<CaseFilter> filters = new ArrayList<>();
 		if (caseCreationRangeBegin != null) {
 			filters.add(FilterFactory.dateRange(new DateRange(caseCreationRangeBegin, caseCreationRangeEnd)));
@@ -191,6 +189,8 @@ public class HitlistApiController {
 						assertSubparameter(parameterRoot, subParameter);
 						filters.add(FilterFactory.caseExtraData(Collections.singletonMap(subParameter, firstValue)));
 						break;
+					case FilterParams.RECEIPT_NUMBER:
+						filters.add(FilterFactory.receiptNumebr(firstValue));
 					default:
 						throw new IllegalArgumentException(String.format("Invalid filter parameter %s", parameterName));
 				}
@@ -206,26 +206,6 @@ public class HitlistApiController {
 		if (null == subParameter || subParameter.isEmpty()) {
 			throw new IllegalArgumentException("Parameter " + parameter + " requires a sub-parameter");
 		}
-	}
-
-	@GetMapping("snoozed")
-	public List<? extends CaseSummary> getSnoozedCases(
-		@PathVariable String caseManagementSystemTag,
-		@PathVariable String caseTypeTag,
-		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,
-		@RequestParam(name = "size", defaultValue = "20") Integer size
-	) {
-		return _listService.getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, size);
-	}
-
-	@GetMapping("active")
-	public List<? extends CaseSummary> getActiveCases(
-		@PathVariable String caseManagementSystemTag,
-		@PathVariable String caseTypeTag,
-		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,
-		@RequestParam(name = "size", defaultValue = "20") Integer size
-	) {
-		return _listService.getActiveCases(caseManagementSystemTag, caseTypeTag, receiptNumber, size);
 	}
 
 	@RequestMapping(value="summary", method=RequestMethod.GET)

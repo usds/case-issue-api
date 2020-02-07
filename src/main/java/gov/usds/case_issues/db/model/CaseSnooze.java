@@ -24,13 +24,13 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 	@JoinColumn(updatable=false)
 	private TroubleCase snoozeCase;
 	@NotNull
-	@Column(updatable=false)
 	private String snoozeReason; // Needs FK relationship
 	@NotNull
 	@Column(updatable=false)
 	private ZonedDateTime snoozeStart;
 	@NotNull
 	private ZonedDateTime snoozeEnd;
+	private ZonedDateTime snoozeResolved;
 
 	protected CaseSnooze() { /* for hibernate/JPA */ }
 
@@ -49,6 +49,10 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 		return snoozeReason;
 	}
 
+	public void setSnoozeReason(String reason) {
+		snoozeReason = reason;
+	}
+
 	public ZonedDateTime getSnoozeStart() {
 		return snoozeStart;
 	}
@@ -57,8 +61,17 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 		return snoozeEnd;
 	}
 
+	public void setSnoozeEnd(int days) {
+		ZonedDateTime now = ZonedDateTime.now();
+		snoozeEnd = getEndTime(now, days);
+	}
+
+	public ZonedDateTime getSnoozeResolved() {
+		return snoozeResolved;
+	}
+
 	public void endSnoozeNow() {
-		snoozeEnd = ZonedDateTime.now();
+		snoozeResolved = ZonedDateTime.now();
 	}
 
 	public static ZonedDateTime getEndTime(ZonedDateTime startTime, int durationDays) {

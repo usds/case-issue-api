@@ -2,7 +2,6 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,17 +35,16 @@ import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
 import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
 import gov.usds.case_issues.model.AttachmentSummary;
+import gov.usds.case_issues.model.CaseListResponse;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
-import gov.usds.case_issues.model.DateRange;
-import gov.usds.case_issues.services.model.CaseFilter;
 import gov.usds.case_issues.services.model.CasePageInfo;
 import gov.usds.case_issues.services.model.DelegatingFilterableCaseSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
 @Service
 @Validated
-public class CaseFilteringService implements CasePagingService {
+public class CaseFilteringService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseFilteringService.class);
 
@@ -62,41 +60,7 @@ public class CaseFilteringService implements CasePagingService {
 	@Autowired
 	private PageTranslationService _translator;
 
-	@Override
-	public List<? extends CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ACTIVE), size, Optional.of(DEFAULT_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
-	@Override
-	public List<? extends CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, Optional<String> snoozeReason, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		snoozeReason.ifPresent(reason -> filters.add(FilterFactory.snoozeReason(reason)));
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.SNOOZED), size, Optional.of(SNOOZE_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
-	@Override
-	public List<? extends CaseSummary> getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ALARMED), size, Optional.of(DEFAULT_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
-	public List<CaseSummary> getCases(
+	public CaseListResponse getCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@NotNull @Size(min=1,max=1) Set<CaseSnoozeFilter> queryFilters,
@@ -105,29 +69,22 @@ public class CaseFilteringService implements CasePagingService {
 			@NotNull Optional<String> pageReference,
 			@NotNull List<? extends Specification<FilterableCase>> filters
 			) {
-		Sort sortOrder = requestedSortOrder.orElse(defaultSort(queryFilters)); // in the long run we should probably validate this better.
+		Sort sortOrder = requestedSortOrder.orElse(DEFAULT_SORT); // in the long run we should probably validate this better.
 		CaseSnoozeFilter singleFilter = queryFilters.stream().findFirst().get();
 		Specification<FilterableCase> spec = baseSpec(caseManagementSystemTag, caseTypeTag, sortOrder, pageReference)
 			.and(caseCategorySpec(singleFilter));
 		for (Specification<FilterableCase> f : filters) {
 			spec = spec.and(f);
 		}
-		return wrapFetched(spec, PageRequest.of(0, pageSize, sortOrder));
-	}
-
-	private Sort defaultSort(Set<CaseSnoozeFilter> queryFilters) {
-		return queryFilters.contains(CaseSnoozeFilter.SNOOZED) ? SNOOZE_SORT : DEFAULT_SORT;
+		return wrapFetched(caseManagementSystemTag, caseTypeTag, spec, PageRequest.of(0, pageSize, sortOrder));
 	}
 
 	private Specification<FilterableCase> caseCategorySpec(CaseSnoozeFilter queryFilter) {
 		switch (queryFilter) {
-			case ACTIVE:
-				return (root, query, cb) -> cb.or(
-						cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp()),
-						cb.isNull(root.get("snoozeEnd"))
-						);
-			case SNOOZED:
-				return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("snoozeEnd"), cb.currentTimestamp());
+			case ALL:
+				return null;
+			case TRIAGED:
+				return (root, query, cb) -> cb.isNotNull(root.get("snoozeReason"));
 			case ALARMED:
 				return (root, query, cb) -> cb.lessThan(root.get("snoozeEnd"), cb.currentTimestamp());
 			case UNCHECKED:
@@ -137,16 +94,21 @@ public class CaseFilteringService implements CasePagingService {
 		}
 	}
 
-	private List<CaseSummary> wrapFetched(Specification<FilterableCase> mainSpec, Pageable pageInfo) {
+	private CaseListResponse wrapFetched(String caseManagementSystemTag, String caseTypeTag, Specification<FilterableCase> mainSpec, Pageable pageInfo) {
 		try {
 			LOG.debug("Starting fetch using {}/{}", mainSpec, pageInfo);
 			Slice<FilterableCase> page = _repo.findAll(mainSpec, pageInfo);
 			LOG.debug("Finished fetch using {}/{}", mainSpec, pageInfo);
 			List<FilterableCase> cases = page.getContent();
 			Map<Long, List<AttachmentSummary>> attachments = fetchAllAttachments(cases);
-			return cases.stream()
-					.map(c -> new DelegatingFilterableCaseSummary(c, attachments.get(c.getInternalId())))
-					.collect(Collectors.toList());
+			List<? extends CaseSummary> casesWithSummarys = cases.stream()
+			.map(c -> new DelegatingFilterableCaseSummary(c, attachments.get(c.getInternalId())))
+			.collect(Collectors.toList());
+			long queryCount=  _repo.count(mainSpec);
+			CasePageInfo path = _translator.translatePath(caseManagementSystemTag, caseTypeTag, null);
+			Specification<FilterableCase> fullSpec = pathSpec(path);
+			long totalCount= _repo.count(fullSpec);
+			return new CaseListResponse(casesWithSummarys, totalCount, queryCount);
 		} catch (InvalidDataAccessApiUsageException e) {
 			if (e.getCause() instanceof IllegalArgumentException) {
 				throw (IllegalArgumentException) e.getCause();
@@ -174,7 +136,7 @@ public class CaseFilteringService implements CasePagingService {
 
 	private Specification<FilterableCase> baseSpec(String caseManagementSystemTag, String caseTypeTag, Sort sortOrder,
 			Optional<String> pageReference) {
-		CasePageInfo path = _translator.translatePath(caseManagementSystemTag, caseTypeTag, pageReference.orElse(null)); 
+		CasePageInfo path = _translator.translatePath(caseManagementSystemTag, caseTypeTag, pageReference.orElse(null));
 		Specification<FilterableCase> fullSpec = pathSpec(path);
 		if (!path.isFirstPage()) {
 			fullSpec = fullSpec.and(pageSpec(path.getCase(), sortOrder));
@@ -210,7 +172,7 @@ public class CaseFilteringService implements CasePagingService {
 				Expression<Comparable> placeholder = cb.literal(val);
 				conjunction.add(o.isAscending() ? cb.greaterThan(field, placeholder) : cb.lessThan(field, placeholder));
 				alternates.add(cb.and(conjunction.toArray(new Predicate[conjunction.size()])));
-				priorFields.add(cb.equal(field, placeholder));	
+				priorFields.add(cb.equal(field, placeholder));
 			}
 			return cb.or(alternates.toArray(new Predicate[alternates.size()]));
 		};

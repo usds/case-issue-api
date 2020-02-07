@@ -55,6 +55,10 @@ public class FilterFactory {
 		);
 	}
 
+	public static CaseFilter receiptNumebr(String receiptNumebr) {
+		return (root, query, cb) -> cb.equal(root.get("receiptNumebr"), receiptNumebr);
+	}
+
 	public static CaseFilter snoozeReason(String reason) {
 		return (root, query, cb) -> cb.equal(root.get(MetaModel.SNOOZE_REASON), reason);
 	}

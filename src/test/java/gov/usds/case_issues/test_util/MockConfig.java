@@ -11,7 +11,6 @@ import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
 
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 

@@ -30,11 +30,7 @@ import gov.usds.case_issues.controllers.HitlistApiController.FilterParams;
 @WithMockUser(authorities="READ_CASES")
 public class HitlistApiControllerFilteringTest extends ControllerTestBase {
 
-	private static final String TAG_TYPE = FilterParams.STEM + FilterParams.TAG_BY_TYPE;
-	private static final String ANY_COMMENT = FilterParams.STEM + FilterParams.COMMENT_ANY;
-	private static final String COMMENT_CONTENT = FilterParams.STEM + FilterParams.COMMENT_CONTENT;
 	private static final String PARITY_FILTER = dataFieldFilter(Keywords.PARITY);
-	private static final String LINK_TYPE = FilterParams.STEM + FilterParams.LINK_BY_TYPE;
 	private static final String TROUBLE_LINK = linkContentFilter("trouble");
 
 	private static final int DEFAULT_PAGE_SIZE = 3;
@@ -48,61 +44,12 @@ public class HitlistApiControllerFilteringTest extends ControllerTestBase {
 	}
 
 	@Test
-	public void snoozedCases_noFilter_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED01))
-		;
-	}
-
-	@Test
-	public void snoozedCases_withTicket_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(LINK_TYPE, "trouble");
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED02, FixtureCase.SNOOZED04, FixtureCase.SNOOZED03))
-		;
-	}
-
-	@Test
-	public void alarmedCases_withTicket_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(LINK_TYPE, "trouble");
-		doGetCases(CaseSnoozeFilter.ALARMED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.DESNOOZED01))
-		;
-	}
-
-	@Test
-	public void alarmedCases_withSpecificGoodTicket_oneCase() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(TROUBLE_LINK, FixtureAttachment.LINK01.name());
-		doGetCases(CaseSnoozeFilter.ALARMED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.DESNOOZED01))
-		;
-	}
-
-	@Test
 	public void alarmedCases_withSpecificBadTicket_emptyList() throws Exception {
 		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
 		additional.add(TROUBLE_LINK, FixtureAttachment.LINK02.name());
 		doGetCases(CaseSnoozeFilter.ALARMED, DEFAULT_PAGE_SIZE, additional)
 			.andExpect(status().isOk())
 			.andExpect(emptyJsonList())
-		;
-	}
-
-	@Test
-	public void snoozedCases_withColorTag_oneResult() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(TAG_TYPE, "color");
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED02))
 		;
 	}
 
@@ -143,72 +90,12 @@ public class HitlistApiControllerFilteringTest extends ControllerTestBase {
 	}
 
 	@Test
-	public void snoozedCases_withComment_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(ANY_COMMENT, "true");
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED04))
-		;
-	}
-
-	@Test
-	public void snoozedCases_withoutComment_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(ANY_COMMENT, "false");
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED01, FixtureCase.SNOOZED03))
-		;
-	}
-
-	@Test
-	public void snoozedCases_withSpecificComment_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(COMMENT_CONTENT, FixtureAttachment.COMMENT2.name());
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED05, FixtureCase.SNOOZED04))
-		;
-	}
-
-	@Test
-	public void snoozedCases_dataParityEven_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(PARITY_FILTER, Keywords.EVEN);
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED05, FixtureCase.SNOOZED02, FixtureCase.SNOOZED03))
-		;
-	}
-
-	@Test
 	public void uncheckedCases_dataParityEven_correctList() throws Exception {
 		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
 		additional.add(PARITY_FILTER, Keywords.EVEN);
 		doGetCases(CaseSnoozeFilter.UNCHECKED, DEFAULT_PAGE_SIZE, additional)
 			.andExpect(status().isOk())
 			.andExpect(caseJson(FixtureCase.ACTIVE03, FixtureCase.ACTIVE05))
-		;
-	}
-	@Test
-	public void snoozedCases_dataParityEvenLaterPage_correctList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(PARITY_FILTER, Keywords.EVEN);
-		additional.add("pageReference", FixtureCase.SNOOZED05.name());
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(caseJson(FixtureCase.SNOOZED02, FixtureCase.SNOOZED03))
-		;
-	}
-
-	@Test
-	public void snoozedCases_dataUnknownField_emptyList() throws Exception {
-		MultiValueMap<String, String> additional = new LinkedMultiValueMap<>();
-		additional.add(dataFieldFilter("fred"), Keywords.EVEN);
-		doGetCases(CaseSnoozeFilter.SNOOZED, DEFAULT_PAGE_SIZE, additional)
-			.andExpect(status().isOk())
-			.andExpect(emptyJsonList())
 		;
 	}
 
@@ -219,11 +106,11 @@ public class HitlistApiControllerFilteringTest extends ControllerTestBase {
 		return String.format(FilterParams.STEM + FilterParams.LINK_BY_CONTENT + "[%s]", subtype);
 	}
 	private static ResultMatcher emptyJsonList() {
-		return content().json("[]", true);
+		return content().json("{\"cases\": [], \"totalCount\": 14, \"queryCount\": 0}");
 	}
 
 	private ResultMatcher caseJson(FixtureCase... cases) {
-		return jsonPath("$[*].receiptNumber").value(Stream.of(cases).map(c -> c.name()).collect(Collectors.toList()));
+		return jsonPath("$.cases.[*].receiptNumber").value(Stream.of(cases).map(c -> c.name()).collect(Collectors.toList()));
 	}
 
 	private ResultActions doGetCases(CaseSnoozeFilter main, int pageSize, MultiValueMap<String, String> additional) throws Exception {

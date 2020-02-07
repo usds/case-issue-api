@@ -58,7 +58,7 @@ public class CaseDetailsService {
 
 	public Optional<CaseSnooze> findSnooze(String caseManagementSystemTag, String receiptNumber) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
-		return _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
+		return _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeStartDesc(mainCase);
 	}
 
 	/**
@@ -102,31 +102,31 @@ public class CaseDetailsService {
 	@Transactional(readOnly=false)
 	public CaseSnoozeSummaryFacade updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
-		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
+		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeStartDesc(mainCase);
 		if (snoozeIsActive(foundSnooze)) {
-			CaseSnooze oldSnooze = foundSnooze.get();
-			oldSnooze.endSnoozeNow();
+			throw new IllegalArgumentException("Cannot edit a snnoze on a case without a snooze");
 		}
-		String reason = requestedSnooze.getSnoozeReason();
-		int duration = requestedSnooze.getDuration();
-		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration);
-		_snoozeRepo.save(replacement);
-		List<AttachmentSummary> savedNotes = requestedSnooze.getNotes().stream()
-				.map(r->_attachmentService.attachToSnooze(r, replacement))
-				.map(AttachmentSummary::new)
-				.collect(Collectors.toList());
-		return new CaseSnoozeSummaryFacade(replacement, savedNotes);
+		CaseSnooze snooze = foundSnooze.get();
+		snooze.setSnoozeReason(requestedSnooze.getSnoozeReason());
+		snooze.setSnoozeEnd(requestedSnooze.getDuration());
+		_snoozeRepo.save(snooze);
+		List<AttachmentSummary> notes = _attachmentService.findAttachmentsForCase(mainCase).stream()
+			.map(AttachmentSummary::new)
+			.collect(Collectors.toList());
+		return new CaseSnoozeSummaryFacade(snooze, notes);
 	}
 
 	private static boolean snoozeIsActive(Optional<CaseSnooze> snooze) {
-		return snooze.isPresent() && snooze.get().getSnoozeEnd().isAfter(ZonedDateTime.now());
+		return snooze.isPresent() &&
+				snooze.get().getSnoozeEnd().isAfter(ZonedDateTime.now()) &&
+				snooze.get().getSnoozeResolved() == null;
 	}
 
 	@Transactional(readOnly=false)
 	public CaseAttachmentAssociation annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
-		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
-		if (!snoozeIsActive(foundSnooze)) {
+		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeStartDesc(mainCase);
+		if (!foundSnooze.isPresent()) {
 			throw new IllegalArgumentException("Cannot add a note to a case that is not snoozed.");
 		}
 		return _attachmentService.attachToSnooze(newNote, foundSnooze.get());

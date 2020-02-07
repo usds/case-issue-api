@@ -145,7 +145,7 @@ public class CaseDetailsApiControllerTest extends ControllerTestBase {
 		perform(addNote(VALID_SYS, SAMPLE_CASE, new AttachmentRequest(AttachmentType.COMMENT, "What up?")).header("Origin", ORIGIN_HTTPS_OK))
 			.andExpect(status().is2xxSuccessful());
 		perform(endSnooze(VALID_SYS, SAMPLE_CASE).header("Origin", ORIGIN_HTTPS_OK))
-			.andExpect(status().isOk());
+			.andExpect(status().isNoContent());
 	}
 
 	@Test
