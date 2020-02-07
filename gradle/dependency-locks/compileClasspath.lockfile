@@ -96,6 +96,7 @@ org.springframework.security:spring-security-oauth2-client:5.1.6.RELEASE
 org.springframework.security:spring-security-oauth2-core:5.1.6.RELEASE
 org.springframework.security:spring-security-oauth2-jose:5.1.6.RELEASE
 org.springframework.security:spring-security-web:5.1.6.RELEASE
+org.springframework.session:spring-session-core:2.1.8.RELEASE
 org.springframework:spring-aop:5.1.9.RELEASE
 org.springframework:spring-aspects:5.1.9.RELEASE
 org.springframework:spring-beans:5.1.9.RELEASE

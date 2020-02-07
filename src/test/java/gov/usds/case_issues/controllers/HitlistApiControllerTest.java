@@ -45,7 +45,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	private static final String VALID_ISSUE_TYPE = "WONKY";
 	private static final String VALID_CASE_TYPE = "C1";
 	private static final String VALID_CASE_MGT_SYS = "F1";
-	private static final String API_PATH = "/api/cases/{caseManagementSystemTag}/{caseTypeTag}/";
+	protected static final String API_PATH = "/api/cases/{caseManagementSystemTag}/{caseTypeTag}/";
 	private static final String ISSUE_UPLOAD_PATH = API_PATH + "{issueTag}";
 	private static final String CASE_TYPE_NOPE = "Case Type 'NOPE' was not found";
 	private static final String CASE_MANAGEMENT_SYSTEM_NOPE = "Case Management System 'NOPE' was not found";
@@ -351,8 +351,6 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isBadRequest());
 		perform(doGetCases().param(Filters.MAIN, "FAKE"))
 			.andExpect(status().isBadRequest());
-		perform(doGetCases().param(Filters.MAIN, "UNCHECKED"))
-			.andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -464,6 +462,23 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.andExpect(content().json("[]", true))
 		;
 	}
+
+	@Test
+	public void getCases_invalidAdditionalParamNames_badRequest() throws Exception {
+		perform(doGetCases().param(Filters.MAIN, "ALARMED").param("+nope", "1", "2", "3"))
+			.andExpect(status().isBadRequest())
+		;
+		perform(doGetCases().param(Filters.MAIN, "ALARMED").param("-flag", "true"))
+			.andExpect(status().isBadRequest())
+		;
+		perform(doGetCases().param(Filters.MAIN, "ALARMED").param("inject\nme", "plzkthx"))
+			.andExpect(status().isBadRequest())
+		;
+		perform(doGetCases().param(Filters.MAIN, "ALARMED").param("filter on awesomeness", "true"))
+			.andExpect(status().isBadRequest())
+		;
+	}
+
 	/**
 	 * Create some data on our default case type!
 	 *

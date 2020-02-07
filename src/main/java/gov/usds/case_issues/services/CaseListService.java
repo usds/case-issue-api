@@ -23,11 +23,11 @@ import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.db.model.CaseIssue;
 import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
-import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
+import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
@@ -35,6 +35,7 @@ import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.CaseTypeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
+import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSummary;
@@ -69,6 +70,8 @@ public class CaseListService implements CasePagingService, PageTranslationServic
 	private CaseIssueRepository _issueRepo;
 	@Autowired
 	private TroubleCaseRepository _caseRepo;
+	@Autowired
+	private FilterableCaseRepository _filterableCaseRepo;
 	@Autowired
 	private CaseAttachmentService _attachmentService;
 	@Autowired
@@ -209,14 +212,13 @@ public class CaseListService implements CasePagingService, PageTranslationServic
 				}
 			}
 		} else {
-			TroubleCase troubleCase = translated.getCase();
-			Optional<CaseSnooze> lastSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(troubleCase);
-			if (!lastSnooze.isPresent()) {
+			FilterableCase troubleCase = translated.getCase();
+			ZonedDateTime lastSnoozeEnd = troubleCase.getSnoozeEnd();
+			if (null == lastSnoozeEnd) {
 				throw new IllegalArgumentException(
 					"Receipt number given does not correspond to a snoozed case"
 				);
 			}
-			ZonedDateTime lastSnoozeEnd = lastSnooze.get().getSnoozeEnd();
 			// in theory, reversing this and using isBefore would work nicely, only this might produce a 1-millisecond
 			// race condition in tests
 			if (!lastSnoozeEnd.isAfter(ZonedDateTime.now())) {
@@ -350,7 +352,7 @@ public class CaseListService implements CasePagingService, PageTranslationServic
 	public CasePageInfo translatePath(@TagFragment String caseManagementSystemTag, @TagFragment String caseTypeTag, @TagFragment String receipt) {
 		CaseGroupInfo group = translatePath(caseManagementSystemTag, caseTypeTag);
 		if (receipt != null) {
-			Optional<TroubleCase> lastCase =_caseRepo.findByCaseManagementSystemAndReceiptNumber(
+			Optional<FilterableCase> lastCase =_filterableCaseRepo.findByCaseManagementSystemAndReceiptNumber(
 				group.getCaseManagementSystem(),
 				receipt
 			);

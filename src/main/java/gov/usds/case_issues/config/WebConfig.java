@@ -18,6 +18,8 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -78,6 +80,19 @@ public class WebConfig implements WebMvcConfigurer {
 		FilterRegistrationBean<JsonRedirectPreventingFilter> registration = new FilterRegistrationBean<>(new JsonRedirectPreventingFilter());
 		registration.setOrder(BEFORE_SECURITY);
 		return registration;
+	}
+
+	/**
+	 * Force cookies to set SameSite=None, since otherwise CORS requests will not work in compliant browsers.
+	 * At some future point (no earlier than when we upgrade to Spring Boot 2.2, and probably later) it will
+	 * be possible to replace this with one line in application.yml, at which point this should definitely be
+	 * deleted (and the compile-time dependency on spring-session-core can be removed).
+	 */
+	@Bean
+	public CookieSerializer getCookieSerializer() {
+		DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+		serializer.setSameSite("None");
+		return serializer;
 	}
 
 	/**

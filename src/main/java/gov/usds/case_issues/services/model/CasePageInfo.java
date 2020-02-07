@@ -4,17 +4,17 @@ import java.time.ZonedDateTime;
 
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
-import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.reporting.FilterableCase;
 
 public class CasePageInfo extends CaseGroupInfo {
 
-	private TroubleCase _case;
+	private FilterableCase _case;
 
-	public CasePageInfo(CaseGroupInfo group, TroubleCase c) {
+	public CasePageInfo(CaseGroupInfo group, FilterableCase c) {
 		this(group.getCaseManagementSystem(), group.getCaseType(), c);
 	}
 
-	public CasePageInfo(CaseManagementSystem system, CaseType type, TroubleCase c) {
+	public CasePageInfo(CaseManagementSystem system, CaseType type, FilterableCase c) {
 		super(system, type);
 		_case = c;
 	}
@@ -23,7 +23,7 @@ public class CasePageInfo extends CaseGroupInfo {
 		return _case == null;
 	}
 
-	public TroubleCase getCase() {
+	public FilterableCase getCase() {
 		assertCase();
 		return _case;
 	}
