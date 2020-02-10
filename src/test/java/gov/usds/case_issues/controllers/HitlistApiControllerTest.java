@@ -1,7 +1,6 @@
 package gov.usds.case_issues.controllers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -215,7 +214,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT, "2017-05-15T20:00:00Z")
 			.content(CSV_HEADER_SHORT + receiptNumber + ",2001-08-29T00:00:00-04:00,Pay Per View\n");
 		perform(issuePut).andExpect(status().isAccepted());
-		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
+		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE).get();
 		assertEquals(2017, lastUpload.getEffectiveDate().getYear());
 		assertEquals(Month.MAY, lastUpload.getEffectiveDate().getMonth());
 		assertEquals(15, lastUpload.getEffectiveDate().getDayOfMonth());
@@ -285,7 +284,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE, "2019-12-31T20:00:00Z")
 				.content("[" + requestCase.toString() + "]");
 		perform(jsonPut).andExpect(status().isAccepted());
-		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
+		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE).get();
 		assertEquals(2019, lastUpload.getEffectiveDate().getYear());
 		assertEquals(Month.DECEMBER, lastUpload.getEffectiveDate().getMonth());
 		assertEquals(31, lastUpload.getEffectiveDate().getDayOfMonth());
@@ -495,8 +494,9 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	}
 
 	private void checkUploadRecord(int recordCount, int newIssues, int closedIssues) {
-		CaseIssueUpload uploadInfo = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
-		assertNotNull(uploadInfo);
+		Optional<CaseIssueUpload> maybeInfo = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE);
+		assertTrue(maybeInfo.isPresent());
+		CaseIssueUpload uploadInfo = maybeInfo.get();
 		assertEquals(UploadStatus.SUCCESSFUL, uploadInfo.getUploadStatus());
 		assertEquals(newIssues, uploadInfo.getNewIssueCount().intValue());
 		assertEquals(closedIssues, uploadInfo.getClosedIssueCount().intValue());

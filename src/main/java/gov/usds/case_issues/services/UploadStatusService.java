@@ -3,6 +3,7 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +41,8 @@ public class UploadStatusService {
 	public CaseIssueUpload commenceUpload(CaseManagementSystem sys, CaseType caseType, String issueType,
 	        ZonedDateTime effectiveDate, int uploadedRecords) {
 		LOG.debug("Checking previous upload record for {}/{}/{}", sys.getExternalId(), caseType.getExternalId(), issueType);
-		CaseIssueUpload previous = getLastUpload(sys, caseType, issueType);
-		if (previous != null && previous.getEffectiveDate().isAfter(effectiveDate)) {
+		Optional<CaseIssueUpload> previous = getLastUpload(sys, caseType, issueType);
+		if (previous.isPresent() && previous.get().getEffectiveDate().isAfter(effectiveDate)) {
 			throw new BusinessConstraintViolationException("Cannot back-date issue upload beyond the latest existing upload.");
 		}
 
@@ -72,13 +73,13 @@ public class UploadStatusService {
 		history.sort((a,b)->a.getEffectiveDate().compareTo(b.getEffectiveDate()));
 		return history;
 	}
-	public CaseIssueUpload getLastUpload(CaseManagementSystem sys, CaseType type, String issueTypeTag) {
+	public Optional<CaseIssueUpload> getLastUpload(CaseManagementSystem sys, CaseType type, String issueTypeTag) {
 		return _uploadRepository.findFirstByCaseManagementSystemAndCaseTypeAndIssueTypeAndUploadStatusOrderByEffectiveDateDesc(
-				sys, type, issueTypeTag, UploadStatus.SUCCESSFUL).orElse(null);
+				sys, type, issueTypeTag, UploadStatus.SUCCESSFUL);
 	}
-	public CaseIssueUpload getLastUpload(CaseManagementSystem sys, CaseType type, UploadStatus successful) {
+	public Optional<CaseIssueUpload> getLastUpload(CaseManagementSystem sys, CaseType type, UploadStatus successful) {
 		return _uploadRepository.findFirstByCaseManagementSystemAndCaseTypeAndUploadStatusOrderByEffectiveDateDesc(
-				sys, type, UploadStatus.SUCCESSFUL).orElse(null);
+				sys, type, successful);
 	}
 
 	/** Simple fetch-by-ID, for something where people rarely want to know the ID: initially just for test/verification */ 
