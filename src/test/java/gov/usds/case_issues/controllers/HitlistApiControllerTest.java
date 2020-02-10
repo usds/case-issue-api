@@ -2,6 +2,7 @@ package gov.usds.case_issues.controllers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -9,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Month;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -211,13 +211,12 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
 	public void putCsv_backDatedIssues_correctDateUsed() throws Exception {
 		String receiptNumber = "FKE27182818";
-		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT, "2017-05-15T20:00:00Z")
+		String effectiveDate = "2017-05-15T20:00:00Z";
+		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT, effectiveDate)
 			.content(CSV_HEADER_SHORT + receiptNumber + ",2001-08-29T00:00:00-04:00,Pay Per View\n");
 		perform(issuePut).andExpect(status().isAccepted());
 		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE).get();
-		assertEquals(2017, lastUpload.getEffectiveDate().getYear());
-		assertEquals(Month.MAY, lastUpload.getEffectiveDate().getMonth());
-		assertEquals(15, lastUpload.getEffectiveDate().getDayOfMonth());
+		assertDateEquals("CSV put effective date", effectiveDate, lastUpload.getEffectiveDate());
 		CaseDetails details = _detailsService.findCaseDetails(VALID_CASE_MGT_SYS, receiptNumber);
 		Optional<? extends CaseIssueSummary> optIssue = details.getIssues().stream().findFirst();
 		assertTrue("Issue exists", optIssue.isPresent());
@@ -239,10 +238,8 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		CaseDetails details = _detailsService.findCaseDetails(VALID_CASE_MGT_SYS, receiptNumber);
 		Optional<? extends CaseIssueSummary> optIssue = details.getIssues().stream().findFirst();
 		assertTrue("Issue exists", optIssue.isPresent());
-		ZonedDateTime openedDate = optIssue.get().getIssueCreated();
-		ZonedDateTime closedDate = optIssue.get().getIssueClosed();
-		assertTrue("issue creation backdate", ZonedDateTime.parse(startDateString).isEqual(openedDate));
-		assertTrue("issue closure backdate", ZonedDateTime.parse(endDateString).isEqual(closedDate));
+		assertDateEquals("issue creation backdate", startDateString, optIssue.get().getIssueCreated());
+		assertDateEquals("issue closure backdate", endDateString, optIssue.get().getIssueClosed());
 	}
 
 	@Test
@@ -278,16 +275,15 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	public void putJson_backDatedIssues_correctDateUsed() throws Exception {
 		JSONObject requestCase = new JSONObject();
 		String receiptNumber = "FKE31415926";
+		String effectiveDate = "2019-12-31T20:00:00Z";
 		requestCase.put("receiptNumber", receiptNumber);
 		requestCase.put("creationDate", "2001-08-29T00:00:00-04:00");
 		requestCase.put("channelType", "Pay Per View");
-		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE, "2019-12-31T20:00:00Z")
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE, effectiveDate)
 				.content("[" + requestCase.toString() + "]");
 		perform(jsonPut).andExpect(status().isAccepted());
 		CaseIssueUpload lastUpload = _uploadService.getLastUpload(_system, _type, VALID_ISSUE_TYPE).get();
-		assertEquals(2019, lastUpload.getEffectiveDate().getYear());
-		assertEquals(Month.DECEMBER, lastUpload.getEffectiveDate().getMonth());
-		assertEquals(31, lastUpload.getEffectiveDate().getDayOfMonth());
+		assertDateEquals("back-dated upload date", effectiveDate, lastUpload.getEffectiveDate());
 		CaseDetails details = _detailsService.findCaseDetails(VALID_CASE_MGT_SYS, receiptNumber);
 		Optional<? extends CaseIssueSummary> optIssue = details.getIssues().stream().findFirst();
 		assertTrue("Issue exists", optIssue.isPresent());
@@ -532,4 +528,12 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.with(csrf());
 	}
 
+	private static void assertDateEquals(String message, String expected, ZonedDateTime found) {
+		assertDateEquals(message, ZonedDateTime.parse(expected), found);
+	}
+	private static void assertDateEquals(String message, ZonedDateTime expected, ZonedDateTime found) {
+		if (!expected.isEqual(found)) {
+			fail(String.format("%s: expected %s, found %s", message, expected, found));
+		}
+	}
 }
