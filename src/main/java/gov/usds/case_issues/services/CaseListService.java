@@ -332,10 +332,10 @@ public class CaseListService implements CasePagingService, PageTranslationServic
 		Map<String, Object> caseCounts = _bulkRepo.getSnoozeSummary(translated.getCaseManagementSystemId(), translated.getCaseTypeId())
 				.stream()
 				.collect(Collectors.toMap(a->((String) a[0]).trim(), a->(Number) a[1]));
-		CaseIssueUpload lastSuccess = _uploadStatusService.getLastUpload(
+		Optional<CaseIssueUpload> lastSuccess = _uploadStatusService.getLastUpload(
 			translated.getCaseManagementSystem(), translated.getCaseType(), UploadStatus.SUCCESSFUL);
-		if (lastSuccess != null) {
-			caseCounts.put("lastUpdated", lastSuccess.getEffectiveDate());
+		if (lastSuccess.isPresent()) {
+			caseCounts.put("lastUpdated", lastSuccess.get().getEffectiveDate());
 		}
 		return caseCounts;
 	}

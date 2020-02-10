@@ -3,6 +3,7 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.db.repositories.CaseIssueUploadRepository;
+import gov.usds.case_issues.model.BusinessConstraintViolationException;
 
 @Service
 @Transactional
@@ -26,10 +28,25 @@ public class UploadStatusService {
 	@Autowired
 	private CaseIssueUploadRepository _uploadRepository;
 
+	/**
+	 * <p>Create a new upload record with status {@link UploadStatus#STARTED}, provided that there is no
+	 * business rule preventing us from creating an upload with the given parameters.</p>
+	 *
+	 * Currently, the only such rule is that uploads must be created in chronological order (that is,
+	 * one can be created in the past relative to the current date, but not in the past relative to
+	 * existing uploads).
+	 * @throws BusinessConstraintViolationException (unchecked) if appropriate
+	 */
 	@Transactional(readOnly=false, propagation=Propagation.REQUIRES_NEW)
 	public CaseIssueUpload commenceUpload(CaseManagementSystem sys, CaseType caseType, String issueType,
 	        ZonedDateTime effectiveDate, int uploadedRecords) {
-		LOG.debug("Saving upload record for {}/{}/{}", sys.getExternalId(), caseType.getExternalId(), issueType);
+		LOG.debug("Checking previous upload record for {}/{}/{}", sys.getExternalId(), caseType.getExternalId(), issueType);
+		Optional<CaseIssueUpload> previous = getLastUpload(sys, caseType, issueType);
+		if (previous.isPresent() && previous.get().getEffectiveDate().isAfter(effectiveDate)) {
+			throw new BusinessConstraintViolationException("Cannot back-date issue upload beyond the latest existing upload.");
+		}
+
+		LOG.debug("Saving new upload record for {}/{}/{}", sys.getExternalId(), caseType.getExternalId(), issueType);
 		return _uploadRepository.save(
 		    new CaseIssueUpload(sys, caseType, issueType, effectiveDate, uploadedRecords));
 	}
@@ -56,13 +73,13 @@ public class UploadStatusService {
 		history.sort((a,b)->a.getEffectiveDate().compareTo(b.getEffectiveDate()));
 		return history;
 	}
-	public CaseIssueUpload getLastUpload(CaseManagementSystem sys, CaseType type, String issueTypeTag) {
+	public Optional<CaseIssueUpload> getLastUpload(CaseManagementSystem sys, CaseType type, String issueTypeTag) {
 		return _uploadRepository.findFirstByCaseManagementSystemAndCaseTypeAndIssueTypeAndUploadStatusOrderByEffectiveDateDesc(
-				sys, type, issueTypeTag, UploadStatus.SUCCESSFUL).orElse(null);
+				sys, type, issueTypeTag, UploadStatus.SUCCESSFUL);
 	}
-	public CaseIssueUpload getLastUpload(CaseManagementSystem sys, CaseType type, UploadStatus successful) {
+	public Optional<CaseIssueUpload> getLastUpload(CaseManagementSystem sys, CaseType type, UploadStatus successful) {
 		return _uploadRepository.findFirstByCaseManagementSystemAndCaseTypeAndUploadStatusOrderByEffectiveDateDesc(
-				sys, type, UploadStatus.SUCCESSFUL).orElse(null);
+				sys, type, successful);
 	}
 
 	/** Simple fetch-by-ID, for something where people rarely want to know the ID: initially just for test/verification */ 

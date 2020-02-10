@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import gov.usds.case_issues.model.ApiModelNotFoundException;
+import gov.usds.case_issues.model.BusinessConstraintViolationException;
 
 @RestControllerAdvice("gov.usds.case_issues.controllers") // maybe make this type safe?
 public class ApiControllerAdvice {
@@ -46,4 +47,12 @@ public class ApiControllerAdvice {
 		LOG.warn("Got a data integrity violation!");
 		return new SpringRestError(e, HttpStatus.CONFLICT, req);
 	}
+
+	@ExceptionHandler
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public SpringRestError handleBusinessRuleViolation(BusinessConstraintViolationException e, HttpServletRequest req) {
+		LOG.warn("Got a business rule violation!", e);
+		return new SpringRestError(e, HttpStatus.CONFLICT, req);
+	}
+
 }

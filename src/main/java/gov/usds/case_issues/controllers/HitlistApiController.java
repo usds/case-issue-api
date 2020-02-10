@@ -39,6 +39,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import gov.usds.case_issues.authorization.RequireReadCasePermission;
+import gov.usds.case_issues.authorization.RequireUploadAndStructurePermission;
 import gov.usds.case_issues.authorization.RequireUploadPermission;
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.db.model.AttachmentType;
@@ -238,13 +239,28 @@ public class HitlistApiController {
 	public ResponseEntity<?> updateIssueListCsv(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
 			@RequestBody InputStream csvStream, @RequestParam(required=false) String uploadSchema) throws IOException {
 		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
+		return processCsvUpload(translated, issueTag, csvStream, ZonedDateTime.now(), uploadSchema);
+	}
+
+	@RequireUploadAndStructurePermission
+	@PutMapping(value="/{issueTag}",consumes={"text/csv"}, params="effectiveDate")
+	public ResponseEntity<?> updateIssueListCsvWithBackdate(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
+			@RequestBody InputStream csvStream,
+			@RequestParam(required=true) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime effectiveDate,
+			@RequestParam(required=false) String uploadSchema) throws IOException {
+		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
+		return processCsvUpload(translated, issueTag, csvStream, effectiveDate, uploadSchema);
+	}
+
+	private ResponseEntity<?> processCsvUpload(CaseGroupInfo translated, String issueTag, InputStream csvStream,
+			ZonedDateTime effectiveDate, String uploadSchema) throws IOException {
 		CsvSchema schema = CsvSchema.emptySchema().withHeader();
 		MappingIterator<Map<String, Object>> valueIterator = new CsvMapper()
 			.readerFor(Map.class)
 			.with(schema)
 			.readValues(csvStream);
 		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
-		_uploadService.putIssueList(translated, issueTag, newIssueCases, ZonedDateTime.now());
+		_uploadService.putIssueList(translated, issueTag, newIssueCases, effectiveDate);
 		return ResponseEntity.accepted().build();
 	}
 
@@ -253,9 +269,24 @@ public class HitlistApiController {
 	public ResponseEntity<?> updateIssueListJson(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
 			@RequestBody List<Map<String,Object>> jsonData, @RequestParam(required=false) String uploadSchema) throws IOException {
 		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
+		return processJsonUpload(translated, issueTag, jsonData, ZonedDateTime.now(), uploadSchema);
+	}
+
+	@RequireUploadAndStructurePermission
+	@PutMapping(value="/{issueTag}",consumes= {MediaType.APPLICATION_JSON_VALUE}, params="effectiveDate")
+	public ResponseEntity<?> updateIssueListJsonWithBackdate(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag, @PathVariable String issueTag,
+			@RequestBody List<Map<String,Object>> jsonData,
+			@RequestParam(required=true) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime effectiveDate,
+			@RequestParam(required=false) String uploadSchema) throws IOException {
+		CaseGroupInfo translated = _listService.translatePath(caseManagementSystemTag, caseTypeTag);
+		return processJsonUpload(translated, issueTag, jsonData, effectiveDate, uploadSchema);
+	}
+
+	private ResponseEntity<?> processJsonUpload(CaseGroupInfo translated, String issueTag,
+			List<Map<String, Object>> jsonData, ZonedDateTime effectiveDate, String uploadSchema) {
 		Iterator<Map<String,Object>> valueIterator = jsonData.listIterator();
 		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
-		_uploadService.putIssueList(translated, issueTag, newIssueCases, ZonedDateTime.now());
+		_uploadService.putIssueList(translated, issueTag, newIssueCases, effectiveDate);
 		return ResponseEntity.accepted().build();
 	}
 
