@@ -193,18 +193,18 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_backDatedWithoutStructureAuthority_forbidden() throws Exception {
 		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT)
-				.param("effectiveDate", "2019-12-31T20:00:00Z")
-				.content(NO_OP);
-			perform(issuePut).andExpect(status().isForbidden());
+			.param("effectiveDate", "2019-12-31T20:00:00Z")
+			.content(NO_OP);
+		perform(issuePut).andExpect(status().isForbidden());
 	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_STRUCTURE")
 	public void putCsv_backDatedWithoutIssuesAuthority_forbidden() throws Exception {
 		MockHttpServletRequestBuilder issuePut = putIssues(CSV_CONTENT)
-				.param("effectiveDate", "2019-12-31T20:00:00Z")
-				.content(NO_OP);
-			perform(issuePut).andExpect(status().isForbidden());
+			.param("effectiveDate", "2019-12-31T20:00:00Z")
+			.content(NO_OP);
+		perform(issuePut).andExpect(status().isForbidden());
 	}
 
 	@Test
@@ -261,16 +261,16 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 	public void putJson_backDatedWithoutStructureAuthority_forbidden() throws Exception {
 		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE, "2019-12-31T20:00:00Z")
 				.content("[]");
-			perform(jsonPut).andExpect(status().isForbidden());
+		perform(jsonPut).andExpect(status().isForbidden());
 	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_STRUCTURE")
 	public void putJson_backDatedWithoutIssuesAuthority_forbidden() throws Exception {
 		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
-				.param("effectiveDate", "2019-12-31T20:00:00Z")
-				.content("[]");
-			perform(jsonPut).andExpect(status().isForbidden());
+			.param("effectiveDate", "2019-12-31T20:00:00Z")
+			.content("[]");
+		perform(jsonPut).andExpect(status().isForbidden());
 	}
 
 	@Test
