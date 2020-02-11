@@ -34,7 +34,6 @@ import org.springframework.validation.annotation.Validated;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
-import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
 import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
@@ -62,6 +61,9 @@ public class CaseFilteringService implements CasePagingService {
 	private AttachmentAssociationRepository _attachmentAssociationRepo;
 	@Autowired
 	private PageTranslationService _translator;
+
+	/** The maximum allowed page size for a paged request. */
+	public static final int MAX_PAGE_SIZE = 100;
 
 	@Override
 	public List<? extends CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag,
@@ -101,7 +103,7 @@ public class CaseFilteringService implements CasePagingService {
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@NotNull @Size(min=1,max=1) Set<CaseSnoozeFilter> queryFilters,
-			@Range(min=1, max=BulkCaseRepository.MAX_PAGE_SIZE) int pageSize,
+			@Range(min=1, max=CaseFilteringService.MAX_PAGE_SIZE) int pageSize,
 			@NotNull Optional<Sort> requestedSortOrder,
 			@NotNull Optional<String> pageReference,
 			@NotNull List<? extends Specification<FilterableCase>> filters

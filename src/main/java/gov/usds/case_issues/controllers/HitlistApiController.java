@@ -44,7 +44,6 @@ import gov.usds.case_issues.authorization.RequireUploadPermission;
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.db.model.AttachmentType;
 import gov.usds.case_issues.db.model.TroubleCase;
-import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
@@ -138,7 +137,7 @@ public class HitlistApiController {
 			@RequestParam(required=false) @DateTimeFormat(iso=ISO.DATE_TIME) ZonedDateTime caseCreationRangeEnd,
 			@RequestParam @ApiParam("An opaque parameter that specifies the page to fetch") Optional<String> pageReference,
 			@RequestParam Optional<String> snoozeReason,
-			@RequestParam(defaultValue = "20") @Range(max=BulkCaseRepository.MAX_PAGE_SIZE) @ApiParam("The maximum records to return") int size,
+			@RequestParam(defaultValue = "20") @Range(max=CaseFilteringService.MAX_PAGE_SIZE) @ApiParam("The maximum records to return") int size,
 			@ApiIgnore @RequestParam MultiValueMap<@FilterParameter String, String> allParams
 			) {
 		if (snoozeReason.isPresent() && !mainFilter.contains(CaseSnoozeFilter.SNOOZED)) {
