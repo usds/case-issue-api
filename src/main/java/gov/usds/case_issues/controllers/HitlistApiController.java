@@ -209,26 +209,6 @@ public class HitlistApiController {
 		}
 	}
 
-	@GetMapping("snoozed")
-	public List<? extends CaseSummary> getSnoozedCases(
-		@PathVariable String caseManagementSystemTag,
-		@PathVariable String caseTypeTag,
-		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,
-		@RequestParam(name = "size", defaultValue = "20") Integer size
-	) {
-		return _listService.getSnoozedCases(caseManagementSystemTag, caseTypeTag, receiptNumber, size);
-	}
-
-	@GetMapping("active")
-	public List<? extends CaseSummary> getActiveCases(
-		@PathVariable String caseManagementSystemTag,
-		@PathVariable String caseTypeTag,
-		@RequestParam(name = "receiptNumber", defaultValue = "") @TagFragment String receiptNumber,
-		@RequestParam(name = "size", defaultValue = "20") Integer size
-	) {
-		return _listService.getActiveCases(caseManagementSystemTag, caseTypeTag, receiptNumber, size);
-	}
-
 	@RequestMapping(value="summary", method=RequestMethod.GET)
 	public Map<String, Object> getSummary(@PathVariable String caseManagementSystemTag, @PathVariable String caseTypeTag) {
 		return _listService.getSummaryInfo(caseManagementSystemTag, caseTypeTag);

@@ -41,6 +41,7 @@ import gov.usds.case_issues.db.repositories.CaseIssueRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
 import gov.usds.case_issues.model.CaseRequest;
+import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
 import gov.usds.case_issues.services.model.CaseGroupInfo;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
@@ -53,6 +54,8 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 	@Autowired
 	private CaseListService _service;
+	@Autowired
+	private CaseFilteringService _fetchService;
 	@Autowired
 	private TroubleCaseRepository _caseRepo;
 	@Autowired
@@ -163,102 +166,6 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 
 		assertEquals(1, cases.size());
 		assertEquals(receiptNumber, cases.get(0).getReceiptNumber());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_invalidSystemTag_exception() {
-		_service.getActiveCases("hello\nworld", VALID_TYPE_TAG, null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_invalidTypeTag_exception() {
-		_service.getActiveCases(VALID_SYS_TAG, "hello\nworld", null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_invalidReceipt_exception() {
-		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_excessivePageSize_exception() {
-		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_excessivePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		_service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
-	}
-
-	@Test
-	public void getActiveCases_zeroPageSize_emptyList() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_negativePageSize_exception() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -10).size());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getActiveCases_negativePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.initCase(_system, receipt, _type, _now);
-		assertEquals(0, _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -10).size());
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_invalidSystemTag_exception() {
-		_service.getSnoozedCases("hello\nworld", VALID_TYPE_TAG, null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_invalidTypeTag_exception() {
-		_service.getSnoozedCases(VALID_SYS_TAG, "hello\nworld", null, 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_invalidReceipt_exception() {
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, "/etc/passwd", 1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_excessivePageSize_exception() {
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 101);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_excessivePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, 101);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_negativePageSize_exception() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, -1);
-	}
-
-	@Test(expected=ConstraintViolationException.class)
-	public void getSnoozedCases_negativePageSizeSecondPage_exception() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		_service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, receipt, -1);
-	}
-
-	@Test
-	public void getSnoozedCases_zeroPageSize_emptyList() {
-		String receipt = "ABCDE";
-		_dataService.snoozeCase(_dataService.initCase(_system, receipt, _type, _now));
-		assertEquals(0, _service.getSnoozedCases(VALID_SYS_TAG, VALID_TYPE_TAG, null, 0).size());
 	}
 
 	@Test
@@ -489,7 +396,7 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		_dataService.initIssue(b, "FOOBAR", lastMonth, null);
 		_dataService.initIssue(c, "FOOBAR", lastMonth, null);
 
-		List<? extends CaseSummary> activeCases = _service.getActiveCases(VALID_SYS_TAG, VALID_TYPE_TAG, oldestReceiptNumber, 20);
+		List<? extends CaseSummary> activeCases = fetchCasesForSystem(VALID_SYS_TAG, oldestReceiptNumber);
 		assertEquals("The two newer cases should be returned", 2, activeCases.size());
 	}
 
@@ -501,9 +408,14 @@ public class CaseListServiceTest extends CaseIssueApiTestBase {
 		return _service.putIssueList(uploadInfo, newIssueCases);
 	}
 
-	@SuppressWarnings("checkstyle:MagicNumber")
 	private List<? extends CaseSummary> fetchCasesForSystem(String systemTag) {
-		 return _service.getActiveCases(systemTag, VALID_TYPE_TAG, null, 20);
+		return fetchCasesForSystem(systemTag, null);
+	}
+
+	@SuppressWarnings("checkstyle:MagicNumber")
+	private List<? extends CaseSummary> fetchCasesForSystem(String systemTag, String pageReference) {
+		 return _fetchService.getCases(systemTag, VALID_TYPE_TAG, Collections.singleton(CaseSnoozeFilter.ACTIVE), 20,
+			 Optional.empty(), Optional.ofNullable(pageReference), Collections.emptyList());
 	}
 
 	private class CaseRequestImpl implements CaseRequest {
