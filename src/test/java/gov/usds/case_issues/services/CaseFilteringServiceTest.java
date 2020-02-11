@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.ConstraintViolationException;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -62,4 +64,49 @@ public class CaseFilteringServiceTest extends CaseListPagingFilteringTest {
 		assertCaseOrder("Snoozed with a trouble link", Arrays.asList(FixtureCase.SNOOZED02, FixtureCase.SNOOZED03, FixtureCase.SNOOZED04), foundCases);
 	}
 
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_zeroPageSize_exception() {
+		_service.getCases(SYSTEM, CASE_TYPE, Collections.singleton(CaseSnoozeFilter.ACTIVE),
+				0, Optional.empty(), Optional.empty(), Collections.emptyList());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_invalidSystemTag_exception() {
+		wrapInvalidCall("hello\nworld", CASE_TYPE, null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_invalidTypeTag_exception() {
+		wrapInvalidCall(SYSTEM, "hello\nworld", null, 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_invalidReceipt_exception() {
+		wrapInvalidCall(SYSTEM, CASE_TYPE, "/etc/passwd", 1);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_excessivePageSize_exception() {
+		wrapInvalidCall(SYSTEM, CASE_TYPE, null, 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_excessivePageSizeSecondPage_exception() {
+		wrapInvalidCall(SYSTEM, CASE_TYPE, "ABCDE", 101);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getCases_negativePageSize_exception() {
+		wrapInvalidCall(SYSTEM, CASE_TYPE, null, -10);
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void getActiveCases_negativePageSizeSecondPage_exception() {
+		wrapInvalidCall(SYSTEM, CASE_TYPE, "ABCDE", -10);
+	}
+
+	private void wrapInvalidCall(String sys, String caseType, String pageRef, int pageSize) {
+		_service.getCases(sys, caseType, Collections.singleton(CaseSnoozeFilter.ACTIVE), pageSize,
+			Optional.empty(), Optional.ofNullable(pageRef), Collections.emptyList());
+	}
 }

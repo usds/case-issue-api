@@ -15,9 +15,9 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,7 @@ import org.springframework.validation.annotation.Validated;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.reporting.FilterableCase;
 import gov.usds.case_issues.db.repositories.AttachmentAssociationRepository;
+import gov.usds.case_issues.db.repositories.BulkCaseRepository;
 import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
 import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
@@ -100,7 +101,7 @@ public class CaseFilteringService implements CasePagingService {
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@NotNull @Size(min=1,max=1) Set<CaseSnoozeFilter> queryFilters,
-			@Positive int pageSize,
+			@Range(min=1, max=BulkCaseRepository.MAX_PAGE_SIZE) int pageSize,
 			@NotNull Optional<Sort> requestedSortOrder,
 			@NotNull Optional<String> pageReference,
 			@NotNull List<? extends Specification<FilterableCase>> filters
