@@ -2,7 +2,6 @@ package gov.usds.case_issues.services;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +14,9 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +37,13 @@ import gov.usds.case_issues.db.repositories.reporting.FilterableCaseRepository;
 import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.CaseSummary;
-import gov.usds.case_issues.model.DateRange;
-import gov.usds.case_issues.services.model.CaseFilter;
 import gov.usds.case_issues.services.model.CasePageInfo;
 import gov.usds.case_issues.services.model.DelegatingFilterableCaseSummary;
 import gov.usds.case_issues.validators.TagFragment;
 
 @Service
 @Validated
-public class CaseFilteringService implements CasePagingService {
+public class CaseFilteringService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseFilteringService.class);
 
@@ -62,45 +59,14 @@ public class CaseFilteringService implements CasePagingService {
 	@Autowired
 	private PageTranslationService _translator;
 
-	@Override
-	public List<? extends CaseSummary> getActiveCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ACTIVE), size, Optional.of(DEFAULT_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
-	@Override
-	public List<? extends CaseSummary> getSnoozedCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, Optional<String> snoozeReason, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		snoozeReason.ifPresent(reason -> filters.add(FilterFactory.snoozeReason(reason)));
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.SNOOZED), size, Optional.of(SNOOZE_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
-
-	@Override
-	public List<? extends CaseSummary> getPreviouslySnoozedCases(String caseManagementSystemTag, String caseTypeTag,
-			String receiptNumber, DateRange caseCreationRange, int size) {
-		List<CaseFilter> filters = new ArrayList<>();
-		if (caseCreationRange != null) {
-			filters.add(FilterFactory.dateRange(caseCreationRange));
-		}
-		return getCases(caseManagementSystemTag, caseTypeTag, Collections.singleton(CaseSnoozeFilter.ALARMED), size, Optional.of(DEFAULT_SORT),
-				Optional.ofNullable(receiptNumber), filters);
-	}
+	/** The maximum allowed page size for a paged request. */
+	public static final int MAX_PAGE_SIZE = 100;
 
 	public List<CaseSummary> getCases(
 			@TagFragment String caseManagementSystemTag,
 			@TagFragment String caseTypeTag,
 			@NotNull @Size(min=1,max=1) Set<CaseSnoozeFilter> queryFilters,
-			@Positive int pageSize,
+			@Range(min=1, max=CaseFilteringService.MAX_PAGE_SIZE) int pageSize,
 			@NotNull Optional<Sort> requestedSortOrder,
 			@NotNull Optional<String> pageReference,
 			@NotNull List<? extends Specification<FilterableCase>> filters

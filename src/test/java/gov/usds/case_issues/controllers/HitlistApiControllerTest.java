@@ -507,11 +507,11 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		return get(API_PATH + "search", cmsTag, ctTag).param("query", queryString);
 	}
 	private static MockHttpServletRequestBuilder getActive(String cmsTag, String ctTag) {
-		return get(API_PATH + "active", cmsTag, ctTag);
+		return get(API_PATH, cmsTag, ctTag).param(Filters.MAIN, "ACTIVE");
 	}
 
 	private static MockHttpServletRequestBuilder getSnoozed(String cmsTag, String ctTag) {
-		return get(API_PATH + "snoozed", cmsTag, ctTag);
+		return get(API_PATH, cmsTag, ctTag).param(Filters.MAIN, "SNOOZED");
 	}
 
 	private static MockHttpServletRequestBuilder getSummary(String cmsTag, String ctTag) {
