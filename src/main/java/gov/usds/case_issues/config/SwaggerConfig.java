@@ -3,12 +3,14 @@ package gov.usds.case_issues.config;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -38,17 +40,18 @@ public class SwaggerConfig {
 	public ApiInfo createApiInfo(
 			@Value("${api.title:API}") String apiTitle,
 			@Value("${api.description:#{null}}") String apiDescription,
-			@Value("${api.version:1.0.0}") String apiVersion,
-			@Value("${api.contact.name:}") String contactName,
-			@Value("${api.contact.url:}") String contactUrl,
-			@Value("${api.contact.email:}") String contactEmail
+			@Value("${api.contact.name:#{null}}") Optional<String> contactName,
+			@Value("${api.contact.url:#{null}}") Optional<String> contactUrl,
+			@Value("${api.contact.email:#{null}}") Optional<String> contactEmail,
+			@Autowired Optional<BuildProperties> buildProps
 			) {
-		Contact contact = new Contact(contactName, contactUrl, contactEmail);
-		if (!contactName.isEmpty() && contactUrl.isEmpty() && contactEmail.isEmpty()) {
+		if (contactName.isPresent() && !(contactUrl.isPresent() || contactEmail.isPresent())) {
 			throw new IllegalArgumentException(
 				"A contact email or url is required when providing an API contact name."
 			);
 		}
+		String apiVersion = buildProps.isPresent() ? buildProps.get().getVersion() : "DEVELOPMENT";
+		Contact contact = new Contact(contactName.orElse(null), contactUrl.orElse(null), contactEmail.orElse(null));
 		ApiInfo apiInfo = new ApiInfo(
 				apiTitle, apiDescription, apiVersion, null, contact,
 				null, null, Collections.emptyList());
@@ -58,12 +61,12 @@ public class SwaggerConfig {
 
 	@Bean
 	public Docket configureSwagger(@Autowired ApiInfo apiInfo,
-			@Value("${api.base.package:#{null}}") String basePackage) {
-		if (basePackage == null) {
-			// we assume we're in a "config" or similar subpackage and go up one level for the base of the app
-			basePackage = this.getClass().getPackage().getName().replaceAll("\\.\\w+\\z", "");
-			LOGGER.info("Guessing API base package as {}", basePackage);
-		}
+			@Value("${api.base.package:#{null}}") Optional<String> basePackageOptional) {
+		String basePackage = basePackageOptional.orElseGet(() -> {
+			String guess = this.getClass().getPackage().getName().replaceAll("\\.\\w+\\z", "");
+			LOGGER.info("Guessing API base package as {}", guess);
+			return guess;
+		});
 		TypeResolver typeResolver = new TypeResolver();
 		return new Docket(DocumentationType.SWAGGER_2)
 			.select()
