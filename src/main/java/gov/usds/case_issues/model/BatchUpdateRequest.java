@@ -9,7 +9,7 @@ public class BatchUpdateRequest {
 	private List<String> receiptNumbers;
 	private Optional<String> snoozeReason;
 	private List<AttachmentRequest> attachments;
-	private int duration;
+	private Optional<Integer> duration;
 
 	public BatchUpdateRequest() {
 
@@ -22,7 +22,7 @@ public class BatchUpdateRequest {
 		this.receiptNumbers = receiptNumbers;
 		this.attachments = attachments;
 		this.snoozeReason = snoozeReason;
-		this.duration = duration;
+		this.duration = Optional.of(duration);
 	}
 
 	public BatchUpdateAction getUpdateAction() {
@@ -40,7 +40,7 @@ public class BatchUpdateRequest {
 		return attachments;
 	}
 
-	public int getDuration() {
+	public Optional<Integer> getDuration() {
 		return duration;
 	}
 }

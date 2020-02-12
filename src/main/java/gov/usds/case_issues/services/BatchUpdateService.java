@@ -82,7 +82,7 @@ public class BatchUpdateService {
 
 	private List<CaseAttachment> doSnoozeCases(Collection<FilterableCase> cases, BatchUpdateRequest batchRequest) {
 		String snoozeReason = batchRequest.getSnoozeReason().orElseThrow(() -> new IllegalArgumentException("Snooze reason must be provided"));
-		int duration = batchRequest.getDuration();
+		int duration = batchRequest.getDuration().orElseThrow(() -> new IllegalArgumentException("Snooze duration must be provided"));
 		List<Long> caseIds = cases.stream().map(TroubleCaseFixedData::getInternalId).collect(Collectors.toList());
 		Collection<CaseSnooze> snoozes = new ArrayList<>();
 		Collection<CaseSnooze> saved = new ArrayList<>();
@@ -120,7 +120,7 @@ public class BatchUpdateService {
 		switch (request.getUpdateAction()) {
 			case BEGIN_SNOOZE:
 				validCaseForAction = c -> c.getSnoozeEnd() == null || c.getSnoozeEnd().isBefore(now);
-				if (request.getDuration() <= 0 || !request.getSnoozeReason().isPresent() ) {
+				if (request.getDuration().orElse(-1) <= 0 || !request.getSnoozeReason().isPresent() ) {
 					throw new IllegalArgumentException("Snooze reason and positive duration are required for batch snooze");
 				}
 				break;

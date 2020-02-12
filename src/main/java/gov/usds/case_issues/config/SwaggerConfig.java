@@ -81,6 +81,10 @@ public class SwaggerConfig {
 				AlternateTypeRules.newRule(
 						typeResolver.resolve(Timestamp.class),
 						typeResolver.resolve(String.class)
+				),
+				AlternateTypeRules.newRule(
+						typeResolver.resolve(Optional.class, WildcardType.class),
+						typeResolver.resolve(WildcardType.class)
 				)
 			)
 			.apiInfo(apiInfo)
