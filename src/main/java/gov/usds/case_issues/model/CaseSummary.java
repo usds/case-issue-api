@@ -13,8 +13,6 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
  */
 public interface CaseSummary extends PersistedCase {
 
-	boolean isPreviouslySnoozed();
-
 	CaseSnoozeSummary getSnoozeInformation();
 
 	List<AttachmentSummary> getNotes();

@@ -46,10 +46,6 @@ public class DelegatingFilterableCaseSummary implements CaseSummary {
 		return ZonedDateTime.ofInstant(_root.getCreatedAt().toInstant(), GMT);
 	}
 	@Override
-	public boolean isPreviouslySnoozed() {
-		return false;
-	}
-	@Override
 	public CaseSnoozeSummary getSnoozeInformation() {
 		return new DelegatingSnoozeSummary();
 	}
