@@ -16,7 +16,7 @@ import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
  * API Model for the full details of a {@link TroubleCase}, including all issues (open and closed)
  * and all snoozes (active and past) and notes.
  */
-public class CaseDetails {
+public class CaseDetails implements PersistedCase {
 
 	private TroubleCase rootCase;
 	private Collection<? extends CaseIssueSummary> issues;
@@ -48,6 +48,13 @@ public class CaseDetails {
 	}
 	public Map<String, Object> getExtraData() {
 		return rootCase.getExtraData();
+	}
+	@Override
+	public ZonedDateTime getCaseInitialUploadDate() {
+		 return ZonedDateTime.ofInstant(rootCase.getCreatedAt().toInstant(), GMT);
+	}
+	public ZonedDateTime getCaseDataModifiedDate() {
+		return ZonedDateTime.ofInstant(rootCase.getUpdatedAt().toInstant(), GMT);
 	}
 
 	@JsonSerialize(contentAs=CaseIssueSummary.class)

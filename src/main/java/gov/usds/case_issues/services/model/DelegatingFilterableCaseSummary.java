@@ -38,6 +38,14 @@ public class DelegatingFilterableCaseSummary implements CaseSummary {
 		return _root.getExtraData();
 	}
 	@Override
+	public ZonedDateTime getCaseDataModifiedDate() {
+		return ZonedDateTime.ofInstant(_root.getUpdatedAt().toInstant(), GMT);
+	}
+	@Override
+	public ZonedDateTime getCaseInitialUploadDate() {
+		return ZonedDateTime.ofInstant(_root.getCreatedAt().toInstant(), GMT);
+	}
+	@Override
 	public boolean isPreviouslySnoozed() {
 		return false;
 	}
