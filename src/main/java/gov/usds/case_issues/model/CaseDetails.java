@@ -37,15 +37,18 @@ public class CaseDetails implements PersistedCase {
 	public CaseManagementSystem getCaseManagementSystem() {
 		return rootCase.getCaseManagementSystem();
 	}
+	@Override
 	public String getReceiptNumber() {
 		return rootCase.getReceiptNumber();
 	}
 	public CaseType getCaseType() {
 		return rootCase.getCaseType();
 	}
+	@Override
 	public ZonedDateTime getCaseCreation() {
 		return rootCase.getCaseCreation();
 	}
+	@Override
 	public Map<String, Object> getExtraData() {
 		return rootCase.getExtraData();
 	}
@@ -53,6 +56,7 @@ public class CaseDetails implements PersistedCase {
 	public ZonedDateTime getCaseInitialUploadDate() {
 		 return ZonedDateTime.ofInstant(rootCase.getCreatedAt().toInstant(), GMT);
 	}
+	@Override
 	public ZonedDateTime getCaseDataModifiedDate() {
 		return ZonedDateTime.ofInstant(rootCase.getUpdatedAt().toInstant(), GMT);
 	}
