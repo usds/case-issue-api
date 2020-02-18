@@ -128,7 +128,7 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 		;
 		_mvc.perform(getActive(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
-			.andExpect(content().json("[{'receiptNumber': 'FFFF1111', 'previouslySnoozed': false}]", false))
+			.andExpect(content().json("[{'receiptNumber': 'FFFF1111'}]", false))
 			.andExpect(jsonPath("$[0].snoozeInformation").value(Matchers.nullValue()))
 		;
 		_mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))

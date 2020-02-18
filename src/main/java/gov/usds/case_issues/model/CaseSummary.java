@@ -11,9 +11,7 @@ import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
  * previously-snoozed case (a shortcut for checking for snooze information and then checking if the
  * snooze has expired).
  */
-public interface CaseSummary extends CaseRequest {
-
-	boolean isPreviouslySnoozed();
+public interface CaseSummary extends PersistedCase {
 
 	CaseSnoozeSummary getSnoozeInformation();
 
