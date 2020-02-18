@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -129,10 +130,12 @@ public class HitlistApiControllerTest extends ControllerTestBase {
 			.andExpect(status().isOk())
 			.andExpect(content().json("[{'receiptNumber': 'FFFF1111'}]", false))
 			.andExpect(jsonPath("$.snoozeInformation").doesNotExist())
+			.andExpect(jsonPath("$[0].snoozeInformation").value(Matchers.nullValue()))
 		;
 		_mvc.perform(getSnoozed(VALID_CASE_MGT_SYS, VALID_CASE_TYPE))
 			.andExpect(status().isOk())
 			.andExpect(content().json("[{'receiptNumber': 'FFFF1112', 'snoozeInformation': {'snoozeReason': 'DONOTCARE'}}]", false))
+			.andExpect(jsonPath("$[0].snoozeInformation").isMap())
 		;
 	}
 
