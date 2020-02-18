@@ -17,6 +17,7 @@ public class DelegatingFilterableCaseSummary implements CaseSummary {
 
 	private FilterableCase _root;
 	private List<AttachmentSummary> _attachments;
+	private CaseSnoozeSummary _snooze;
 
 	public DelegatingFilterableCaseSummary(FilterableCase r, List<AttachmentSummary> attachments) {
 		_root = r;
@@ -24,7 +25,11 @@ public class DelegatingFilterableCaseSummary implements CaseSummary {
 		if (attachments == null) {
 			_attachments = Collections.emptyList();
 		}
+		if (_root.getSnoozeStart() != null) {
+			_snooze = new DelegatingSnoozeSummary();
+		}
 	}
+
 	@Override
 	public String getReceiptNumber() {
 		return _root.getReceiptNumber();
@@ -43,7 +48,7 @@ public class DelegatingFilterableCaseSummary implements CaseSummary {
 	}
 	@Override
 	public CaseSnoozeSummary getSnoozeInformation() {
-		return new DelegatingSnoozeSummary();
+		return _snooze;
 	}
 	@Override
 	public List<AttachmentSummary> getNotes() {
