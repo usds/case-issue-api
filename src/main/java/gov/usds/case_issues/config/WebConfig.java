@@ -4,8 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.catalina.connector.Connector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +40,8 @@ public class WebConfig implements WebMvcConfigurer {
 
 	/** A filter order that allows us to get in before the Spring Security filter chain. */
 	private static final int BEFORE_SECURITY = -100;
+
+	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class);
 
 	@Autowired
 	private WebConfigurationProperties _customProperties;
@@ -95,6 +103,22 @@ public class WebConfig implements WebMvcConfigurer {
 		return serializer;
 	}
 
+	/**
+	 * If desired, configure the embedded Tomcat server to listen on an additional HTTP port.
+	 * (To enable both HTTPS and HTTP connectors, use Spring Boot's built-in configuration for
+	 * the HTTPS port, so as to take advantage of auto-configuration.)
+	 */
+	@Bean
+	@ConditionalOnProperty("web-customization.additional-http-port")
+	public WebServerFactoryCustomizer<TomcatServletWebServerFactory> getServerCustomizer() {
+		int port = _customProperties.getAdditionalHttpPort();
+		LOG.info("Configuring additional HTTP listener on port {}", port);
+		return f -> {
+			Connector conn = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
+			conn.setPort(port);
+			f.addAdditionalTomcatConnectors(conn);
+		};
+	}
 	/**
 	 * Trivial {@link HttpMessageConverter} implementation to allow handler methods to accept
 	 * "text/csv" input as a raw input stream.

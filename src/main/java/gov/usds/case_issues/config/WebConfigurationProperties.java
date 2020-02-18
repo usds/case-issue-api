@@ -20,6 +20,7 @@ public class WebConfigurationProperties {
 	private String[] _corsOrigins;
 	private List<UserDefinition> _users;
 	private Map<String, DataFormatSpec> _dataFormats = new HashMap<>();
+	private int additionalHttpPort;
 
 	public void setCorsOrigins(String[] origins) {
 		_corsOrigins = origins;
@@ -43,6 +44,14 @@ public class WebConfigurationProperties {
 
 	public void setDataFormats(Map<String, DataFormatSpec> dataFormats) {
 		this._dataFormats = dataFormats;
+	}
+
+	public int getAdditionalHttpPort() {
+		return additionalHttpPort;
+	}
+
+	public void setAdditionalHttpPort(int additionalHttpPort) {
+		this.additionalHttpPort = additionalHttpPort;
 	}
 
 	public static class UserDefinition {
