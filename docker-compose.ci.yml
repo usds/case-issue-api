@@ -5,6 +5,8 @@ services:
       context: ./db-setup
     image: "postgres-with-init"
     container_name: "case-issues-ci-db"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       # Mount a tmpfs volume so that we wipe the DB entirely every restart
       - type: tmpfs
