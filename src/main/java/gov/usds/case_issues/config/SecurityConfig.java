@@ -49,6 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.headers()
 				.httpStrictTransportSecurity().and()
 				.and()
+			.logout()
+			.and()
 			.authorizeRequests()
 				.antMatchers(HttpMethod.GET, "/health", "/favicon.ico")
 					.permitAll()
