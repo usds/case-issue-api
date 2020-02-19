@@ -268,6 +268,16 @@ a local (self-signed) certificate authority and server/client certificates.
     make
     make my_client_id.p12
 
+### Using client and server certificates
+
+There is a predefined profile (`x509`) that will automatically configure the server to run
+a plain HTTP server on port 8080, and a separate HTTPS server with required two-way authentication
+on port 8443. Assuming you have already created local server and client certificates as described
+above, you can see this configuration in action with the following commands:
+
+    SPRING_PROFILES_ACTIVE=dev,x509 ./gradlew bootRun
+    curl --cacert ./local-ca-certs/ca.crt -E ./local-ca-certs/my_client_id.p12:justdoit https://localhost:8443/csrf
+
 # Deployment
 
 As a standalone Spring Boot jar, this application is intended to be deployed in a platform-as-a-service

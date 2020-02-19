@@ -1,0 +1,12 @@
+web-customization:
+  additional-http-port: 8080
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    client-auth: need
+    key-store: ./local-ca-certs/keystore.p12
+    key-store-password: changeit
+    key-alias: localhost
+    trust-store: ./local-ca-certs/truststore.jks
+    trust-store-password: yololol
