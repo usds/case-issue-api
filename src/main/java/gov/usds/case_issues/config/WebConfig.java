@@ -43,8 +43,11 @@ public class WebConfig implements WebMvcConfigurer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class);
 
-	@Autowired
 	private WebConfigurationProperties _customProperties;
+
+	public WebConfig(@Autowired WebConfigurationProperties webProperties) {
+		_customProperties = webProperties;
+	}
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
@@ -112,6 +115,11 @@ public class WebConfig implements WebMvcConfigurer {
 	@ConditionalOnProperty("web-customization.additional-http-port")
 	public WebServerFactoryCustomizer<TomcatServletWebServerFactory> getServerCustomizer() {
 		int port = _customProperties.getAdditionalHttpPort();
+		if (port <= 0) {
+			throw new IllegalArgumentException(
+				String.format("Configured additional HTTP port (%d) is not valid", port)
+			);
+		}
 		LOG.info("Configuring additional HTTP listener on port {}", port);
 		return f -> {
 			Connector conn = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);

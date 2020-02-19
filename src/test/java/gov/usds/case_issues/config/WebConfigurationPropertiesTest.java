@@ -24,6 +24,7 @@ import gov.usds.case_issues.authorization.CaseIssuePermission;
 import gov.usds.case_issues.config.WebConfigurationProperties.UserDefinition;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
+@SuppressWarnings("checkstyle:MagicNumber")
 public class WebConfigurationPropertiesTest extends CaseIssueApiTestBase {
 
 	@Autowired
@@ -77,7 +78,6 @@ public class WebConfigurationPropertiesTest extends CaseIssueApiTestBase {
 		assertEquals(0, bound.get().getDataFormats().size());
 	}
 	@Test
-	@SuppressWarnings("checkstyle:MagicNumber")
 	public void bindProperties_simpleDataFormats_found() {
 		BindResult<WebConfigurationProperties> bound = bindProperties("bind-testing.web-conf-d");
 		assertTrue(bound.isBound());
@@ -102,7 +102,18 @@ public class WebConfigurationPropertiesTest extends CaseIssueApiTestBase {
 		assertEquals("EEE MMM dd yyyy", foundFormat.getCreationDateFormat());
 		assertFalse(DateTimeFormatter.ISO_DATE_TIME.equals(foundFormat.getCreationDateParser()));
 		assertEquals("creationDate", foundFormat.getCreationDateKey());
+	}
 
+	@Test
+	public void bindProperties_noHttpPort_defaultFound() {
+		WebConfigurationProperties props = bindProperties("bind-testing.web-conf-d").get();
+		assertEquals(0, props.getAdditionalHttpPort());
+	}
+
+	@Test
+	public void bindProperties_validHttpPort_found() {
+		WebConfigurationProperties props = bindProperties("bind-testing.web-conf-e").get();
+		assertEquals(23, props.getAdditionalHttpPort());
 	}
 
 	private static DataFormatSpec getNonNull(Map<String, DataFormatSpec> dataFormats, String key) {
