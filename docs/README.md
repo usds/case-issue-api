@@ -257,6 +257,17 @@ the HAL browser at `/resources`. However, the HAL browser has an entry field for
 at the  top of the screen: simply paste your desired CSRF header (probably something along the lines
 of `X-CSRF-TOKEN: abcd-ef01234-567890`) into that text area before making an unsafe request.
 
+## Using two-way x.509 authentication
+
+### Local Certificate Authority
+
+For convenience, this project includes a Makefile that automates the process of producing
+a local (self-signed) certificate authority and server/client certificates.
+
+    cd local-ca-certs
+    make
+    make my_client_id.p12
+
 # Deployment
 
 As a standalone Spring Boot jar, this application is intended to be deployed in a platform-as-a-service
