@@ -15,6 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import gov.usds.case_issues.controllers.UserInformationApiController;
+import gov.usds.case_issues.services.UserService;
 import springfox.documentation.service.ApiInfo;
 
 @Configuration
@@ -26,18 +28,21 @@ public class DemoUserLoginConfig {
 	@Autowired
 	private WebConfigurationProperties _webProperties;
 	@Autowired
+	private UserService _userInformationService;
+	@Autowired
 	private ApiInfo _apiInfo;
 
 	@Bean
 	@Order(-1)
 	public WebSecurityPlugin addDemoLogins() {
+		LOG.info("Getting realm name from {}", _apiInfo);
 		final String apiTitle = _apiInfo.getTitle();
 
 		return http -> {
 			LOG.info("Configuring form login and basic auth on {} with realm {}.", http, apiTitle);
 			http
 				.formLogin()
-					.defaultSuccessUrl("/user")
+					.defaultSuccessUrl(UserInformationApiController.USER_INFO_ENDPOINT)
 					.and()
 				.httpBasic()
 					.realmName(apiTitle)
@@ -49,13 +54,18 @@ public class DemoUserLoginConfig {
 	public UserDetailsService getUserService() {
 		LOG.info("Configuring demo users from {}.", _webProperties);
 		List<UserDetails> users = _webProperties.getUsers().stream()
-				.map(u -> User
+				.map(u -> {
+					_userInformationService.createUserOrUpdateLastSeen(u.getName(), u.getPrintName());
+
+					return User
 					.withUsername(u.getName())
 					.password("{noop}"+ u.getName())
 					.authorities(u.getGrants())
-					.build())
+					.build();
+				})
 				.collect(Collectors.toList()
 		);
+
 		return new InMemoryUserDetailsManager(users);
 	}
 }

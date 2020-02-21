@@ -2,11 +2,8 @@ package gov.usds.case_issues.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -21,6 +18,8 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -33,7 +32,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnWebApplication
 public class WebConfig implements WebMvcConfigurer {
 
-	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class);
+	/** A filter order that allows us to get in before the Spring Security filter chain. */
+	private static final int BEFORE_SECURITY = -100;
 
 	@Autowired
 	private WebConfigurationProperties _customProperties;
@@ -41,17 +41,19 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		String[] origins = _customProperties.getCorsOrigins();
-		LOG.info("Configuring CORS allowed origins for API to {}", Arrays.toString(origins));
+		// NOTE: Spring Data Rest (/resources) CORS configuration is in RestConfig, not here.
 		if (origins != null && 0 < origins.length) {
-			registry
-				.addMapping("/api/**")
+			registry.addMapping("/api/**")
 					.allowCredentials(true)
 					.allowedMethods("*")
-					.allowedOrigins(origins)
-			;
+					.allowedOrigins(origins);
+			registry.addMapping("/csrf")
+					.allowCredentials(true)
+					.allowedMethods("GET")
+					.allowedOrigins(origins);
 		}
 	}
-	
+
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addStatusController("/health", HttpStatus.OK);
@@ -72,6 +74,27 @@ public class WebConfig implements WebMvcConfigurer {
 		reg.setOrder(OrderedFilter.HIGHEST_PRECEDENCE);
 		return reg;
 	}
+
+	@Bean
+	public FilterRegistrationBean<JsonRedirectPreventingFilter> getRedirectPreventingFilter() {
+		FilterRegistrationBean<JsonRedirectPreventingFilter> registration = new FilterRegistrationBean<>(new JsonRedirectPreventingFilter());
+		registration.setOrder(BEFORE_SECURITY);
+		return registration;
+	}
+
+	/**
+	 * Force cookies to set SameSite=None, since otherwise CORS requests will not work in compliant browsers.
+	 * At some future point (no earlier than when we upgrade to Spring Boot 2.2, and probably later) it will
+	 * be possible to replace this with one line in application.yml, at which point this should definitely be
+	 * deleted (and the compile-time dependency on spring-session-core can be removed).
+	 */
+	@Bean
+	public CookieSerializer getCookieSerializer() {
+		DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+		serializer.setSameSite("None");
+		return serializer;
+	}
+
 	/**
 	 * Trivial {@link HttpMessageConverter} implementation to allow handler methods to accept
 	 * "text/csv" input as a raw input stream.

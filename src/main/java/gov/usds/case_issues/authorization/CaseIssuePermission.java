@@ -14,6 +14,8 @@ public enum CaseIssuePermission implements GrantedAuthority {
 	UPDATE_STRUCTURE,
 	/** The ability to update an issue list using the PUT endpoints (ideally, only held by automated processes) */
 	UPDATE_ISSUES,
+	/** The ability to read and potentially write system-management ("actuator") endpoints. */
+	MANAGE_APPLICATION,
 	;
 
 	@Override

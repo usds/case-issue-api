@@ -3,4 +3,3 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
-rootProject.name = 'case-issues-api'

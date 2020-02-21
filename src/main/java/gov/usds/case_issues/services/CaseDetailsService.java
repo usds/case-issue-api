@@ -8,12 +8,11 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
 import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseSnooze;
 import gov.usds.case_issues.db.model.TroubleCase;
@@ -24,10 +23,10 @@ import gov.usds.case_issues.db.repositories.CaseManagementSystemRepository;
 import gov.usds.case_issues.db.repositories.CaseSnoozeRepository;
 import gov.usds.case_issues.db.repositories.TroubleCaseRepository;
 import gov.usds.case_issues.model.ApiModelNotFoundException;
+import gov.usds.case_issues.model.AttachmentRequest;
+import gov.usds.case_issues.model.AttachmentSummary;
 import gov.usds.case_issues.model.CaseDetails;
 import gov.usds.case_issues.model.CaseSnoozeSummaryFacade;
-import gov.usds.case_issues.model.AttachmentRequest;
-import gov.usds.case_issues.model.NoteSummary;
 import gov.usds.case_issues.model.SnoozeRequest;
 
 /**
@@ -37,8 +36,6 @@ import gov.usds.case_issues.model.SnoozeRequest;
 @Service
 @Transactional(readOnly=true)
 public class CaseDetailsService {
-
-	private static final Logger LOG = LoggerFactory.getLogger(CaseDetailsService.class);
 
 	@Autowired
 	private CaseManagementSystemRepository _caseManagementSystemRepo;
@@ -73,8 +70,12 @@ public class CaseDetailsService {
 	public CaseDetails findCaseDetails(String caseManagementSystemTag, String receiptNumber) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Collection<CaseIssueSummary> issues = _issueRepo.findAllByIssueCaseOrderByIssueCreated(mainCase);
-		Collection<CaseSnoozeSummary> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase);
-		List<NoteSummary> notes = _attachmentService.findNotesForCase(mainCase).stream().map(NoteSummary::new).collect(Collectors.toList());
+		List<CaseSnoozeSummaryFacade> snoozes = _snoozeRepo.findAllBySnoozeCaseOrderBySnoozeStartAsc(mainCase).stream()
+													.map(CaseSnoozeSummaryFacade::new)
+													.collect(Collectors.toList());
+		List<AttachmentSummary> notes = _attachmentService.findAttachmentsForCase(mainCase).stream()
+													.map(AttachmentSummary::new)
+													.collect(Collectors.toList());
 		return new CaseDetails(mainCase, issues, snoozes, notes);
 	}
 
@@ -89,36 +90,30 @@ public class CaseDetailsService {
 
 	@Transactional(readOnly=false)
 	public boolean endActiveSnooze(String caseManagementSystemTag, String receiptNumber) {
-		LOG.debug("Ending current snooze on {}/{}", caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> found = findSnooze(caseManagementSystemTag, receiptNumber);
 		if (snoozeIsActive(found)) {
 			found.get().endSnoozeNow();
 			return true;
 		} else {
-			LOG.debug("No active snooze found for {}/{}", caseManagementSystemTag, receiptNumber);
 			return false;
 		}
 	}
 
 	@Transactional(readOnly=false)
-	public CaseSnoozeSummary updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
+	public CaseSnoozeSummaryFacade updateSnooze(String caseManagementSystemTag, String receiptNumber, @Valid SnoozeRequest requestedSnooze) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
 		if (snoozeIsActive(foundSnooze)) {
 			CaseSnooze oldSnooze = foundSnooze.get();
-			LOG.debug("Found snooze on {}/{} expiring {}: ending it now",
-				caseManagementSystemTag, receiptNumber, oldSnooze.getSnoozeEnd());
 			oldSnooze.endSnoozeNow();
 		}
 		String reason = requestedSnooze.getSnoozeReason();
 		int duration = requestedSnooze.getDuration();
-		LOG.debug("Setting snooze on {}/{} to {} for {} days",
-				caseManagementSystemTag, receiptNumber, reason, duration);
 		CaseSnooze replacement = new CaseSnooze(mainCase, reason, duration);
 		_snoozeRepo.save(replacement);
-		List<NoteSummary> savedNotes = requestedSnooze.getNotes().stream()
-				.map(r->_attachmentService.attachNote(r, replacement))
-				.map(NoteSummary::new)
+		List<AttachmentSummary> savedNotes = requestedSnooze.getNotes().stream()
+				.map(r->_attachmentService.attachToSnooze(r, replacement))
+				.map(AttachmentSummary::new)
 				.collect(Collectors.toList());
 		return new CaseSnoozeSummaryFacade(replacement, savedNotes);
 	}
@@ -128,13 +123,12 @@ public class CaseDetailsService {
 	}
 
 	@Transactional(readOnly=false)
-	public void annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
+	public CaseAttachmentAssociation annotateActiveSnooze(String caseManagementSystemTag, String receiptNumber, AttachmentRequest newNote) {
 		TroubleCase mainCase = findCaseByTags(caseManagementSystemTag, receiptNumber);
 		Optional<CaseSnooze> foundSnooze = _snoozeRepo.findFirstBySnoozeCaseOrderBySnoozeEndDesc(mainCase);
-		if (snoozeIsActive(foundSnooze)) {
-			_attachmentService.attachNote(newNote, foundSnooze.get());
-		} else {
+		if (!snoozeIsActive(foundSnooze)) {
 			throw new IllegalArgumentException("Cannot add a note to a case that is not snoozed.");
 		}
+		return _attachmentService.attachToSnooze(newNote, foundSnooze.get());
 	}
 }

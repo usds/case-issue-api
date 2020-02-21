@@ -6,14 +6,25 @@ logging:
       gov.usds.case_issues: DEBUG
       org.springframework.security.access: DEBUG
 spring:
+  profiles:
+    include: autotest-local
+  datasource:
+    username: case_issue_api
+    url: jdbc:postgresql://localhost:${CASEISSUES_TEST_DB_PORT:5400}/case_issues
   jpa:
     properties:
       hibernate:
+        default_schema: case_issue_main
         format_sql: true
         generate_statistics: false # way too noisy to be worth it
     hibernate.ddl-auto: none
   liquibase:
     enabled: true
+    user: case_issue_migrations
+web-customization:
+  cors-origins:
+    - http://ok-client.net
+    - https://ok-client.gov
 bind-testing:
   web-conf-a:
     cors-origins:
@@ -34,6 +45,14 @@ bind-testing:
         grants:
           - FAKE
           - UPDATE_CASES
+  web-conf-d:
+    data-formats:
+      yabba:
+        receipt-number-key: customReceiptNumber
+      dabba:
+        creation-date-key: "whenever"
+      doo:
+        creation-date-format: "EEE MMM dd yyyy" # Wed May 7 2031
   oauth-conf-a:
     name-path:
       - yabba

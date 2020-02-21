@@ -4,13 +4,14 @@ plugins {
 	id 'checkstyle'
 	id 'jacoco'
 	id 'org.sonarqube'  version '2.7.1'
+	id "com.gorylenko.gradle-git-properties" version "2.2.0"
 }
 
 apply plugin: 'io.spring.dependency-management'
 
 ext{ springFoxVersion = '2.9.2'}
 group = 'gov.usds'
-version = '0.0.1-SNAPSHOT'
+version = '0.2.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -24,8 +25,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
+	// this next line is only here so we can tweak the cookie serializer to set SameSite:
+	// otherwise, a runtimeOnly dependency on spring-session-jdbc would be sufficient.
+	implementation 'org.springframework.session:spring-session-core'
+	runtimeOnly 'org.springframework.session:spring-session-jdbc'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.data:spring-data-rest-hal-browser'
+	implementation 'org.springframework.retry:spring-retry'
 
 	// access logging:
 	implementation 'net.rakugakibox.spring.boot:logback-access-spring-boot-starter:2.7.1'
@@ -36,13 +43,15 @@ dependencies {
 //	try this again if and when springfox 3.0 comes out:
 //	implementation "io.springfox:springfox-data-rest:${springFoxVersion}"
 
-	implementation "com.fasterxml.jackson.core:jackson-databind:2.9.9.3"
+	implementation "com.fasterxml.jackson.core:jackson-annotations:2.9.10"
+	implementation "com.fasterxml.jackson.core:jackson-core:2.9.10"
+	implementation "com.fasterxml.jackson.core:jackson-databind:2.9.10"
+
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
 
 	implementation "com.vladmihalcea:hibernate-types-52:2.5.0"
 	implementation "org.liquibase:liquibase-core"
 
-	runtimeOnly 'org.hsqldb:hsqldb'
 	runtimeOnly 'org.postgresql:postgresql'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -73,7 +82,14 @@ configurations {
 	compileClasspath {
 		resolutionStrategy.activateDependencyLocking()
 	}
+	runtimeClasspath {
+		resolutionStrategy.activateDependencyLocking()
+	}
 }
 
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
+
+springBoot {
+	buildInfo()
+}

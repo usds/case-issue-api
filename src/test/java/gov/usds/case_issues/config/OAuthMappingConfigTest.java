@@ -1,20 +1,23 @@
 package gov.usds.case_issues.config;
 
+import static gov.usds.case_issues.test_util.Assert.assertInstantOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -25,10 +28,25 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
+import gov.usds.case_issues.db.model.UserInformation;
+import gov.usds.case_issues.db.repositories.UserInformationRepository;
+import gov.usds.case_issues.services.UserService;
+import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
-public class OAuthMappingConfigTest {
+
+public class OAuthMappingConfigTest extends CaseIssueApiTestBase {
+
+	@Autowired
+	private UserService _userService;
+	@Autowired
+	private UserInformationRepository _userRepo;
 
 	private static final List<String> NEVER_FOUND = Arrays.asList("no_such_attribute","nopenopenope");
+
+	@Before
+	public void resetDb() {
+		truncateDb();
+	}
 
 	@Test
 	public void oauthAuthorityMapper_emptyInput_nullMapper() {
@@ -135,8 +153,8 @@ public class OAuthMappingConfigTest {
 
 	@Test
 	public void createDelegatingUserService_emptyInput_nullService() {
-		assertNull(OAuthMappingConfig.createDelegatingUserService(null, null));
-		assertNull(OAuthMappingConfig.createDelegatingUserService(null, Collections.emptyList()));
+		assertNull(OAuthMappingConfig.createDelegatingUserService(null, null, _userService));
+		assertNull(OAuthMappingConfig.createDelegatingUserService(null, Collections.emptyList(), _userService));
 	}
 
 	@Test
@@ -158,6 +176,23 @@ public class OAuthMappingConfigTest {
 		assertEquals(Collections.singleton(new SimpleGrantedAuthority("respect")), user.getAuthorities());
 	}
 
+	@Test
+	public void createDelegatingUserService_newUser_userCreated() {
+		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
+		service.loadUser(null);
+		assertNotNull(_userRepo.findByUserId("name_in_scalar"));
+	}
+
+	@Test
+	public void createDelegatingUserService_existingUser_userLastSeenUpdated() {
+		ZonedDateTime start = ZonedDateTime.now();
+		_userRepo.save(new UserInformation("name_in_scalar", "print name"));
+		OAuth2UserService<OAuth2UserRequest, OAuth2User> service = setupService("my_attr", "scalar_name");
+		service.loadUser(null);
+		UserInformation user = _userRepo.findByUserId("name_in_scalar");
+		assertInstantOrder(start.toInstant(), user.getLastSeen().toInstant(), false);
+	}
+
 	@Test(expected=IllegalArgumentException.class)
 	public void createDelegatingUserService_pathToNull_error() {
 		setupService("my_attr", "nopenopenope").loadUser(null);
@@ -176,7 +211,8 @@ public class OAuthMappingConfigTest {
 	private OAuth2UserService<OAuth2UserRequest, OAuth2User> setupService(String... namePath) {
 		return OAuthMappingConfig.createDelegatingUserService(
 			r->new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority("respect")), simpleAttributes(), "name"),
-			Arrays.asList(namePath)
+			Arrays.asList(namePath),
+			_userService
 		);
 	}
 	private Set<OAuth2UserAuthority> simpleAuthority() {
@@ -185,7 +221,7 @@ public class OAuthMappingConfigTest {
 
 	private Map<String, Object> simpleAttributes() {
 		Map<String, Object> attr = new HashMap<>();
-		attr.put("name", "not actually the name");
+		attr.put("name", "Print Name");
 		Map<String, Object> myAttr = new HashMap<>();
 		myAttr.put("name_list", Arrays.asList("actual_name"));
 		myAttr.put("empty_list", Collections.emptyList());

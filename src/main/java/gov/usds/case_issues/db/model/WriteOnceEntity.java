@@ -2,10 +2,13 @@ package gov.usds.case_issues.db.model;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.SequenceGenerator;
 
@@ -35,17 +38,26 @@ public abstract class WriteOnceEntity {
 		sequenceName="case_issue_entity_id_sequence"
 	)
 	@JsonIgnore
+	@Column(updatable=false)
 	private Long internalId;
+
+	@CreatedBy
+	@Column(updatable=false)
+	private String createdBy;
+
+	@CreatedDate
+	@Column(updatable=false)
+	private Date createdAt;
+
+	@ManyToOne(optional=true)
+	@JoinColumn(name="createdBy", referencedColumnName="userId",
+		insertable=false, updatable=false)
+	@JsonIgnore
+	private UserInformation creationUser;
 
 	public Long getInternalId() {
 		return internalId;
 	}
-
-	@CreatedBy
-	private String createdBy;
-
-	@CreatedDate
-	private Date createdAt;
 
 	public String getCreatedBy() {
 		return createdBy;
@@ -55,4 +67,7 @@ public abstract class WriteOnceEntity {
 		return createdAt;
 	}
 
+	public UserInformation getCreationUser() {
+		return creationUser;
+	}
 }

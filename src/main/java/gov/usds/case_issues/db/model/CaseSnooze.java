@@ -31,7 +31,7 @@ public class CaseSnooze extends UpdatableEntity implements CaseSnoozeSummary {
 	private ZonedDateTime snoozeStart;
 	@NotNull
 	private ZonedDateTime snoozeEnd;
-	
+
 	protected CaseSnooze() { /* for hibernate/JPA */ }
 
 	public CaseSnooze(TroubleCase troubleCase, String reason, int days) {

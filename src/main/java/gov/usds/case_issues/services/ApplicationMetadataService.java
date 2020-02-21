@@ -3,6 +3,8 @@ package gov.usds.case_issues.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import gov.usds.case_issues.model.NavigationEntry;
 @Service
 @Transactional(readOnly=true)
 public class ApplicationMetadataService {
+	private static final Logger LOG = LoggerFactory.getLogger(ApplicationMetadataService.class);
 
 	@Autowired
 	private CaseManagementSystemRepository _systemRepo;
@@ -27,6 +30,9 @@ public class ApplicationMetadataService {
 	private CaseTypeRepository _typeRepo;
 
 	public List<NavigationEntry> getCaseNavigation() {
+		LOG.debug("Getting all case management systems from {}.", _systemRepo);
+		LOG.debug("Getting Case types from {}.", _typeRepo);
+
 		Iterable<CaseManagementSystem> allSystems = _systemRepo.findAll(Sort.by("name").ascending());
 		Iterable<CaseType> allTypesIterable = _typeRepo.findAll();
 

@@ -3,6 +3,7 @@ x-ref-data:
       - &idtype bigint
       - &string varchar(255)
       - &user_date timestamp with time zone # a date that may come from outside, which may include time zone information that we may want to preserve
+      - &session_timestamp bigint
    column-defs:
       - column: &pk_column
           name: internal_id
@@ -52,8 +53,23 @@ x-ref-data:
           name: description
           type: *string
           remarks: A longer (optional) plain-language description of this entity, for use in wider list views.
+      - column: &session_timestamp_column
+          type: *session_timestamp
+          constraints:
+            nullable: false
 
 databaseChangeLog:
+  - property:
+      name: attribute_bytes_type
+      value: BYTEA
+      dbms: postgresql
+  - property:
+      name: attribute_bytes_type
+      value: LONGVARBINARY
+      dbms: hsqldb
+  - property:
+      name: attribute_bytes_type
+      value: BLOB
   - changeSet:
       id: initial-schema
       author: ben.warfield@usds.dhs.gov
@@ -293,3 +309,257 @@ databaseChangeLog:
             tableName: case_attachment_association
             constraint_name: uk__case_attachment_association
             columnNames: snooze_internal_id, attachment_internal_id
+  - changeSet:
+      id: issue-upload-log
+      author: ben.warfield@usds.dhs.gov
+      comment: Record details about each upload of new issues/cases.
+      changes:
+        - createTable:
+            tableName: case_issue_upload
+            remarks: Information about when case issues were uploaded.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: case_management_system_internal_id
+                  remarks: The case management system where the uploaded cases are tracked outside of this application.
+                  type: *idtype
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__case_issue_upload__case_management_system
+                    references: case_management_system
+              - column:
+                  name: case_type_internal_id
+                  remarks: What type of cases the uploaded issues are associated with (e.g. what form or what category of letter or inquiry).
+                  type: *idtype
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__case_issue_upload__case_type
+                    references: case_type
+              - column:
+                  name: issue_type
+                  type: *string
+                  remarks: The type of this issue, as a URL-safe string (e.g. "AGING").
+              - column:
+                  name: effective_date
+                  type: *user_date
+                  remarks: The effective date of this upload (will match issue_created/issue_closed in case_issue; likely but not necessarily the same as created_at).
+                  constraints:
+                    nullable: false
+              - column:
+                  name: upload_status
+                  type: *string
+                  remarks: The current status (e.g. in progress/completed/error) of this upload.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uploaded_record_count
+                  type: bigint
+                  remarks: The number of records (CSV rows or JSON objects) in the upload request.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: new_issue_count
+                  type: bigint
+                  remarks: The number of new issues created by this request (if it was successfully processed at all).
+              - column:
+                  name: closed_issue_count
+                  type: bigint
+                  remarks: The number of existing issues closed by this request (if it was successfully processed at all).
+  - changeSet:
+      id: users-table
+      author: tim.best@usds.dhs.gov
+      comment: information about the users of the case-issue-api
+      changes:
+        - createTable:
+            tableName: user_information
+            remarks: Data about the users that login to the api.
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *created_by_column
+              - column: *updated_at_column
+              - column: *updated_by_column
+              - column:
+                  name: print_name
+                  type: *string
+                  remarks: The human-readable name of this user (may contain spaces and punctuation).
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: *string
+                  remarks: The external unique identifier for this user
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_seen
+                  type: DATETIME
+                  remarks: the last time this user has logged into the application
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: back-populate-users-table
+      author: ben.warfield@usds.dhs.gov
+      comment: Back-populate the user_information table with users whose names we had stored before, and normalize the created_by/updated_by fields.
+      dbms: postgresql
+      validCheckSum:
+        - 8:9e470a2ba921eabc38016359d0cfeaef
+        - 8:a1297187517147856b9712c2afb5b918
+      changes:
+        - sql:
+            sql: SET search_path=${database.defaultSchemaName};
+            comment: Force liquibase to find the correct schema, even for literal SQL migrations.
+        - sqlFile:
+            path: prepopulate-user-information.sql
+            relativeToChangelogFile: true
+        - sqlFile:
+            path: repair-createdby-updatedby.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: add-unique-user-constraint
+      author: ben.warfield@usds.dhs.gov
+      comment: Add unique constraint for the external user ID in user_information.
+      changes:
+        - addUniqueConstraint:
+            tableName: user_information
+            constraint_name: uk__user_information
+            columnNames: user_id
+  - changeSet:
+      id: tag-release-0.1.0
+      author: ben.warfield@usds.dhs.gov
+      comment: Tag the schema when we moved fully to postgresql, and away from HSQLDB.
+      changes:
+        - tagDatabase:
+            tag: version_0.1.0
+  - changeSet:
+      id: jdbc-session-support
+      author: ben.warfield@usds.dhs.gov
+      comment: Tables required by Spring Session JDBC
+      changes:
+        - createTable:
+            tableName: user_session
+            remarks: Primary data store for logged-in user sessions. See also org.springframework.session.Session and org.springframework.session.jdbc.JdbcOperationsSessionRepository.
+            columns:
+              - column:
+                  name: primary_id
+                  type: char(36)
+                  remarks: The internal (immutable) key to identify this session.
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk__user_session
+              - column:
+                  name: session_id
+                  type: char(36)
+                  remarks: A unique (externally visible) string that identifies this session.
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk__user_session
+              - column:
+                  <<: *session_timestamp_column
+                  name: creation_time
+                  remarks: The time when this session was created.
+              - column:
+                  <<: *session_timestamp_column
+                  name: last_access_time
+                  remarks: The last time when this session was accessed.
+              - column:
+                  name: max_inactive_interval
+                  type: int
+                  remarks: The maximum inactive interval in (milliseconds) between requests before this session will be invalidated. A negative time indicates that the session will never timeout.
+                  constraints:
+                    nullable: false
+              - column:
+                  <<: *session_timestamp_column
+                  name: expiry_time
+                  remarks: The time at which this session will expire (always equal to last_access_time + max_inactive_interval).
+              - column:
+                  name: principal_name
+                  type: varchar(100)
+                  remarks: The name or unique ID of the user for this session.
+        - createIndex:
+            tableName: user_session
+            indexName: ix__user_session_expiry_time
+            columns:
+              - column:
+                  name: expiry_time
+        - createIndex:
+            tableName: user_session
+            indexName: ix__user_session_principal_name
+            columns:
+              - column:
+                  name: principal_name
+        - createTable:
+            tableName: user_session_attributes
+            remarks: Normalized attribute store for logged-in user sessions.
+            columns:
+              - column:
+                  name: session_primary_id
+                  type: char(36)
+                  remarks: The internal (immutable) key to identify this session.
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk__user_session_attributes__user_session
+                    references: user_session
+                    deleteCascade: true
+              - column:
+                  name: attribute_name
+                  type: varchar(200)
+                  remarks: The unique name of this attribute.
+                  constraints:
+                    nullable: false
+              - column:
+                  name: attribute_bytes
+                  type: ${attribute_bytes_type}
+                  remarks: The stored value of the attribute.
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: user_session_attributes
+            columnNames: session_primary_id, attribute_name
+  - changeSet:
+      id: filterable-case-view
+      author: ben.warfield@usds.dhs.gov
+      comment: Create view that exposes the case and snooze information we want for the main query API.
+      changes:
+        - createView:
+            viewName: filterable_case_view
+            selectQuery: |
+              SELECT
+                c.internal_id,
+                c.created_at,
+                c.created_by,
+                c.updated_at,
+                c.updated_by,
+                c.case_management_system_internal_id,
+                c.case_type_internal_id,
+                c.receipt_number,
+                c.case_creation,
+                c.extra_data::jsonb as extra_data_converted,
+                s.internal_id as snooze_id,
+                s.snooze_reason,
+                s.snooze_start,
+                s.snooze_end,
+                s.created_at snooze_created_at,
+                s.created_by snooze_created_by,
+                s.updated_at as snooze_updated_at,
+                s.updated_by as snooze_updated_by,
+                exists (
+                  select case_issue.internal_id
+                  from ${database.defaultSchemaName}.case_issue
+                  where c.internal_id=case_issue.issue_case_internal_id
+                    and issue_closed is null
+                ) as has_open_issue
+              FROM
+                ${database.defaultSchemaName}.trouble_case c
+                LEFT JOIN (
+                  SELECT DISTINCT ON(snooze_case_internal_id) *
+                  from ${database.defaultSchemaName}.case_snooze
+                  order by snooze_case_internal_id, created_at desc
+                ) s on s.snooze_case_internal_id = c.internal_id
+

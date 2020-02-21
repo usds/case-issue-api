@@ -1,5 +1,6 @@
 package gov.usds.case_issues.authorization;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -12,9 +13,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
  * It should probably extend DefaultOAuth2User or borrow more of the internal structure
  * from that class, to make equality/hashing work reliably.
  */
-public class NamedOAuth2User implements OAuth2User {
+public class NamedOAuth2User implements OAuth2User, Serializable {
 
-	@SuppressWarnings("unused")
 	private static final long serialVersionUID = 1L;
 
 	private String name;
@@ -22,15 +22,9 @@ public class NamedOAuth2User implements OAuth2User {
 	private Map<String, Object> attributes;
 
 	public NamedOAuth2User(String name, OAuth2User wrapped) {
-		this(name, wrapped.getAuthorities(), wrapped.getAttributes());
-	}
-
-	public NamedOAuth2User(String name,
-			Collection<? extends GrantedAuthority> authorities,
-			Map<String, Object> attributes) {
 		this.name = name;
-		this.authorities = authorities;
-		this.attributes = attributes;
+		this.authorities =  wrapped.getAuthorities();
+		this.attributes = wrapped.getAttributes();
 	}
 
 	@Override
@@ -46,5 +40,9 @@ public class NamedOAuth2User implements OAuth2User {
 	@Override
 	public Map<String, Object> getAttributes() {
 		return attributes;
+	}
+
+	public String toString() {
+		return name;
 	}
 }

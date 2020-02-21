@@ -3,7 +3,11 @@ package gov.usds.case_issues.model;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+
 import gov.usds.case_issues.db.model.AttachmentType;
+import gov.usds.case_issues.validators.EscapeXSS;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -30,12 +34,18 @@ public class AttachmentRequest {
 		this.subType = subType;
 	}
 
+	@InitBinder
+	protected void initBinder(WebDataBinder binder) {
+		binder.setAllowedFields("noteTypeCode", "content", "subType");
+	}
+
 	@JsonProperty(value="type", defaultValue="COMMENT")
 	public AttachmentType getNoteType() {
 		return noteTypeCode;
 	}
 
 	@JsonProperty("content")
+	@EscapeXSS
 	public String getContent() {
 		return content;
 	}

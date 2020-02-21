@@ -11,23 +11,22 @@ import gov.usds.case_issues.db.model.CaseManagementSystem;
 import gov.usds.case_issues.db.model.CaseType;
 import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.db.model.projections.CaseIssueSummary;
-import gov.usds.case_issues.db.model.projections.CaseSnoozeSummary;
 
 /**
  * API Model for the full details of a {@link TroubleCase}, including all issues (open and closed)
  * and all snoozes (active and past) and notes.
  */
-public class CaseDetails {
+public class CaseDetails implements PersistedCase {
 
 	private TroubleCase rootCase;
 	private Collection<? extends CaseIssueSummary> issues;
-	private Collection<? extends CaseSnoozeSummary> snoozes;
-	private List<NoteSummary> notes;
+	private Collection<? extends CaseSnoozeSummaryFacade> snoozes;
+	private List<AttachmentSummary> notes;
 
 	public CaseDetails(TroubleCase rootCase,
 			Collection<? extends CaseIssueSummary> issues,
-			Collection<? extends CaseSnoozeSummary> snoozes,
-			List<NoteSummary> notes) {
+			Collection<? extends CaseSnoozeSummaryFacade> snoozes,
+			List<AttachmentSummary> notes) {
 		super();
 		this.rootCase = rootCase;
 		this.issues = issues;
@@ -38,17 +37,28 @@ public class CaseDetails {
 	public CaseManagementSystem getCaseManagementSystem() {
 		return rootCase.getCaseManagementSystem();
 	}
+	@Override
 	public String getReceiptNumber() {
 		return rootCase.getReceiptNumber();
 	}
 	public CaseType getCaseType() {
 		return rootCase.getCaseType();
 	}
+	@Override
 	public ZonedDateTime getCaseCreation() {
 		return rootCase.getCaseCreation();
 	}
+	@Override
 	public Map<String, Object> getExtraData() {
 		return rootCase.getExtraData();
+	}
+	@Override
+	public ZonedDateTime getCaseInitialUploadDate() {
+		 return ZonedDateTime.ofInstant(rootCase.getCreatedAt().toInstant(), GMT);
+	}
+	@Override
+	public ZonedDateTime getCaseDataModifiedDate() {
+		return ZonedDateTime.ofInstant(rootCase.getUpdatedAt().toInstant(), GMT);
 	}
 
 	@JsonSerialize(contentAs=CaseIssueSummary.class)
@@ -56,12 +66,12 @@ public class CaseDetails {
 		return issues;
 	}
 
-	@JsonSerialize(contentAs=CaseSnoozeSummary.class)
-	public Collection<? extends CaseSnoozeSummary> getSnoozes() {
+	@JsonSerialize(contentAs=CaseSnoozeSummaryFacade.class)
+	public Collection<? extends CaseSnoozeSummaryFacade> getSnoozes() {
 		return snoozes;
 	}
 
-	public List<NoteSummary> getNotes() {
+	public List<AttachmentSummary> getNotes() {
 		return notes;
 	}
 }

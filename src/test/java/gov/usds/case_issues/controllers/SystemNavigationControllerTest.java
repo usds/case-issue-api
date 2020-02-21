@@ -34,6 +34,25 @@ public class SystemNavigationControllerTest extends ControllerTestBase {
 					+ "\"caseTypes\": [{\"tag\":\"W2\", \"name\": \"Income Reporting\","
 					+ " \"description\": \"That form you get every January\"}]}]"))
 			;
+	}
 
+	@Test
+	public void getNavigationInformation_okOrigin_resultsFound() throws Exception {
+		_dataService.ensureCaseManagementSystemInitialized("YO", "Your case manager");
+		_dataService.ensureCaseTypeInitialized("W2", "Income Reporting", "That form you get every January");
+		perform(get("/api/navigation").header("Origin", ORIGIN_HTTPS_OK))
+			.andExpect(status().isOk())
+			.andExpect(content().json("[{\"tag\": \"YO\", \"name\": \"Your case manager\", "
+					+ "\"caseTypes\": [{\"tag\":\"W2\", \"name\": \"Income Reporting\","
+					+ " \"description\": \"That form you get every January\"}]}]"))
+			;
+
+	}
+
+	@Test
+	public void getNavigationInformation_badOrigin_forbidden() throws Exception {
+		perform(get("/api/navigation").header("Origin", ORIGIN_NOT_OK))
+			.andExpect(status().isForbidden())
+			;
 	}
 }
