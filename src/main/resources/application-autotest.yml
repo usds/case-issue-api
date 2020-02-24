@@ -53,6 +53,8 @@ bind-testing:
         creation-date-key: "whenever"
       doo:
         creation-date-format: "EEE MMM dd yyyy" # Wed May 7 2031
+  web-conf-e:
+    additional-http-port: 23
   oauth-conf-a:
     name-path:
       - yabba
