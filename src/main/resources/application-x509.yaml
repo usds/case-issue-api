@@ -1,3 +1,7 @@
+spring:
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: off
 web-customization:
   additional-http-port: 8080
 server:
