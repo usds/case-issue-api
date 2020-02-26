@@ -36,3 +36,10 @@ management:
   endpoint:
     health:
       show-details: always
+---
+# Single Jackson property tweak just for debugging x509 auth:
+spring:
+  profiles: auth-testing
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: off
