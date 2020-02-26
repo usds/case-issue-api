@@ -29,6 +29,9 @@ import gov.usds.case_issues.services.UserService;
 @ConditionalOnProperty("server.ssl.client-auth") // could be @ConditionalOnExpression and test for "want" or "need"
 public class X509MappingConfig {
 
+	/** This is the size of the smallest column into which an ID must fit. */
+	private static final int MAX_ID_LENGTH = 100;
+
 	private static final Logger LOG = LoggerFactory.getLogger(X509MappingConfig.class);
 
 	@Autowired
@@ -52,6 +55,9 @@ public class X509MappingConfig {
 				} else {
 					LOG.debug("Falling back to using DN as print name");
 					printName = userName;
+				}
+				if (userName.length() > MAX_ID_LENGTH) {
+					userName = userName.substring(0, MAX_ID_LENGTH); // get the first 100 characters, since they include the CN
 				}
 				_userService.createUserOrUpdateLastSeen(userName, printName);
 				return new User(userName, "", Collections.emptyList());
