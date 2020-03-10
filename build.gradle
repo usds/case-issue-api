@@ -93,3 +93,19 @@ check.dependsOn jacocoTestCoverageVerification
 springBoot {
 	buildInfo()
 }
+
+task startDb(type: Exec) {
+	commandLine "docker-compose", "up", "-d", "db"
+}
+
+task stopDb(type: Exec) {
+	commandLine "docker-compose", "down"
+}
+
+task startTestDb(type: Exec) {
+	commandLine "docker-compose", "-f", "docker-compose.test.yml", "-p", "case-issue-api-tests", "up", "-d", "test-db"
+}
+
+task stopTestDb(type: Exec) {
+	commandLine "docker-compose", "-f", "docker-compose.test.yml", "-p", "case-issue-api-tests", "down"
+}

@@ -2,7 +2,6 @@ version: "3.2"
 services:
   test-db:
     image: "postgres"
-    container_name: "case-issues-test-db"
     ports:
       - "${CASEISSUES_TEST_DB_PORT:-5400}:5432"
     volumes:
