@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import gov.usds.case_issues.db.model.UserInformation;
@@ -18,7 +17,6 @@ import gov.usds.case_issues.db.repositories.UserInformationRepository;
 /**
  * Consolidated tests for the controllers that have one handler each and are too annoying.
  */
-@ActiveProfiles("auth-testing")
 public class OneShotControllersTest extends ControllerTestBase {
 
 	@Autowired
