@@ -1,11 +1,13 @@
 package gov.usds.case_issues.services;
 
+import org.hibernate.validator.constraints.Length;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import gov.usds.case_issues.db.model.UserInformation;
 import gov.usds.case_issues.db.repositories.UserInformationRepository;
@@ -13,6 +15,7 @@ import gov.usds.case_issues.model.SerializedUserInformation;
 
 @Service
 @Transactional(readOnly = false)
+@Validated
 public class UserService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
@@ -30,7 +33,7 @@ public class UserService {
 		return new SerializedUserInformation(user);
 	}
 
-	public void createUserOrUpdateLastSeen(String id, String printName) {
+	public void createUserOrUpdateLastSeen(@Length(min=1, max=255) String id, @Length(min=1, max=255) String printName) {
 		UserInformation user = _userRepo.findByUserId(id);
 		if (user != null) {
 			user.updateLastSeen();

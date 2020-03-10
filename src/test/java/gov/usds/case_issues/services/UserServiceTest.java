@@ -8,6 +8,8 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
 
+import javax.validation.ConstraintViolationException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +82,25 @@ public class UserServiceTest extends CaseIssueApiTestBase {
 		assertNotNull(u);
 		assertEquals("Fred Jones", u.getName());
 		assertEquals(id, u.getID());
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void createUserOrUpdateLastSeen_userNameTooLong_catastrophe() {
+		StringBuilder longString = new StringBuilder();
+		while (longString.length() < 300) {
+			longString.append("abcde");
+		}
+		_service.createUserOrUpdateLastSeen(longString.toString(), "Irrelevant");
+	}
+
+	@Test(expected=ConstraintViolationException.class)
+	public void createUserOrUpdateLastSeen_printNameTooLong_catastrophe() {
+		StringBuilder longString = new StringBuilder();
+		while (longString.length() < 300) {
+			longString.append("abcde");
+		}
+		_service.createUserOrUpdateLastSeen("irrelevant", longString.toString());
+
 	}
 
 	/** Minimal Authentication implementation for tests */
