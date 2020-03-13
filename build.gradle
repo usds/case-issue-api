@@ -58,6 +58,16 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
+task makeTestCerts(type: Exec) {
+	executable "make"
+	args = [ "--makefile", "Makefile-testcerts"]
+}
+
+task cleanTestCerts(type: Exec) {
+	executable "make"
+	args = [ "--makefile", "Makefile-testcerts", "clean"]
+}
+
 jacocoTestCoverageVerification {
 	violationRules {
 		rule {
@@ -89,6 +99,8 @@ configurations {
 
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
+testClasses.dependsOn makeTestCerts
+clean.dependsOn cleanTestCerts
 
 springBoot {
 	buildInfo()

@@ -116,6 +116,10 @@ if you have not already.
 See the Database section above for instructions on configuring the database for tests,
 if you have not already.
 
+In addition, if you are not using gradle to run your tests, you will need to run the
+command `make -f Makefile-testcerts` from the root directory to create the
+self-signed certificates needed for certain tests.
+
 IDE configuration for running tests is beyond the scope of this document.
 
 To configure your IDE to report style violations, use the checkstyle configuration in [config/checkstyle/checkstyle.xml].

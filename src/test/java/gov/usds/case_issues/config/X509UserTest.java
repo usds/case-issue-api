@@ -23,17 +23,17 @@ public class X509UserTest extends ControllerTestBase {
 		perform(get("/api/users").with(x509("normal-user-name.crt")))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.name").value("normal user name"))
-			.andExpect(jsonPath("$.id").value(Matchers.startsWith("CN=normal user name + UID=be3bde871002e9fc83b0a387f485f363")))
+			.andExpect(jsonPath("$.id").value(Matchers.startsWith("UID=be3bde871002e9fc83b0a387f485f363, CN=normal user name")))
 			.andExpect(jsonPath("$.id").value(Matchers.endsWith("C=US")))
 			;
 	}
 
 	@Test
 	public void getUserInformation_withLongUserDn_userInfoFound() throws Exception { // this user has a DN longer than 100 but under 255 characters
-		perform(get("/api/users").with(x509("medium-long-username.crt")))
+		perform(get("/api/users").with(x509("medium-long-user-name.crt")))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.name").value("medium-long-username"))
-			.andExpect(jsonPath("$.id").value(Matchers.startsWith("CN=medium-long-username + UID=0bc6c46ca38ef3e8af3e50bc7ac244f7")))
+			.andExpect(jsonPath("$.id").value(Matchers.startsWith("UID=0bc6c46ca38ef3e8af3e50bc7ac244f7, CN=medium-long-username")))
 			.andExpect(jsonPath("$.id").value(Matchers.endsWith("C=US")))
 			;
 	}
@@ -41,10 +41,6 @@ public class X509UserTest extends ControllerTestBase {
 	@Test(expected=IllegalArgumentException.class)
 	public void getUserInformation_withExtremeUserDn_serverError() throws Exception { // this user has a DN longer than 256 characters
 		perform(get("/api/users").with(x509("extra-long-user-name.crt")))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name").value("Baby Shark, doo-doo-de-doo-de-doo, Baby Shark!"))
-			.andExpect(jsonPath("$.id").value(Matchers.startsWith("UID=fd511292bc79fb7592549eaccb0cb9db + CN=\"Baby Shark, doo-doo-de-doo-de-doo, Baby Shark!\"")))
-			.andExpect(jsonPath("$.id").value(Matchers.endsWith("C=US")))
 			;
 	}
 }
