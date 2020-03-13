@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import gov.usds.case_issues.test_util.CaseIssueApiTestBase;
 
 @AutoConfigureMockMvc
-@WithMockUser
 public abstract class ControllerTestBase extends CaseIssueApiTestBase {
 
 	protected static final String ORIGIN_HTTPS_OK = "https://ok-client.gov";

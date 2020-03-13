@@ -30,7 +30,7 @@ import gov.usds.case_issues.services.UserService;
 public class X509MappingConfig {
 
 	/** This is the size of the smallest column into which an ID must fit. */
-	private static final int MAX_ID_LENGTH = 100;
+	private static final int MAX_ID_LENGTH = 255;
 
 	private static final Logger LOG = LoggerFactory.getLogger(X509MappingConfig.class);
 
@@ -57,7 +57,8 @@ public class X509MappingConfig {
 					printName = userName;
 				}
 				if (userName.length() > MAX_ID_LENGTH) {
-					userName = userName.substring(0, MAX_ID_LENGTH); // get the first 100 characters, since they include the CN
+					throw new IllegalArgumentException(
+						String.format("User DN length (%d) exceeds system limit (%d)", userName.length(), MAX_ID_LENGTH));
 				}
 				_userService.createUserOrUpdateLastSeen(userName, printName);
 				return new User(userName, "", Collections.emptyList());
@@ -83,6 +84,7 @@ public class X509MappingConfig {
 			wrapped = w;
 		}
 
+		@SuppressWarnings("access")
 		/** Get the Common Name of this user, either by calling the {@link sun.security.x509.X500Name#getCommonName()}
 		 * method on the wrapped Principal (if it is an instance of that class) or by parsing the name using
 		 * {@link javax.naming.ldap.LdapName}.

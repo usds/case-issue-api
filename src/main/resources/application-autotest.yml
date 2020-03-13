@@ -25,6 +25,8 @@ web-customization:
   cors-origins:
     - http://ok-client.net
     - https://ok-client.gov
+# this is probably not needed in the long run, but for now X509MappingConfig is conditional on it being set
+server.ssl.client-auth: none
 bind-testing:
   web-conf-a:
     cors-origins:
