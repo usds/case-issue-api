@@ -62,7 +62,7 @@ To use the included Dockerized postgresql database, run
 
 or
 
-    ./gradlew startDb
+    ./gradlew dbStart
 
 To configure an already-running instance of postgresql, either run `db-setup/create-db.sh`
 from the command line, or look and see what it does and configure the database as you choose.
@@ -87,7 +87,7 @@ To use a dockerized database for tests, run
 Or (somewhat preferably, since it avoids confusing docker-compose by having two different
 files that belong to the same "project")
 
-    ./gradlew startTestDb
+    ./gradlew testDbStart
 
 ## Tests and checks
 
