@@ -60,6 +60,10 @@ To use the included Dockerized postgresql database, run
 
     docker-compose up db
 
+or
+
+    ./gradlew dbStart
+
 To configure an already-running instance of postgresql, either run `db-setup/create-db.sh`
 from the command line, or look and see what it does and configure the database as you choose.
 
@@ -79,6 +83,11 @@ be listening on port 5400. The port can be overridden using the environment vari
 To use a dockerized database for tests, run
 
     docker-compose -f docker-compose.test.yml up -d test-db
+
+Or (somewhat preferably, since it avoids confusing docker-compose by having two different
+files that belong to the same "project")
+
+    ./gradlew testDbStart
 
 ## Tests and checks
 
