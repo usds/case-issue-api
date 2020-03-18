@@ -5,7 +5,8 @@
 # In an ideal world this would probably be an incremental gradle task: for now, it
 # is a seven-line Makefile, because Make makes some things a lot easier than Gradle.
 
-TEST_CERTS=src/test/resources/normal-user-name.crt src/test/resources/medium-long-user-name.crt src/test/resources/extra-long-user-name.crt
+TEST_CERTS=src/test/resources/normal-user-name.crt src/test/resources/medium-long-user-name.crt src/test/resources/extra-long-user-name.crt \
+	src/test/resources/alice.crt src/test/resources/bob.crt
 
 default: $(TEST_CERTS)
 

@@ -2,7 +2,10 @@ package gov.usds.case_issues.config;
 
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -22,6 +25,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.authentication.preauth.x509.X509PrincipalExtractor;
 
+import gov.usds.case_issues.authorization.CaseIssuePermission;
+import gov.usds.case_issues.config.model.AuthenticationType;
+import gov.usds.case_issues.config.model.AuthorityMapping;
 import gov.usds.case_issues.services.UserService;
 
 @Configuration
@@ -36,6 +42,8 @@ public class X509MappingConfig {
 
 	@Autowired
 	private UserService _userService;
+	@Autowired
+	private AuthorizationProperties _properties;
 
 	/**
 	 * Return a configuration plugin that sets up x509 (two-way SSL) authentication.
@@ -43,6 +51,10 @@ public class X509MappingConfig {
 	@Bean
 	public WebSecurityPlugin getX509Configurer() {
 		LOG.info("Configuring x509 authentication");
+		final List<AuthorityMapping> x509grants = _properties.getGrants().stream()
+			.filter(m -> m.getAuthenticationType() == AuthenticationType.X509)
+			.collect(Collectors.toList())
+			;
 		return http -> {
 			AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> detailsService = token -> {
 				LOG.debug("Mapping x509 user details for {}", token);
@@ -61,7 +73,19 @@ public class X509MappingConfig {
 						String.format("User DN length (%d) exceeds system limit (%d)", userName.length(), MAX_ID_LENGTH));
 				}
 				_userService.createUserOrUpdateLastSeen(userName, printName);
-				return new User(userName, "", Collections.emptyList());
+				Set<CaseIssuePermission> authorities = EnumSet.noneOf(CaseIssuePermission.class);
+				for (AuthorityMapping m : x509grants) {
+					String matchString = m.getMatchString();
+					LOG.debug("Matching user DN against [{}]", matchString);
+					if (userName.equals(matchString)) {
+						LOG.debug("Match found!");
+						authorities.addAll(m.getAuthorities());
+						if (m.isTerminal()) {
+							break;
+						}
+					}
+				}
+				return new User(userName, "", authorities);
 			};
 
 			X509PrincipalExtractor principalExtractor = cert -> {

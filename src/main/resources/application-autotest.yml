@@ -25,6 +25,17 @@ web-customization:
   cors-origins:
     - http://ok-client.net
     - https://ok-client.gov
+authorization:
+  grants:
+    - authentication-type: x509
+      authorities: read-cases, manage-application
+      match-condition: 'CN=alice, O=No Such Agency, L=Washington, ST=DC, C=US'
+      terminal: true
+    - authentication-type: x509
+      authorities: UPDATE_ISSUES
+      match-condition:
+        - 'CN=bob, O=No Such Agency, L=Washington, ST=DC, C=US'
+      terminal: true
 # this is probably not needed in the long run, but for now X509MappingConfig is conditional on it being set
 server.ssl.client-auth: none
 bind-testing:
