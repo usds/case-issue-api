@@ -28,7 +28,7 @@ web-customization:
 authorization:
   grants:
     - authentication-type: x509
-      authorities: read-cases, manage-application
+      authorities: read-cases, update-cases, manage-application
       match-condition: 'CN=alice, O=No Such Agency, L=Washington, ST=DC, C=US'
       terminal: true
     - authentication-type: x509
