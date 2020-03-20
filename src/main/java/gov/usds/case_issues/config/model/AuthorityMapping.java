@@ -25,7 +25,6 @@ public class AuthorityMapping {
 	private Set<CaseIssuePermission> _authorities;
 	private List<String> _matchCondition;
 	private String _joinedCondition = null;
-	private boolean _bypassCsrf;
 	private boolean _terminal;
 
 	public AuthenticationType getAuthenticationType() {
@@ -83,14 +82,5 @@ public class AuthorityMapping {
 
 	public void setDescription(String description) {
 		this._description = description;
-	}
-
-	/** Do users set up under this authority get to bypass CSRF protection? */
-	public boolean isBypassCsrf() {
-		return _bypassCsrf;
-	}
-
-	public void setBypassCsrf(boolean bypassCsrf) {
-		this._bypassCsrf = bypassCsrf;
 	}
 }
