@@ -100,7 +100,7 @@ public class X509MappingConfig {
 		};
 	}
 
-	private static class CommonNameExtractingPrincipal implements Principal {
+	protected static class CommonNameExtractingPrincipal implements Principal {
 
 		private Principal wrapped;
 
