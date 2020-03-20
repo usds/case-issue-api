@@ -1,8 +1,8 @@
 # All the rules we need to create local Certificate Authority, Server, and Client certificates
 
 KEY_SIZE=4096
-BASE_DN=/C=US/ST=DC/L=Washington/O=Fake\ CA
-CA_NAME=Fake\ Certificate\ Authority
+BASE_DN?=/C=US/ST=DC/L=Washington/O=Fake\ CA
+CA_NAME?=Fake\ Certificate\ Authority
 # this is traditional:
 KEYSTORE_PASSWORD?=changeit
 TRUSTSTORE_PASSWORD?=yololol
@@ -31,7 +31,7 @@ realclean:
 	openssl genrsa -aes256 -out $@ -passout file:$< $(KEY_SIZE)
 
 %.csr: %.key
-	openssl req -new -key $< -out $@ -subj $(BASE_DN)/$(CLIENT_RDN) -passin file:$*.password -multivalue-rdn
+	openssl req -new -key $< -out $@ -subj "$(BASE_DN)/$(CLIENT_RDN)" -passin file:$*.password -multivalue-rdn
 
 %.crt: %.csr ca.crt
 	openssl x509 -req -in $< -CA ca.crt -CAkey ca.key -out $@ -passin file:ca.password -CAcreateserial
@@ -40,10 +40,10 @@ realclean:
 	openssl pkcs12 -export -in $< -inkey $*.key -out $@ -name $* -passin file:$*.password -passout pass:$(CLIENT_PASSWORD)
 
 server.csr: server.key
-	openssl req -new -key $< -out $@ -subj $(BASE_DN)/CN=$(SERVER_NAME) -passin file:server.password
+	openssl req -new -key $< -out $@ -subj "$(BASE_DN)/CN=$(SERVER_NAME)" -passin file:server.password
 
 ca.crt: ca.key
-	openssl req -x509 -new -key $< -out $@ -subj $(BASE_DN)/CN=$(CA_NAME) -passin file:ca.password -multivalue-rdn -days 3650
+	openssl req -x509 -new -key $< -out $@ -subj "$(BASE_DN)/CN=$(CA_NAME)" -passin file:ca.password -multivalue-rdn -days 3650
 
 keystore.p12: server.crt
 	openssl pkcs12 -export -in server.crt -inkey server.key -out $@ -name localhost -passin file:server.password -passout pass:$(KEYSTORE_PASSWORD)
