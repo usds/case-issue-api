@@ -29,5 +29,5 @@ public @interface PersistedId {
 
 	Class<?>[] groups() default {};
 	Class<? extends Payload>[] payload() default {};
-    String message() default "Parameter must be a string of " + MAX_ID_LENGTH + " characters or less";
+	String message() default "Parameter must be a string of " + MAX_ID_LENGTH + " characters or less";
 }
