@@ -13,10 +13,17 @@ CLIENT_RDN ?= CN=$(CLIENT_CN)+UID=$(CLIENT_UID)
 CLIENT_UID ?= $(shell echo -n $* | md5)
 CLIENT_CN ?= $*
 SERVER_NAME ?= localhost
+CURL_WITH_CA = curl --cacert ca.crt https://localhost:8443/auth-info
 
-.PRECIOUS: %.key %.password
+.PRECIOUS: %.key %.password %.crt
 
-default: truststore.jks keystore.p12
+default: truststore.jks keystore.p12 etl-robot.p12 tony.p12
+
+robot-demo: etl-robot.crt
+	$(CURL_WITH_CA) -E etl-robot.crt:`cat etl-robot.password` --key etl-robot.key  | jq
+
+robot-demo-p12: etl-robot.p12
+	$(CURL_WITH_CA) -E etl-robot.p12:justdoit | jq
 
 # "clean" would be the normal name for this target, but wanted to make it a little
 # harder to nuke everything
