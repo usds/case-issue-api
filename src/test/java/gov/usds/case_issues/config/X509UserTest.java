@@ -119,6 +119,13 @@ public class X509UserTest extends ControllerTestBase {
 		perform(snoozePut.with(csrf())).andExpect(status().isForbidden());
 	}
 
+	@Test(expected=AssertionError.class) // this is not currently supported
+	public void snoozeCase_serviceUser_noCsrfRequired() throws Exception {
+		initData();
+		perform(updateSnoozeAsUser("sam")).andExpect(status().isOk());
+	}
+
+
 	private MockHttpServletRequestBuilder getSnoozeAsUser(String certName) throws IOException, CertificateException {
 		return get(SNOOZE_TEMPLATE, CASE_SYS, RCPT).with(x509(certName + ".crt"));
 	}

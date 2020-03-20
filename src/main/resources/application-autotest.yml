@@ -36,6 +36,11 @@ authorization:
       match-condition:
         - 'CN=bob, O=No Such Agency, L=Washington, ST=DC, C=US'
       terminal: true
+    - authentication-type: x509
+      authorities: UPDATE_CASES
+      match-condition: 'CN=sam, O=No Such Agency, L=Washington, ST=DC, C=US'
+      terminal: true
+      bypass-csrf: on
 # this is probably not needed in the long run, but for now X509MappingConfig is conditional on it being set
 server.ssl.client-auth: none
 bind-testing:

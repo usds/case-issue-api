@@ -21,11 +21,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.authentication.preauth.x509.X509PrincipalExtractor;
 
 import gov.usds.case_issues.authorization.CaseIssuePermission;
+import gov.usds.case_issues.authorization.PreauthUser;
 import gov.usds.case_issues.config.model.AuthenticationType;
 import gov.usds.case_issues.config.model.AuthorityMapping;
 import gov.usds.case_issues.services.UserService;
@@ -74,18 +74,20 @@ public class X509MappingConfig {
 				}
 				_userService.createUserOrUpdateLastSeen(userName, printName);
 				Set<CaseIssuePermission> authorities = EnumSet.noneOf(CaseIssuePermission.class);
+				boolean bypassCsrf = false;
 				for (AuthorityMapping m : x509grants) {
 					String matchString = m.getMatchString();
 					LOG.debug("Matching user DN against [{}]", matchString);
 					if (userName.equals(matchString)) {
 						LOG.debug("Match found!");
 						authorities.addAll(m.getAuthorities());
-						if (m.isTerminal()) {
+						bypassCsrf = bypassCsrf || m.isBypassCsrf(); // account for possible multiple matches
+						if (m.isTerminal()) { // probably always true
 							break;
 						}
 					}
 				}
-				return new User(userName, "", authorities);
+				return new PreauthUser(userName, authorities, bypassCsrf);
 			};
 
 			X509PrincipalExtractor principalExtractor = cert -> {
