@@ -5,6 +5,7 @@
 # In an ideal world this would probably be an incremental gradle task: for now, it
 # is a seven-line Makefile, because Make makes some things a lot easier than Gradle.
 
+SHELL:=/bin/bash
 TEST_CERTS=$(shell echo src/test/resources/{normal,extra-long,medium-long}-user-name.crt src/test/resources/{alice,bob}.crt)
 MAKE_CERT=openssl req -x509 -new -nodes -newkey rsa:512 -keyout /dev/null -out "$@" -days 3650
 
