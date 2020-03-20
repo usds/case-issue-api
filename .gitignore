@@ -11,9 +11,6 @@ build/
 /src/main/resources/application-autotest-local.yml
 /src/main/resources/application-autotest-local.properties
 
-# ignore generated certificates for tests
-/src/test/resources/*.crt
-
 ### STS ###
 .apt_generated
 .classpath
@@ -29,6 +26,9 @@ build/
 *.password
 *.csr
 *.crt
+*.p12
+*.srl
+*.jks
 
 ### IntelliJ IDEA ###
 .idea
