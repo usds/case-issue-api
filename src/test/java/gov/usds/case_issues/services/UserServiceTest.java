@@ -24,6 +24,15 @@ import gov.usds.case_issues.validators.PersistedId;
 public class UserServiceTest extends CaseIssueApiTestBase {
 
 	private static final String SAMPLE_ID = "cbc1b10b-fe73-4367-806f-027d30d27f84";
+	private static final String LONG_STRING;
+	static {
+		StringBuilder longStringBuilder = new StringBuilder();
+		while (longStringBuilder.length() <= PersistedId.MAX_ID_LENGTH) {
+			longStringBuilder.append("abcde");
+		}
+		LONG_STRING = longStringBuilder.toString();
+	}
+
 	@Autowired
 	private UserInformationRepository _userRepo;
 	@Autowired
@@ -87,20 +96,12 @@ public class UserServiceTest extends CaseIssueApiTestBase {
 
 	@Test(expected=ConstraintViolationException.class)
 	public void createUserOrUpdateLastSeen_userNameTooLong_exception() {
-		StringBuilder longString = new StringBuilder();
-		while (longString.length() <= PersistedId.MAX_ID_LENGTH) {
-			longString.append("abcde");
-		}
-		_service.createUserOrUpdateLastSeen(longString.toString(), "Irrelevant");
+		_service.createUserOrUpdateLastSeen(LONG_STRING, "Irrelevant");
 	}
 
 	@Test(expected=ConstraintViolationException.class)
 	public void createUserOrUpdateLastSeen_printNameTooLong_exception() {
-		StringBuilder longString = new StringBuilder();
-		while (longString.length() <= PersistedId.MAX_ID_LENGTH) {
-			longString.append("abcde");
-		}
-		_service.createUserOrUpdateLastSeen("irrelevant", longString.toString());
+		_service.createUserOrUpdateLastSeen("irrelevant", LONG_STRING);
 	}
 
 	@Test(expected=ConstraintViolationException.class)
@@ -115,20 +116,12 @@ public class UserServiceTest extends CaseIssueApiTestBase {
 
 	@Test
 	public void createUserOrUpdateLastSeen_userNameMaxLength_ok() {
-		StringBuilder longString = new StringBuilder();
-		while (longString.length() <= PersistedId.MAX_ID_LENGTH) {
-			longString.append("abcde");
-		}
-		_service.createUserOrUpdateLastSeen(longString.substring(0, PersistedId.MAX_ID_LENGTH), "Irrelevant");
+		_service.createUserOrUpdateLastSeen(LONG_STRING.substring(0, PersistedId.MAX_ID_LENGTH), "Irrelevant");
 	}
 
 	@Test
 	public void createUserOrUpdateLastSeen_printNameMaxLength_ok() {
-		StringBuilder longString = new StringBuilder();
-		while (longString.length() <= PersistedId.MAX_ID_LENGTH) {
-			longString.append("abcde");
-		}
-		_service.createUserOrUpdateLastSeen("irrelevant", longString.substring(0, PersistedId.MAX_ID_LENGTH));
+		_service.createUserOrUpdateLastSeen("irrelevant", LONG_STRING.substring(0, PersistedId.MAX_ID_LENGTH));
 	}
 
 	/** Minimal Authentication implementation for tests */
