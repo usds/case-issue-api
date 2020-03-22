@@ -75,3 +75,41 @@ bind-testing:
     authority-paths:
       - authority: UPDATE_ISSUES
         path: custom, attribute, path
+  auth-conf-a:
+    grants.test:
+      - name: user1
+        authorities:
+          - READ_CASES
+          - UPDATE_CASES
+          - UPDATE_STRUCTURE
+          - UPDATE_ISSUES
+      - name: user2
+  auth-conf-b:
+    grants.test:
+      - name: user1
+        authorities:
+          - FAKE
+          - UPDATE_CASES
+  auth-conf-c:
+    grants.magical:
+      - name: user1
+        authorities:
+          - FAKE
+          - UPDATE_CASES
+  auth-conf-d:
+    grants.x509:
+      - name: user1
+        match-condition: "a, b, c, d"
+        authorities: manage-application
+      - name: user2
+        match-condition:
+          - "q, w, e, rty"
+        authorities: read-cases
+  auth-conf-e:
+    oauth-id-path:
+      - yabba
+      - dabba
+      - doo
+    grants.oauth:
+      - authorities: UPDATE_ISSUES
+        match-condition: custom, attribute, path

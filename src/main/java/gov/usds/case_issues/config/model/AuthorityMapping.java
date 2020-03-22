@@ -21,7 +21,7 @@ public class AuthorityMapping {
 	// these are mostly for demo users but are nice placeholders for debugging
 	private String _name;
 	private String _description;
-	private Set<CaseIssuePermission> _authorities;
+	private Set<CaseIssuePermission> _authorities = EnumSet.noneOf(CaseIssuePermission.class);
 	private List<String> _matchCondition;
 	private String _joinedCondition = null;
 	private boolean _terminal;
