@@ -18,7 +18,6 @@ public class AuthorityMapping {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AuthorityMapping.class);
 
-	private AuthenticationType _authenticationType;
 	// these are mostly for demo users but are nice placeholders for debugging
 	private String _name;
 	private String _description;
@@ -26,10 +25,6 @@ public class AuthorityMapping {
 	private List<String> _matchCondition;
 	private String _joinedCondition = null;
 	private boolean _terminal;
-
-	public AuthenticationType getAuthenticationType() {
-		return _authenticationType;
-	}
 
 	public Set<CaseIssuePermission> getAuthorities() {
 		return _authorities;
@@ -45,10 +40,6 @@ public class AuthorityMapping {
 			LOG.debug("Joined back to [{}]", _joinedCondition);
 		}
 		return _joinedCondition;
-	}
-
-	public void setAuthenticationType(AuthenticationType authenticationType) {
-		this._authenticationType = authenticationType;
 	}
 
 	public void setAuthorities(Set<CaseIssuePermission> authorities) {

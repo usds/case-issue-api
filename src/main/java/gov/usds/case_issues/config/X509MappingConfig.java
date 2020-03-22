@@ -2,10 +2,11 @@ package gov.usds.case_issues.config;
 
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -51,10 +52,9 @@ public class X509MappingConfig {
 	@Bean
 	public WebSecurityPlugin getX509Configurer() {
 		LOG.info("Configuring x509 authentication");
-		final List<AuthorityMapping> x509grants = _properties.getGrants().stream()
-			.filter(m -> m.getAuthenticationType() == AuthenticationType.X509)
-			.collect(Collectors.toList())
-			;
+		final List<AuthorityMapping> x509grants = Collections.unmodifiableList(
+			new ArrayList<>(_properties.getGrants().getOrDefault(AuthenticationType.X509, Collections.emptyList()))
+		);
 		return http -> {
 			AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> detailsService = token -> {
 				LOG.debug("Mapping x509 user details for {}", token);
