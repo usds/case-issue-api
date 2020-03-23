@@ -1,16 +1,11 @@
 package gov.usds.case_issues.config;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-
-import gov.usds.case_issues.authorization.CaseIssuePermission;
 
 @Component
 @Lazy
@@ -18,7 +13,6 @@ import gov.usds.case_issues.authorization.CaseIssuePermission;
 public class WebConfigurationProperties {
 
 	private String[] _corsOrigins;
-	private List<UserDefinition> _users;
 	private Map<String, DataFormatSpec> _dataFormats = new HashMap<>();
 	private int additionalHttpPort;
 
@@ -28,14 +22,6 @@ public class WebConfigurationProperties {
 
 	public String[] getCorsOrigins() {
 		return _corsOrigins;
-	}
-
-	public List<UserDefinition> getUsers() {
-		return _users == null ? Collections.emptyList() : _users;
-	}
-
-	public void setUsers(List<UserDefinition> users) {
-		this._users = users;
 	}
 
 	public Map<String, DataFormatSpec> getDataFormats() {
@@ -52,34 +38,5 @@ public class WebConfigurationProperties {
 
 	public void setAdditionalHttpPort(int additionalHttpPort) {
 		this.additionalHttpPort = additionalHttpPort;
-	}
-
-	public static class UserDefinition {
-		private String _name;
-		private String _printName;
-		private List<CaseIssuePermission> _grants = new ArrayList<>();
-
-		public String getName() {
-			return _name;
-		}
-
-		public void setName(String _name) {
-			this._name = _name;
-		}
-
-		public String getPrintName() {
-			return _printName;
-		}
-		public void setPrintName(String _printName) {
-			this._printName = _printName;
-		}
-
-		public List<CaseIssuePermission> getGrants() {
-			return _grants;
-		}
-
-		public void setGrants(List<CaseIssuePermission> _grants) {
-			this._grants = _grants;
-		}
 	}
 }

@@ -185,8 +185,22 @@ Several custom sections can be added to the application properties:
 
 * `web-customization` customizes the server configuration
     * `cors-origins` is a list of allowed origins for cross-origin resource sharing
-    * `users` is a list of test users (for use in development environments), for testing with various
-    authorization levels
+    * `additional-http-port` is port on which the application will listen using plain HTTP
+       (useful if the main `server` auto-configuration is being used for an HTTPS listener)
+* `authorization` customizes what permissions are granted to which users, both for local dev/test and
+  for deployment using x509 (two-way SSL) authentication.
+    * `grants` is a dictionary with three possible keys: `test`, `x509`, and `oauth`. The value for each
+      key is a list of records with the following possible keys
+      * `name`: used as the username for test users; otherwise simply a label that may be useful in debugging
+      * `description`: used as the print name for test users; otherwise a label that may be useful in debugging
+      * `authorities`: the list of local authorities (members of the `CaseIssuePermission` enumeration) that
+        this user (or users matching this pattern) should be granted (Spring Boot will standardize spelling from SNAKE_CASE or camelCase, but recommends standardizing on kebab-case).
+      * `match-condition`: a simple string or a list of strings.
+        * for `x509` records, this should be the full Distinguished Name (DN) of the user that is being
+          granted these permissions
+        * for `test` records it is ignored
+      * `terminal`: a boolean indicating whether a match on this particular grant indicates that no further
+         grants should be examined (likely always true for `x509`, irrelevant for `test`)
 * `oauth-user-config` customizes the way that OAuth2/OIDC user ID tokens are translated into local
   users (with local permissions).
     * `name-path` (optionally) provides a path to the value in the user's `attributes` map where we can find

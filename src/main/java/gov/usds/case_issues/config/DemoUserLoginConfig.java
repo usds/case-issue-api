@@ -1,5 +1,6 @@
 package gov.usds.case_issues.config;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import gov.usds.case_issues.config.model.AuthenticationType;
 import gov.usds.case_issues.controllers.UserInformationApiController;
 import gov.usds.case_issues.services.UserService;
 import springfox.documentation.service.ApiInfo;
@@ -26,7 +28,7 @@ public class DemoUserLoginConfig {
 	private static final Logger LOG = LoggerFactory.getLogger(DemoUserLoginConfig.class);
 
 	@Autowired
-	private WebConfigurationProperties _webProperties;
+	private AuthorizationProperties _properties;
 	@Autowired
 	private UserService _userInformationService;
 	@Autowired
@@ -52,15 +54,16 @@ public class DemoUserLoginConfig {
 
 	@Bean
 	public UserDetailsService getUserService() {
-		LOG.info("Configuring demo users from {}.", _webProperties);
-		List<UserDetails> users = _webProperties.getUsers().stream()
+		LOG.info("Configuring demo users from {}.", _properties);
+		List<UserDetails> users = _properties.getGrants().getOrDefault(AuthenticationType.TEST, Collections.emptyList())
+				.stream()
 				.map(u -> {
-					_userInformationService.createUserOrUpdateLastSeen(u.getName(), u.getPrintName());
+					_userInformationService.createUserOrUpdateLastSeen(u.getName(), u.getDescription());
 
 					return User
 					.withUsername(u.getName())
 					.password("{noop}"+ u.getName())
-					.authorities(u.getGrants())
+					.authorities(u.getAuthorities())
 					.build();
 				})
 				.collect(Collectors.toList()

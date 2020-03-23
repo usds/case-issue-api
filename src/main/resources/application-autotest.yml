@@ -42,21 +42,6 @@ bind-testing:
     cors-origins:
       - http://origin
       - https://other-origin
-  web-conf-b:
-    users:
-      - name: user1
-        grants:
-          - READ_CASES
-          - UPDATE_CASES
-          - UPDATE_STRUCTURE
-          - UPDATE_ISSUES
-      - name: user2
-  web-conf-c:
-    users:
-      - name: user1
-        grants:
-          - FAKE
-          - UPDATE_CASES
   web-conf-d:
     data-formats:
       yabba:
@@ -80,8 +65,8 @@ bind-testing:
       - name: user1
         authorities:
           - READ_CASES
-          - UPDATE_CASES
-          - UPDATE_STRUCTURE
+          - update-cases
+          - updateStructure
           - UPDATE_ISSUES
       - name: user2
   auth-conf-b:
@@ -94,7 +79,6 @@ bind-testing:
     grants.magical:
       - name: user1
         authorities:
-          - FAKE
           - UPDATE_CASES
   auth-conf-d:
     grants.x509:
