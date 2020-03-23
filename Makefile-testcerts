@@ -7,7 +7,8 @@
 
 SHELL:=/bin/bash
 TEST_CERTS=$(shell echo src/test/resources/{normal,extra-long,medium-long}-user-name.crt src/test/resources/{alice,bob}.crt)
-MAKE_CERT=openssl req -x509 -new -nodes -newkey rsa:512 -keyout /dev/null -out "$@" -days 3650
+TEST_KEY_BITS?=512
+MAKE_CERT=openssl req -x509 -new -nodes -newkey rsa:$(TEST_KEY_BITS) -keyout /dev/null -out "$@" -days 3650
 
 default: $(TEST_CERTS)
 
