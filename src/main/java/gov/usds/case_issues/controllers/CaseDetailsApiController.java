@@ -32,9 +32,11 @@ import gov.usds.case_issues.services.CaseAttachmentService;
 import gov.usds.case_issues.services.CaseDetailsService;
 
 @RestController
-@RequestMapping("/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}")
+@RequestMapping(CaseDetailsApiController.URL_TEMPLATE)
 @RequireReadCasePermission
 public class CaseDetailsApiController {
+
+	public static final String URL_TEMPLATE = "/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}";
 
 	@Autowired
 	private CaseDetailsService _caseDetailsService;

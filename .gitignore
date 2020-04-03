@@ -21,6 +21,15 @@ build/
 .sts4-cache
 /bin
 
+### CA files ###
+*.key
+*.password
+*.csr
+*.crt
+*.p12
+*.srl
+*.jks
+
 ### IntelliJ IDEA ###
 .idea
 *.iws

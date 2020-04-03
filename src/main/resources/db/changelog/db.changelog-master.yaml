@@ -562,4 +562,12 @@ databaseChangeLog:
                   from ${database.defaultSchemaName}.case_snooze
                   order by snooze_case_internal_id, created_at desc
                 ) s on s.snooze_case_internal_id = c.internal_id
-
+  - changeSet:
+      id: session-principal-name-size
+      author: ben.warfield@usds.dhs.gov
+      comment: Update the user_session table to allow longer user IDs (since DNs can be much more than 100 characters)
+      changes:
+        - modifyDataType:
+            columnName: principal_name
+            newDataType: *string
+            tableName: user_session

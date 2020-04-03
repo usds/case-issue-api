@@ -35,8 +35,8 @@ import gov.usds.case_issues.model.AttachmentRequest;
 public class CaseDetailsApiControllerTest extends ControllerTestBase {
 
 	static final String USER_ID = "d15f7835-7fe7-438d-b889-90a5f5974ec2";
-	private static final String CASE_DETAILS_URL_TEMPLATE = "/api/caseDetails/{caseManagementSystemTag}/{receiptNumber}";
-	private static final String ACTIVE_SNOOZE_TEMPLATE = CASE_DETAILS_URL_TEMPLATE + "/activeSnooze";
+	private static final String CASE_DETAILS_URL_TEMPLATE = CaseDetailsApiController.URL_TEMPLATE;
+	private static final String ACTIVE_SNOOZE_TEMPLATE = CaseDetailsApiController.URL_TEMPLATE + "/activeSnooze";
 
 	private static final String VALID_SYS = "C1";
 	private static final String SAMPLE_CASE = "BH90210";

@@ -11,7 +11,7 @@ apply plugin: 'io.spring.dependency-management'
 
 ext{ springFoxVersion = '2.9.2'}
 group = 'gov.usds'
-version = '0.2.0-SNAPSHOT'
+version = '0.2.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -58,6 +58,16 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
+task makeTestCerts(type: Exec) {
+	executable "make"
+	args = [ "--makefile", "Makefile-testcerts"]
+}
+
+task cleanTestCerts(type: Exec) {
+	executable "make"
+	args = [ "--makefile", "Makefile-testcerts", "clean"]
+}
+
 jacocoTestCoverageVerification {
 	violationRules {
 		rule {
@@ -89,6 +99,8 @@ configurations {
 
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
+testClasses.dependsOn makeTestCerts
+clean.dependsOn cleanTestCerts
 
 springBoot {
 	buildInfo()

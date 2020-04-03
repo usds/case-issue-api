@@ -39,3 +39,13 @@ web-customization:
       grants:
         - MANAGE_APPLICATION
 access-log-format: combined
+authorization:
+  grants:
+    x509:
+      - authorities: read-cases, update-cases
+        description: Tony Two-Way
+        match-condition:
+         - 'CN=tony + UID=f37d63f81c219e90636b55a181b69855, O=Fake CA, L=Washington, ST=DC, C=US'
+      - description: Service User for automated data upload
+        authorities: update-issues, manage-application
+        match-condition: CN=etl-robot + UID=11ed0e9ff10212b6011684b94d8a2c95, O=Fake CA, L=Washington, ST=DC, C=US

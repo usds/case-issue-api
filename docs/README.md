@@ -125,6 +125,10 @@ if you have not already.
 See the Database section above for instructions on configuring the database for tests,
 if you have not already.
 
+In addition, if you are not using gradle to run your tests, you will need to run the
+command `make -f Makefile-testcerts` from the root directory to create the
+self-signed certificates needed for certain tests.
+
 IDE configuration for running tests is beyond the scope of this document.
 
 To configure your IDE to report style violations, use the checkstyle configuration in [config/checkstyle/checkstyle.xml].
@@ -265,6 +269,43 @@ The CSRF token will be automatically read and used by the Swagger UI at `/swagge
 the HAL browser at `/resources`. However, the HAL browser has an entry field for "Custom Request Headers"
 at the  top of the screen: simply paste your desired CSRF header (probably something along the lines
 of `X-CSRF-TOKEN: abcd-ef01234-567890`) into that text area before making an unsafe request.
+
+## Using two-way x.509 authentication
+
+### Local Certificate Authority
+
+For convenience, this project includes a Makefile that automates the process of producing
+a local (self-signed) certificate authority and server/client certificates.
+
+    cd local-ca-certs
+    make
+    make my_client_id.p12 # or any other name that matches the pattern
+
+Two user certificates are included in the default target and will be automatically
+useable if the x.509 authorization is enabled (see below):
+
+  - "etl-robot" (issue-upload and app-management permissions)
+  - "tony" (read-case and update-case permissions)
+
+### Using client and server certificates
+
+There is a predefined profile (`x509-dev`) that will automatically configure the server to run
+a plain HTTP server on port 8080, and a separate HTTPS server with required two-way authentication
+on port 8443. Assuming you have already created local server and client certificates as described
+above, you can see this configuration in action with the following commands:
+
+    SPRING_PROFILES_ACTIVE=dev,x509-dev ./gradlew bootRun
+    curl --cacert ./local-ca-certs/ca.crt -E ./local-ca-certs/tony.p12:justdoit https://localhost:8443/auth-info
+
+It is possible your version of `curl` does not support PKCS12 files, in which case you may see an error along the lines of
+`curl: (58) could not load PEM client certificate, LibreSSL error error:0906D06C:PEM routines:PEM_read_bio:no start line, (no key found, wrong pass phrase, or wrong file format?)`.
+In that case, you can supply the certificate and private key to `curl` separately,
+as shown below.
+
+    curl --cacert ./local-ca-certs/ca.crt -E etl-robot.crt:`cat etl-robot.password` --key etl-robot.key https://localhost:8443/auth-info
+
+For rapid demonstration and testing purposes, you can run those two commands in the
+`local-ca-certs` directory using `make robot-demo-p12` or `make robot-demo`.
 
 # Deployment
 

@@ -1,0 +1,22 @@
+# Makefile for creating self-signed certificates used by automated tests.
+# Unlike the Makefile for manual tests, we do not use multi-valued RDNs, nor do
+# we have a local certificate authority, because neither of those adds value to the tests
+
+# In an ideal world this would probably be an incremental gradle task: for now, it
+# is a seven-line Makefile, because Make makes some things a lot easier than Gradle.
+
+SHELL:=/bin/bash
+TEST_CERTS=$(shell echo src/test/resources/{normal,extra-long,medium-long}-user-name.crt src/test/resources/{alice,bob}.crt)
+TEST_KEY_BITS?=512
+MAKE_CERT=openssl req -x509 -new -nodes -newkey rsa:$(TEST_KEY_BITS) -keyout /dev/null -out "$@" -days 3650
+
+default: $(TEST_CERTS)
+
+clean:
+	rm -f $(TEST_CERTS)
+
+%-user-name.crt: %-user-name.cfg
+	$(MAKE_CERT) -batch -config $<
+
+%.crt:
+	$(MAKE_CERT) -subj "/C=US/ST=DC/L=Washington/O=No Such Agency/CN=$(shell basename $*)"
