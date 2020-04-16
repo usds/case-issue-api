@@ -44,7 +44,7 @@ dependencies {
 //	implementation "io.springfox:springfox-data-rest:${springFoxVersion}"
 
 	// CVE-2020-10673 requires this update, which is not yet available
-	// implementation "com.fasterxml.jackson.core:jackson-databind:2.9.10.4"
+	implementation "com.fasterxml.jackson.core:jackson-databind:2.9.10.4"
 
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
 
