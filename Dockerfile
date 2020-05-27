@@ -2,7 +2,7 @@ FROM gradle:5.4.1-jdk8
 WORKDIR /home/gradle/case-issue-api
 RUN apt-get update && apt-get install --yes make
 COPY --chown=gradle:gradle gradle ./gradle
-COPY --chown=gradle:gradle ./*.gradle ./
+COPY --chown=gradle:gradle ./*.gradle ./gradle.properties ./
 RUN gradle --info dependencies
 
 COPY --chown=gradle:gradle ./.git ./.git
