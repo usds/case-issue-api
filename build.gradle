@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.1.13.RELEASE'
+	id 'org.springframework.boot' version '2.1.14.RELEASE'
 	id 'java'
 	id 'checkstyle'
 	id 'jacoco'
@@ -9,7 +9,6 @@ plugins {
 
 apply plugin: 'io.spring.dependency-management'
 
-ext{ springFoxVersion = '2.9.2'}
 group = 'gov.usds'
 version = '0.2.2-SNAPSHOT'
 sourceCompatibility = '1.8'
@@ -42,9 +41,6 @@ dependencies {
 	implementation "io.springfox:springfox-bean-validators:${springFoxVersion}"
 //	try this again if and when springfox 3.0 comes out:
 //	implementation "io.springfox:springfox-data-rest:${springFoxVersion}"
-
-	// CVE-2020-10673 requires this update, which is not yet available
-	implementation "com.fasterxml.jackson.core:jackson-databind:2.9.10.4"
 
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
 
