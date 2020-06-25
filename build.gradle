@@ -43,6 +43,8 @@ dependencies {
 //	implementation "io.springfox:springfox-data-rest:${springFoxVersion}"
 
 	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
+	// CVE-2020-14060, CVE-2020-14061, CVE-2020-14062
+	implementation "com.fasterxml.jackson.core:jackson-databind:2.9.10.5"
 
 	implementation "com.vladmihalcea:hibernate-types-52:2.5.0"
 	implementation "org.liquibase:liquibase-core"
