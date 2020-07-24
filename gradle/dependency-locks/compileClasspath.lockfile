@@ -47,9 +47,9 @@ net.minidev:json-smart:2.3
 net.rakugakibox.spring.boot:logback-access-spring-boot-starter:2.7.1
 org.apache.logging.log4j:log4j-api:2.11.2
 org.apache.logging.log4j:log4j-to-slf4j:2.11.2
-org.apache.tomcat.embed:tomcat-embed-core:9.0.36
-org.apache.tomcat.embed:tomcat-embed-el:9.0.36
-org.apache.tomcat.embed:tomcat-embed-websocket:9.0.36
+org.apache.tomcat.embed:tomcat-embed-core:9.0.37
+org.apache.tomcat.embed:tomcat-embed-el:9.0.37
+org.apache.tomcat.embed:tomcat-embed-websocket:9.0.37
 org.aspectj:aspectjweaver:1.9.5
 org.atteo:evo-inflector:1.2.2
 org.dom4j:dom4j:2.1.3
