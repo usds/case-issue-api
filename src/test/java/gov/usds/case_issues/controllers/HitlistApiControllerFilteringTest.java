@@ -25,7 +25,7 @@ import gov.usds.case_issues.test_util.CaseListFixtureService;
 import gov.usds.case_issues.test_util.CaseListFixtureService.FixtureAttachment;
 import gov.usds.case_issues.test_util.CaseListFixtureService.FixtureCase;
 import gov.usds.case_issues.test_util.CaseListFixtureService.Keywords;
-import gov.usds.case_issues.controllers.HitlistApiController.FilterParams;
+import gov.usds.case_issues.controllers.ApiTests.FilterParams;
 
 @WithMockUser(authorities="READ_CASES")
 public class HitlistApiControllerFilteringTest extends ControllerTestBase {
@@ -234,7 +234,7 @@ public class HitlistApiControllerFilteringTest extends ControllerTestBase {
 		MultiValueMap<String, String> baseParams = new LinkedMultiValueMap<>();
 		baseParams.put("mainFilter", main.stream().map(CaseSnoozeFilter::name).collect(Collectors.toList()));
 		baseParams.add("size", Integer.toString(pageSize));
-		MockHttpServletRequestBuilder req = get(HitlistApiControllerTest.API_PATH, CaseListFixtureService.SYSTEM, CaseListFixtureService.CASE_TYPE)
+		MockHttpServletRequestBuilder req = get(ApiTests.API_PATH, CaseListFixtureService.SYSTEM, CaseListFixtureService.CASE_TYPE)
 			.params(baseParams)
 			.params(additional)
 			;
