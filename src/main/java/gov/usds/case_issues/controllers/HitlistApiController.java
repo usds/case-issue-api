@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
@@ -43,7 +45,9 @@ import gov.usds.case_issues.authorization.RequireUploadAndStructurePermission;
 import gov.usds.case_issues.authorization.RequireUploadPermission;
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.db.model.AttachmentType;
+import gov.usds.case_issues.db.model.CaseIssueUpload;
 import gov.usds.case_issues.db.model.TroubleCase;
+import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.model.AttachmentRequest;
 import gov.usds.case_issues.model.CaseRequest;
 import gov.usds.case_issues.model.CaseSnoozeFilter;
@@ -239,8 +243,7 @@ public class HitlistApiController {
 			.with(schema)
 			.readValues(csvStream);
 		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
-		_uploadService.putIssueList(translated, issueTag, newIssueCases, effectiveDate);
-		return ResponseEntity.accepted().build();
+		return createUploadResponse(_uploadService.putIssueList(translated, issueTag, newIssueCases, effectiveDate));
 	}
 
 	@RequireUploadPermission
@@ -265,15 +268,29 @@ public class HitlistApiController {
 			List<Map<String, Object>> jsonData, ZonedDateTime effectiveDate, String uploadSchema) {
 		Iterator<Map<String,Object>> valueIterator = jsonData.listIterator();
 		List<CaseRequest> newIssueCases = processCaseUploads(valueIterator, uploadSchema);
-		_uploadService.putIssueList(translated, issueTag, newIssueCases, effectiveDate);
-		return ResponseEntity.accepted().build();
+		return createUploadResponse(_uploadService.putIssueList(translated, issueTag, newIssueCases, effectiveDate));
+	}
+
+	private static ResponseEntity<?> createUploadResponse(CaseIssueUpload uploadStatus) {
+		return uploadStatus.getUploadStatus() == UploadStatus.SUCCESSFUL ?
+				ResponseEntity.accepted().build() :
+				ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 
 	private List<CaseRequest> processCaseUploads(Iterator<Map<String, Object>> valueIterator, String schemaName) {
 		List<CaseRequest> newIssueCases = new ArrayList<>();
 		DataFormatSpec spec = _listService.getUploadFormat(schemaName);
 		try {
-			valueIterator.forEachRemaining(m -> newIssueCases.add(new MapBasedCaseRequest(spec, m)));
+			Set<String> seenReceipts = new HashSet<>();
+			while (valueIterator.hasNext()) {
+				MapBasedCaseRequest req = new MapBasedCaseRequest(spec, valueIterator.next());
+				if (!seenReceipts.add(req.getReceiptNumber())) {
+					throw new IllegalArgumentException(
+						String.format("Multiple records in input with same receipt number (%s)",
+								req.getReceiptNumber()));
+				}
+				newIssueCases.add(req);
+			}
 		} catch (DateTimeParseException badDate) {
 			throw new IllegalArgumentException("Incorrectly formatted case creation date in input"); // ... somewhere
 		}

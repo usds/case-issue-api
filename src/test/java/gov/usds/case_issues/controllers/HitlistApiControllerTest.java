@@ -24,6 +24,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import gov.usds.case_issues.config.DataFormatSpec;
 import gov.usds.case_issues.config.WebConfigurationProperties;
 import gov.usds.case_issues.controllers.ApiTests.Filters;
+import gov.usds.case_issues.db.model.CaseIssueUpload;
+import gov.usds.case_issues.db.model.UploadStatus;
 import gov.usds.case_issues.services.CaseFilteringService;
 import gov.usds.case_issues.services.CaseListService;
 import gov.usds.case_issues.services.IssueUploadService;
@@ -36,6 +38,7 @@ import gov.usds.case_issues.services.IssueUploadService;
 @WithMockUser(username = "default_hitlist_user", authorities = "READ_CASES")
 public class HitlistApiControllerTest {
 
+	private static final String DUPE_INPUT_ERROR_MESSAGE = "{\"message\":\"Multiple records in input with same receipt number (DUPE123)\"}";
 	private static final String NO_OP = "this request intentionally left blank";
 	private static final String DATE_STAMP_2018 = "2018-01-01T12:00:00Z";
 	private static final String DATE_STAMP_2019 = "2019-01-01T12:00:00Z";
@@ -142,6 +145,28 @@ public class HitlistApiControllerTest {
 		;
 	}
 
+	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putJson_badUploadStatus_serverError() throws Exception {
+		Mockito.when(_uploadService.putIssueList(ArgumentMatchers.any(), ArgumentMatchers.eq(ApiTests.VALID_ISSUE_TYPE), ArgumentMatchers.any(), ArgumentMatchers.any()))
+			.thenReturn(makeStatus(UploadStatus.FAILED));
+		_mvc.perform(putIssues(MediaType.APPLICATION_JSON_VALUE).content("[]"))
+			.andExpect(status().isInternalServerError());
+		_mvc.perform(putIssues(MediaType.APPLICATION_JSON_VALUE, "2001-01-01T00:00:00Z").content("[]"))
+			.andExpect(status().isInternalServerError());
+	}
+
+	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putCsv_badUploadStatus_serverError() throws Exception {
+		Mockito.when(_uploadService.putIssueList(ArgumentMatchers.any(), ArgumentMatchers.eq(ApiTests.VALID_ISSUE_TYPE), ArgumentMatchers.any(), ArgumentMatchers.any()))
+			.thenReturn(makeStatus(UploadStatus.FAILED));
+		String csvHeader = "receiptNumber,creationDate,caseStatus";
+		_mvc.perform(putIssues(ApiTests.CSV_CONTENT).content(csvHeader))
+			.andExpect(status().isInternalServerError());
+		_mvc.perform(putIssues(ApiTests.CSV_CONTENT, "2001-01-01T00:00:00Z").content(csvHeader))
+			.andExpect(status().isInternalServerError());
+	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
@@ -170,6 +195,28 @@ public class HitlistApiControllerTest {
 		_mvc.perform(jsonPut).andExpect(status().isForbidden());
 	}
 
+	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putJson_duplicateRows_badRequest() throws Exception {
+		Mockito.when(_listService.getUploadFormat(ArgumentMatchers.isNull()))
+			.thenReturn(new DataFormatSpec());
+		String dupeArray = "["
+			+ "{\"receiptNumber\": \"DUPE123\", \"creationDate\": \"2001-01-01T01:02:03Z\"},"
+			+ "{\"receiptNumber\": \"DUPE123\", \"creationDate\": \"2001-01-01T01:02:04Z\"}"
+			+ "]";
+		MockHttpServletRequestBuilder jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE)
+				.content(dupeArray);
+		_mvc.perform(jsonPut)
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(DUPE_INPUT_ERROR_MESSAGE))
+			;
+		jsonPut = putIssues(MediaType.APPLICATION_JSON_VALUE, "2019-12-31T20:00:00Z")
+			.content(dupeArray);
+		_mvc.perform(jsonPut)
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(DUPE_INPUT_ERROR_MESSAGE))
+			;
+	}
 
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
@@ -188,8 +235,7 @@ public class HitlistApiControllerTest {
 	@Test
 	@WithMockUser(authorities = "UPDATE_ISSUES")
 	public void putCsv_backDatedWithoutStructureAuthority_forbidden() throws Exception {
-		MockHttpServletRequestBuilder issuePut = putIssues(ApiTests.CSV_CONTENT)
-			.param("effectiveDate", "2019-12-31T20:00:00Z")
+		MockHttpServletRequestBuilder issuePut = putIssues(ApiTests.CSV_CONTENT, "2019-12-31T20:00:00Z")
 			.content(NO_OP);
 		_mvc.perform(issuePut).andExpect(status().isForbidden());
 	}
@@ -197,12 +243,38 @@ public class HitlistApiControllerTest {
 	@Test
 	@WithMockUser(authorities = "UPDATE_STRUCTURE")
 	public void putCsv_backDatedWithoutIssuesAuthority_forbidden() throws Exception {
-		MockHttpServletRequestBuilder issuePut = putIssues(ApiTests.CSV_CONTENT)
-			.param("effectiveDate", "2019-12-31T20:00:00Z")
+		MockHttpServletRequestBuilder issuePut = putIssues(ApiTests.CSV_CONTENT, "2019-12-31T20:00:00Z")
 			.content(NO_OP);
 		_mvc.perform(issuePut).andExpect(status().isForbidden());
 	}
 
+	@Test
+	@WithMockUser(authorities = {"UPDATE_ISSUES", "UPDATE_STRUCTURE"})
+	public void putCsv_duplicateRows_badRequest() throws Exception {
+		Mockito.when(_listService.getUploadFormat(ArgumentMatchers.isNull()))
+			.thenReturn(new DataFormatSpec());
+		String csvContent = "receiptNumber,creationDate,whosit,\n"
+				+ "DUPE123,1978-08-05T00:00:00Z,True\n"
+				+ "DUPE123,1978-08-05T00:00:00Z,False\n";
+		MockHttpServletRequestBuilder issuePut = putIssues(ApiTests.CSV_CONTENT)
+			.content(csvContent);
+		_mvc.perform(issuePut)
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(DUPE_INPUT_ERROR_MESSAGE))
+			;
+		issuePut = putIssues(ApiTests.CSV_CONTENT, "2019-12-31T20:00:00Z")
+			.content(csvContent);
+		_mvc.perform(issuePut)
+			.andExpect(status().isBadRequest())
+			.andExpect(content().json(DUPE_INPUT_ERROR_MESSAGE))
+			;
+	}
+
+	private static CaseIssueUpload makeStatus(UploadStatus wanted) {
+		CaseIssueUpload upload = new CaseIssueUpload(null, null, "DUMMY1", null, 0);
+		upload.setUploadStatus(wanted);
+		return upload;
+	}
 
 	// inline this eventually probably
 	private ResultActions perform(MockHttpServletRequestBuilder req) throws Exception {
