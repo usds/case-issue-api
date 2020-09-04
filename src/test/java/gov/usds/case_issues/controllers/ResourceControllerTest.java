@@ -318,10 +318,10 @@ public class ResourceControllerTest extends ControllerTestBase {
 	}
 
 	private URI getFixtureCaseManagerUrl() {
-		return links.linkForSingleResource(CaseManagementSystem.class, FIXTURE_CASE_MANAGER_TAG).toUri();
+		return links.linkToItemResource(CaseManagementSystem.class, FIXTURE_CASE_MANAGER_TAG).toUri();
 	}
 
 	private URI getFixtureCaseTypeUrl() {
-		return links.linkForSingleResource(CaseType.class, FIXTURE_FORM_TAG).toUri();
+		return links.linkToItemResource(CaseType.class, FIXTURE_FORM_TAG).toUri();
 	}
 }
