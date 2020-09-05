@@ -52,7 +52,7 @@ dependencies {
 	implementation "com.vladmihalcea:hibernate-types-52:2.5.0"
 	implementation "org.liquibase:liquibase-core"
 
-	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'org.hsqldb:hsqldb'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
