@@ -28,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
@@ -43,6 +44,7 @@ import gov.usds.case_issues.validators.TagFragment;
 
 @Service
 @Validated
+@Transactional(readOnly=true)
 public class CaseFilteringService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CaseFilteringService.class);
