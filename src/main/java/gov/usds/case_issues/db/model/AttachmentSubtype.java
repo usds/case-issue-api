@@ -19,8 +19,7 @@ public class AttachmentSubtype extends TaggedEntity {
 	private AttachmentType forAttachmentType;
 	private String urlTemplate;
 
-	@SuppressWarnings("unused")
-	private AttachmentSubtype() { /* for hibernate */}
+	protected AttachmentSubtype() { /* for hibernate with Spring Boot 2.2 (apparently can be private again with 2.3?) */}
 
 	public AttachmentSubtype(String noteSubtypeTag, AttachmentType forNoteType, String name, String description,
 			String urlTemplate) {
