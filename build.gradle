@@ -32,7 +32,7 @@ dependencies {
 	runtimeOnly 'org.springframework.session:spring-session-jdbc'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-	implementation 'org.springframework.data:spring-data-rest-hal-browser'
+	implementation 'org.springframework.data:spring-data-rest-hal-explorer'
 	implementation 'org.springframework.retry:spring-retry'
 
 	// access logging:
