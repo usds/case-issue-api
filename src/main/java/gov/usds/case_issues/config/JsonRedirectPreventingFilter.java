@@ -29,7 +29,9 @@ public class JsonRedirectPreventingFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		String accept = request.getHeader("Accept");
-		if (accept != null && accept.contains("text/html")) { // this is probably a browser qua browser, not JS client or curl
+		// leave the request alone if it is likely a browser qua browser, not JS client or curl
+		// also leave it alone if it is for swagger-ui.html, since we generate that redirect ourselves (what, me hackish?)
+		if ( (accept != null && accept.contains("text/html")) || request.getRequestURI().startsWith("/swagger-ui") ) {
 			chain.doFilter(servletRequest, servletResponse);
 		} else {
 			LOG.debug("Wrapping the response to intercept redirects");

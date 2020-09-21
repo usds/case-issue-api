@@ -70,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests()
 			.mvcMatchers(HttpMethod.GET, _resourceApiBase)
 				.permitAll()
-			.antMatchers(HttpMethod.GET, _resourceApiBase + "/browser/**")
+			.antMatchers(HttpMethod.GET, _resourceApiBase + "/explorer/**")
 				.permitAll()
 			.antMatchers(_resourceApiBase + "/**")
 				.hasAuthority(CaseIssuePermission.UPDATE_STRUCTURE.name())
@@ -83,9 +83,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 					"/",
 					"/csrf",
 					"/swagger-ui.html",
+					"/swagger-ui/**",
 					"/v2/api-docs",
-					"/swagger-resources/**",
-					"/webjars/springfox-swagger-ui/**")
+					"/swagger-resources/**")
 				.permitAll()
 		;
 	}

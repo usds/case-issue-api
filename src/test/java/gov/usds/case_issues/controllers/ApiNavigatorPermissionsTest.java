@@ -1,6 +1,7 @@
 package gov.usds.case_issues.controllers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
@@ -25,24 +26,31 @@ public class ApiNavigatorPermissionsTest extends ControllerTestBase {
 
 	@Test
 	public void getHalIndex_anonymous_ok() throws Exception {
-		browserGet("/browser/index.html").andExpect(status().isOk());
+		browserGet("/explorer/index.html").andExpect(status().isOk());
 	}
 
 	@Test
 	public void getHalResource_anonymous_ok() throws Exception {
-		browserGet("/browser/vendor/img/ajax-loader.gif").andExpect(status().isOk());
+		browserGet("/explorer/favicon.ico").andExpect(status().isOk());
 	}
 
 	@Test
-	public void getFavicon_anonymous_ok() throws Exception {
-		perform(get("/favicon.ico")).andExpect(status().isOk());
+	public void getFavicon_anonymous_notFound() throws Exception {
+		perform(get("/favicon.ico")).andExpect(status().isNotFound()); // there is no default, but it's allowed to check
+	}
+
+	@Test
+	public void getSwaggerUiLegacy_anonymous_found() throws Exception {
+		perform(get("/swagger-ui.html"))
+			.andExpect(status().isFound())
+			.andExpect(redirectedUrl("/swagger-ui/"))
+		;
 	}
 
 	@Test
 	public void getSwaggerUi_anonymous_ok() throws Exception {
-		perform(get("/swagger-ui.html")).andExpect(status().isOk());
+		perform(get("/swagger-ui/")).andExpect(status().isOk());
 	}
-
 	@Test
 	public void getSwaggerApi_anonymous_ok() throws Exception {
 		perform(get("/v2/api-docs")).andExpect(status().isOk());

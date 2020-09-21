@@ -68,6 +68,7 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addStatusController("/health", HttpStatus.OK);
+		registry.addRedirectViewController("/swagger-ui.html", "/swagger-ui/");
 	}
 
 	@Override
