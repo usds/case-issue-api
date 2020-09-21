@@ -33,7 +33,7 @@ public class ActuatorPermissionsTest extends ControllerTestBase {
 	public void getHealth_systemAdmin_fullResult() throws Exception {
 		doActuatorGet("health")
 			.andExpect(status().isOk())
-			.andExpect(content().json("{\"status\": \"UP\", \"details\": {\"db\": {\"status\": \"UP\"}}}", false))
+			.andExpect(content().json("{\"status\": \"UP\", \"components\": {\"db\": {\"status\": \"UP\"}}}", false))
 		;
 	}
 
