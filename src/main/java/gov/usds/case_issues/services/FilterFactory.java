@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -17,7 +18,10 @@ import org.springframework.stereotype.Service;
 import gov.usds.case_issues.db.JsonOperatorContributor;
 import gov.usds.case_issues.db.model.CaseAttachment;
 import gov.usds.case_issues.db.model.CaseAttachmentAssociation;
+import gov.usds.case_issues.db.model.CaseIssue;
+import gov.usds.case_issues.db.model.TroubleCase;
 import gov.usds.case_issues.model.AttachmentRequest;
+import gov.usds.case_issues.model.CaseSnoozeFilter;
 import gov.usds.case_issues.model.DateRange;
 import gov.usds.case_issues.services.model.CaseFilter;
 
@@ -85,6 +89,17 @@ public class FilterFactory {
 			sq.where(conjunction.toArray(new Predicate[0]));
 			Predicate attachmentExists = cb.exists(sq);
 			return attachmentDesired ? attachmentExists : cb.not(attachmentExists) ;
+		};
+	}
+
+	/** Restrict to cases that have an open issue of one of the given types */
+	public static CaseFilter hasIssueTypes(List<String> issueTypes) {
+		return (root, query, cb) -> {
+			Subquery<Long> idQuery = query.subquery(Long.class);
+			Root<CaseIssue> iRoot = idQuery.from(CaseIssue.class);
+			idQuery.select(iRoot.get("issueCase").get(MetaModel.ID).as(Long.class));
+			idQuery.where(iRoot.get("issueType").in(issueTypes), cb.isNull(iRoot.get("issueClosed")));
+			return cb.in(root.get(MetaModel.ID)).value(idQuery);
 		};
 	}
 }
