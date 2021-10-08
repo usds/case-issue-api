@@ -5,12 +5,6 @@ on:
   workflow_dispatch: # because sometimes you just want to force a branch to have tests run
   push:
     branches: "**"
-    paths:
-      - "src/**"
-      - "config/**"
-      - "gradle/**"
-      - build.gradle
-      - .github/workflows/smoketest.yml
 
 jobs:
   test:
