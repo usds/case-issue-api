@@ -12,10 +12,6 @@ on:
       - build.gradle
       - .github/workflows/smoketest.yml
 
-defaults:
-  run:
-    working-directory: backend
-
 jobs:
   test:
     strategy:
