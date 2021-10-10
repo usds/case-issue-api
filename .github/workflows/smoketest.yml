@@ -10,7 +10,7 @@ jobs:
   test:
     strategy:
       matrix:
-        java: [1.8]
+        jdk: [1.8]
     runs-on: ubuntu-latest
     services:
       test-db:
@@ -28,17 +28,17 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK ${{matrix.java}}
+      - name: Set up JDK ${{matrix.jdk}}
         uses: actions/setup-java@v1
         with:
-          java-version: ${{matrix.java}}
+          java-version: ${{matrix.jdk}}
       - name: Cache Java Dependencies
         uses: actions/cache@v2
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-java-${{matrix.java}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
+          key: gradle-java-${{matrix.jdk}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
       - name: Set up postgresql sidecar
         env:
           PGHOST: localhost
@@ -64,39 +64,39 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [1.8]
+        jdk: [1.8]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK ${{matrix.java}}
+      - name: Set up JDK ${{matrix.jdk}}
         uses: actions/setup-java@v1
         with:
-          java-version: ${{matrix.java}}
+          java-version: ${{matrix.jdk}}
       - name: Cache Java Dependencies
         uses: actions/cache@v2
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-java-${{matrix.java}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
+          key: gradle-java-${{matrix.jdk}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
       - name: Run Java Build
         run: ./gradlew assemble
   lint:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [1.8]
+        jdk: [1.8]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK ${{matrix.java}}
+      - name: Set up JDK ${{matrix.jdk}}
         uses: actions/setup-java@v1
         with:
-          java-version: ${{matrix.java}}
+          java-version: ${{matrix.jdk}}
       - name: Cache Java Dependencies
         uses: actions/cache@v2
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-java-${{matrix.java}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
+          key: gradle-java-${{matrix.jdk}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest --continue
