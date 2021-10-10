@@ -571,3 +571,31 @@ databaseChangeLog:
             columnName: principal_name
             newDataType: *string
             tableName: user_session
+  - changeSet:
+      id: open-issue-overlap-constraint
+      author: ben.warfield@usds.dhs.gov
+      comment: Modify the unique index for case_issue to prevent overlapping issue date ranges.
+      changes:
+        - dropUniqueConstraint:
+            comment: Remove naive unique constraint from case_issue.
+            constraintName: uk__case_issue
+            tableName: case_issue
+            rollback:
+              - addUniqueConstraint:
+                  tableName: case_issue
+                  constraintName: uk__case_issue
+                  columnName: issue_case_internal_id, issue_type, issue_created
+        - sql:
+            comment: Create range index to prevent overlapping date ranges for issues of the same type for the same case.
+            sql: |
+              ALTER TABLE ${database.defaultSchemaName}.case_issue
+              ADD CONSTRAINT uk__case_issue EXCLUDE using gist
+              (
+                issue_case_internal_id WITH =,
+                issue_type WITH =,
+                TSTZRANGE(issue_created, issue_closed) WITH &&
+              )
+            rollback:
+              - sql: |
+                  ALTER TABLE ${database.defaultSchemaName}.case_issue
+                  DROP CONSTRAINT uk__case_issue
