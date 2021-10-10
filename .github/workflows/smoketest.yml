@@ -17,6 +17,7 @@ jobs:
         image: postgres:12-alpine
         env:
           POSTGRES_PASSWORD: this_is_a_super_secure_admin_password
+          POSTGRES_HOST_AUTH_METHOD: trust
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
