@@ -1,0 +1,102 @@
+name: Smoke Test API
+
+# Run this on pushes to any branch that change a backend file or the workflow definition
+on:
+  workflow_dispatch: # because sometimes you just want to force a branch to have tests run
+  push:
+    branches: "**"
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        jdk: [1.8]
+    runs-on: ubuntu-latest
+    services:
+      test-db:
+        image: postgres:12-alpine
+        env:
+          POSTGRES_PASSWORD: this_is_a_super_secure_admin_password
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{matrix.jdk}}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{matrix.jdk}}
+      - name: Cache Java Dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-java-${{matrix.jdk}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
+      - name: Set up postgresql sidecar
+        env:
+          PGHOST: localhost
+          PGPASSFILE: db-setup/.pgpass_ci
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          LIB_DIR: db-setup
+        run: |
+          chmod 0600 $PGPASSFILE
+          db-setup/create-db.sh
+      - name: Run Java Tests
+        env:
+          CASEISSUES_TEST_DB_PORT: 5432
+        run: ./gradlew test
+      - name: Archive Test Results
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: test-report
+          path: build/reports/tests/test
+          retention-days: 7
+  build-jar:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [1.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{matrix.jdk}}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{matrix.jdk}}
+      - name: Cache Java Dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-java-${{matrix.jdk}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
+      - name: Run Java Build
+        run: ./gradlew assemble
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [1.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK ${{matrix.jdk}}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{matrix.jdk}}
+      - name: Cache Java Dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-java-${{matrix.jdk}}-${{ hashFiles('*.gradle', 'gradle/dependency-locks/*') }}
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest --continue
