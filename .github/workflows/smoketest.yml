@@ -10,7 +10,7 @@ jobs:
   test:
     strategy:
       matrix:
-        jdk: [1.8]
+        jdk: [1.8, 11, 17]
     runs-on: ubuntu-latest
     services:
       test-db:
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        jdk: [1.8]
+        jdk: [1.8, 11, 17]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK ${{matrix.jdk}}
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        jdk: [1.8]
+        jdk: [1.8, 11, 17]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK ${{matrix.jdk}}
