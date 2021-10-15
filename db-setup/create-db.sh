@@ -11,4 +11,5 @@ psql -v ON_ERROR_STOP=1  -U "$POSTGRES_USER" case_issues <<-SQL
     ALTER DEFAULT PRIVILEGES FOR USER case_issue_migrations IN SCHEMA case_issue_main
         GRANT SELECT, UPDATE ON SEQUENCES TO case_issue_api;
     GRANT USAGE ON LANGUAGE plpgsql to case_issue_api;
+    CREATE EXTENSION IF NOT EXISTS btree_gist;
 SQL

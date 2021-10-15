@@ -154,7 +154,6 @@ databaseChangeLog:
                   remarks: Additional data about this case, as of the time it was most recently updated in this application. Mutable.
         - addUniqueConstraint:
             tableName: trouble_case
-            constraint_name: uk__trouble_case
             columnNames: case_management_system_internal_id, receipt_number
         - createTable:
             tableName: case_issue
@@ -191,7 +190,6 @@ databaseChangeLog:
                     nullable: true
         - addUniqueConstraint:
             tableName: case_issue
-            constraint_name: uk__case_issue
             columnNames: issue_case_internal_id, issue_type, issue_created
         - createTable:
             tableName: case_snooze
@@ -307,7 +305,6 @@ databaseChangeLog:
                     references: case_attachment
         - addUniqueConstraint:
             tableName: case_attachment_association
-            constraint_name: uk__case_attachment_association
             columnNames: snooze_internal_id, attachment_internal_id
   - changeSet:
       id: issue-upload-log
@@ -426,7 +423,6 @@ databaseChangeLog:
       changes:
         - addUniqueConstraint:
             tableName: user_information
-            constraint_name: uk__user_information
             columnNames: user_id
   - changeSet:
       id: tag-release-0.1.0
@@ -571,3 +567,61 @@ databaseChangeLog:
             columnName: principal_name
             newDataType: *string
             tableName: user_session
+  - changeSet:
+      id: fix-unique-constraint-names
+      author: ben.warfield@usds.dhs.gov
+      comment: Rename custom unique keys with the correct names.
+      # No rollbacks provided because seriously nobody wants those names back
+      changes:
+        - sql:
+            comment: Rename default-named constraint on case_issue.
+            sql: |
+              ALTER TABLE ${database.defaultSchemaName}.case_issue
+              RENAME CONSTRAINT case_issue_issue_case_internal_id_issue_type_issue_created_key
+              TO uk__case_issue
+        - sql:
+            comment: Rename default-named constraint on trouble_case.
+            sql: |
+              ALTER TABLE ${database.defaultSchemaName}.trouble_case
+              RENAME CONSTRAINT trouble_case_case_management_system_internal_id_receipt_num_key
+              TO uk__trouble_case
+        - sql:
+            comment: Rename default-named constraint on user_information.
+            sql: |
+              ALTER TABLE ${database.defaultSchemaName}.user_information
+              RENAME CONSTRAINT user_information_user_id_key
+              TO uk__user_information
+        - sql:
+            comment: Rename default-named constraint on case_attachment_association.
+            sql: |
+              ALTER TABLE ${database.defaultSchemaName}.case_attachment_association
+              RENAME CONSTRAINT case_attachment_association_snooze_internal_id_attachment_i_key
+              TO uk__case_attachment_association
+  - changeSet:
+      id: open-issue-overlap-constraint
+      author: ben.warfield@usds.dhs.gov
+      comment: Modify the unique index for case_issue to prevent overlapping issue date ranges.
+      changes:
+        - dropUniqueConstraint:
+            comment: Remove naive unique constraint from case_issue.
+            constraintName: uk__case_issue
+            tableName: case_issue
+            rollback:
+              - addUniqueConstraint:
+                  tableName: case_issue
+                  constraintName: uk__case_issue
+                  columnName: issue_case_internal_id, issue_type, issue_created
+        - sql:
+            comment: Create range index to prevent overlapping date ranges for issues of the same type for the same case.
+            sql: |
+              ALTER TABLE ${database.defaultSchemaName}.case_issue
+              ADD CONSTRAINT uk__case_issue EXCLUDE using gist
+              (
+                issue_case_internal_id WITH =,
+                issue_type WITH =,
+                TSTZRANGE(issue_created, issue_closed) WITH &&
+              )
+            rollback:
+              - sql: |
+                  ALTER TABLE ${database.defaultSchemaName}.case_issue
+                  DROP CONSTRAINT uk__case_issue

@@ -54,9 +54,7 @@ public class CaseIssueRepositoryTest extends CaseIssueApiTestBase {
 	}
 
 	@Test(expected=DataIntegrityViolationException.class)
-	@org.junit.Ignore("Constraint not available on HSQLDB")
 	public void createIssue_rangeOverlapViolation_exception() {
-		// better: org.junit.Assume.assumeThat... (database is not postgresql)
 		TroubleCase mainCase = _dataService.initCase(_system, "HELO1234", _type, _now.minusMonths(1));
 		_repo.save(new CaseIssue(mainCase, "HEYO", _now.minusMonths(2)));
 		CaseIssue conflicting = new CaseIssue(mainCase, "HEYO", _now.minusMonths(1));
